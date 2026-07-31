@@ -140,37 +140,30 @@ export type CreateBookingFormValues = z.infer<
   typeof createBookingFormSchema
 >
 
+// Counter bookings are phone-first: the Backend matches or creates the
+// Customer from the contact phone, so customerId stays out of the main flow.
 export const createManagementBookingFormSchema = z
   .object({
     ...bookingFormShape,
     roomId: z.string().regex(/^[1-9][0-9]*$/, 'Mã phòng không hợp lệ.'),
-    customerId: z
-      .string()
-      .trim()
-      .refine(
-        (value) => value === '' || /^[1-9][0-9]*$/.test(value),
-        'Mã khách hàng không hợp lệ.',
-      ),
   })
   .superRefine((values, context) => {
     validateStay(values, context)
 
-    if (values.customerId === '') {
-      if (values.contactName === '') {
-        context.addIssue({
-          code: 'custom',
-          message: 'Vui lòng nhập tên liên hệ khi tạo khách tại quầy.',
-          path: ['contactName'],
-        })
-      }
+    if (values.contactPhone === '') {
+      context.addIssue({
+        code: 'custom',
+        message: 'Vui lòng nhập số điện thoại khách.',
+        path: ['contactPhone'],
+      })
+    }
 
-      if (values.contactPhone === '') {
-        context.addIssue({
-          code: 'custom',
-          message: 'Vui lòng nhập số điện thoại khi tạo khách tại quầy.',
-          path: ['contactPhone'],
-        })
-      }
+    if (values.contactName === '') {
+      context.addIssue({
+        code: 'custom',
+        message: 'Vui lòng nhập họ tên khách.',
+        path: ['contactName'],
+      })
     }
   })
 

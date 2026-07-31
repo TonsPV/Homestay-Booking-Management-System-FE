@@ -5,8 +5,10 @@ import type {
   BlockRoomDatesInput,
   CreateRoomImageInput,
   CreateRoomInput,
+  ListAvailableRoomsQuery,
   ListManagementRoomsQuery,
   ListRoomsQuery,
+
   Room,
   RoomCalendarEntry,
   RoomCalendarRange,
@@ -102,7 +104,33 @@ export async function listManagementRooms(
   }
 }
 
+// TODO(BE-001): Endpoint is pending Backend implementation. The query
+// contract follows docs/issues/BE-001-room-availability-api.md. Regenerate
+// OpenAPI types and switch to the generated query type once available.
+export async function listAvailableRooms(
+  query: ListAvailableRoomsQuery,
+  signal?: AbortSignal,
+): Promise<PaginatedRooms> {
+  const result = await apiRequest<Room[]>('/management/rooms/available', {
+    query: {
+      checkIn: query.checkIn,
+      checkOut: query.checkOut,
+      guests: query.guests,
+      limit: query.limit,
+      page: query.page,
+      roomTypeId: query.roomTypeId,
+    },
+    signal,
+  })
+
+  return {
+    items: result.data,
+    pagination: result.meta?.pagination,
+  }
+}
+
 export async function getManagementRoom(
+
   id: string,
   signal?: AbortSignal,
 ): Promise<Room> {

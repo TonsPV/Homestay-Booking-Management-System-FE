@@ -31,8 +31,6 @@ describe('getBookingActionError', () => {
   it('uses a safe fallback for an unknown booking conflict', () => {
     expect(
       getBookingActionError(httpError('Unknown conflict.', 409)),
-    ).toBe(
-      'Dữ liệu đặt phòng vừa thay đổi. Vui lòng tải lại tình trạng phòng và thử lại.',
-    )
+    ).toBe('Phòng vừa được người khác đặt. Vui lòng chọn lại phòng khác.')
   })
 })

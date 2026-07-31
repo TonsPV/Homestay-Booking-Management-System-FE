@@ -1,9 +1,11 @@
 import type {
+  ListAvailableRoomsQuery,
   ListManagementRoomsQuery,
   ListRoomsQuery,
   RoomCalendarRange,
   SearchRoomsQuery,
 } from './types'
+
 
 export const roomKeys = {
   all: ['rooms'] as const,
@@ -18,4 +20,8 @@ export const roomKeys = {
     ['rooms', 'management', 'calendar', id, range] as const,
   search: (query: SearchRoomsQuery) =>
     ['rooms', 'public', 'search', query] as const,
+  available: (query: ListAvailableRoomsQuery) =>
+    ['rooms', 'management', 'available', query] as const,
 }
+
+

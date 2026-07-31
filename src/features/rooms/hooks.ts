@@ -14,7 +14,9 @@ import {
   deleteRoomImage,
   getManagementRoom,
   getRoom,
+  listAvailableRooms,
   listManagementRooms,
+
   listRoomCalendar,
   listRooms,
   searchRooms,
@@ -27,7 +29,9 @@ import { roomKeys } from './query-keys'
 import type {
   BlockRoomDatesInput,
   CreateRoomImageInput,
+  ListAvailableRoomsQuery,
   ListManagementRoomsQuery,
+
   ListRoomsQuery,
   RoomCalendarRange,
   RoomStatus,
@@ -70,7 +74,20 @@ export function useManagementRooms(query: ListManagementRoomsQuery = {}) {
   })
 }
 
+export function useAvailableRooms(query: ListAvailableRoomsQuery | undefined) {
+  return useQuery({
+    enabled: query !== undefined,
+    queryFn: ({ signal }) =>
+      listAvailableRooms(query as ListAvailableRoomsQuery, signal),
+    queryKey:
+      query === undefined
+        ? (['rooms', 'management', 'available', 'idle'] as const)
+        : roomKeys.available(query),
+  })
+}
+
 export function useManagementRoom(id: string, enabled = true) {
+
   return useQuery({
     enabled: enabled && id.length > 0,
     queryFn: ({ signal }) => getManagementRoom(id, signal),

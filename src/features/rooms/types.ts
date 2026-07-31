@@ -38,6 +38,19 @@ export type ListManagementRoomsQuery = NonNullable<
 
 export type SearchRoomsQuery = RoomSearchData['query']
 
+// TODO(BE-001): Replace with the generated contract type once
+// GET /management/rooms/available is added to the OpenAPI spec.
+// See docs/issues/BE-001-room-availability-api.md.
+export interface ListAvailableRoomsQuery {
+  checkIn: string
+  checkOut: string
+  guests?: number
+  roomTypeId?: string
+  page?: number
+  limit?: number
+}
+
+
 export type CreateRoomInput = RoomCreateData['body']
 
 export type UpdateRoomInput = RoomUpdateData['body']

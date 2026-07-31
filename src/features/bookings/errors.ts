@@ -1,7 +1,7 @@
 import { ApiError, getErrorMessage } from '@/api/errors'
 
 const BOOKING_CONFLICT_MESSAGE =
-  'Dữ liệu đặt phòng vừa thay đổi. Vui lòng tải lại tình trạng phòng và thử lại.'
+  'Phòng vừa được người khác đặt. Vui lòng chọn lại phòng khác.'
 
 const bookingErrorMessages: Record<string, string> = {
   'Booking da thanh toan. Can hoan tien truoc khi huy.':

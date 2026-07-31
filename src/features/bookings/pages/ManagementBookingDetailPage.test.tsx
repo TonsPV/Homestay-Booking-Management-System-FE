@@ -218,7 +218,7 @@ describe('ManagementBookingDetailPage cancellation safety', () => {
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent(
-      'Dữ liệu đặt phòng vừa thay đổi.',
+      'Phòng vừa được người khác đặt.',
     )
   })
 })
