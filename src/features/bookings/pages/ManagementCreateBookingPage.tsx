@@ -24,6 +24,10 @@ function optionalValue(value: string) {
   return trimmed === '' ? undefined : trimmed
 }
 
+// TODO(BE-001): Replace with availability query when the management API is available.
+// Xem docs/issues/BE-001-room-availability-api.md.
+const isAvailabilityApiReady = false
+
 export function ManagementCreateBookingPage() {
   const navigate = useNavigate()
   const createMutation = useCreateManagementBooking()
@@ -49,6 +53,9 @@ export function ManagementCreateBookingPage() {
   const existingCustomerId = watch('customerId')
 
   const submit = handleSubmit((values) => {
+    if (!isAvailabilityApiReady) {
+      return
+    }
     createMutation.mutate(
       {
         roomId: values.roomId,
@@ -78,6 +85,21 @@ export function ManagementCreateBookingPage() {
 
       {createMutation.isError ? (
         <Alert tone="error">{getBookingActionError(createMutation.error)}</Alert>
+      ) : null}
+
+      {!isAvailabilityApiReady ? (
+        <div id="availability-pending-notice">
+          <Alert
+            title="Chức năng đang chờ API kiểm tra phòng trống"
+            tone="warning"
+          >
+            Backend chưa cung cấp endpoint kiểm tra phòng trống tại quầy (GET
+            /api/v1/management/rooms/available). Để tránh tạo booking bằng dữ
+            liệu phòng chưa được kiểm tra, chức năng tạo booking tạm thời bị
+            khóa. Vui lòng theo dõi tiến độ tại
+            docs/issues/BE-001-room-availability-api.md.
+          </Alert>
+        </div>
       ) : null}
 
       <Card>
@@ -165,7 +187,16 @@ export function ManagementCreateBookingPage() {
           </Field>
 
           <div className="flex flex-wrap gap-3">
-            <Button loading={createMutation.isPending} type="submit">
+            <Button
+              aria-describedby={
+                !isAvailabilityApiReady
+                  ? 'availability-pending-notice'
+                  : undefined
+              }
+              disabled={!isAvailabilityApiReady}
+              loading={createMutation.isPending}
+              type="submit"
+            >
               Tạo booking
             </Button>
             <Button onClick={() => navigate(-1)} variant="outline">

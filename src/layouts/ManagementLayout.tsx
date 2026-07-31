@@ -37,6 +37,7 @@ const navigation: ManagementNavItem[] = [
     to: '/management/amenities',
   },
   { label: 'Booking', to: '/management/bookings' },
+  { label: 'Đặt phòng tại quầy', to: '/management/bookings/new' },
   { label: 'Thanh toán', to: '/management/payments' },
   { adminOnly: true, label: 'Nhân viên', to: '/management/users' },
   { adminOnly: true, label: 'Khách hàng', to: '/management/customers' },
