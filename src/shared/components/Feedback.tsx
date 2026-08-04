@@ -94,15 +94,21 @@ export function EmptyState({
 interface ErrorStateProps {
   description?: string
   onRetry?: () => void
+  title?: string
 }
 
 export function ErrorState({
   description = 'Không thể tải dữ liệu. Vui lòng thử lại.',
   onRetry,
+  title = 'Không thể tải nội dung',
 }: ErrorStateProps) {
   return (
-    <Card className="border-danger/20 bg-danger-soft py-10 text-center">
-      <h2 className="text-lg font-bold text-danger-strong">Có lỗi xảy ra</h2>
+    <Card
+      aria-live="assertive"
+      className="border-danger/20 bg-danger-soft py-10 text-center"
+      role="alert"
+    >
+      <h2 className="text-lg font-bold text-danger-strong">{title}</h2>
       <p className="mt-2 text-sm text-danger">{description}</p>
       {onRetry ? (
         <Button className="mt-5" onClick={onRetry} variant="outline">

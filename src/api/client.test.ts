@@ -15,7 +15,7 @@ afterEach(() => {
 })
 
 describe('buildApiUrl', () => {
-  it('uses the configured origin and omits empty query values', () => {
+  it('uses the browser origin in dev and omits empty query values', () => {
     const url = buildApiUrl('/rooms/search', {
       checkIn: '2026-08-01',
       checkOut: '2026-08-03',
@@ -24,7 +24,7 @@ describe('buildApiUrl', () => {
     })
 
     expect(url.toString()).toBe(
-      'http://localhost:3000/api/v1/rooms/search?checkIn=2026-08-01&checkOut=2026-08-03&guests=2',
+      `${window.location.origin}/api/v1/rooms/search?checkIn=2026-08-01&checkOut=2026-08-03&guests=2`,
     )
   })
 })
@@ -78,6 +78,11 @@ describe('apiRequest', () => {
           JSON.stringify({
             success: false,
             statusCode: 429,
+            errorCode: 'COMMON_RATE_LIMITED',
+            fieldErrors: {
+              identifier: [{ errorCode: 'COMMON_RATE_LIMITED' }],
+            },
+            details: { retryable: true },
             message: 'Too many requests.',
             error: 'Too Many Requests',
             path: '/api/v1/auth/customers/login',
@@ -103,8 +108,16 @@ describe('apiRequest', () => {
       }),
     ).rejects.toMatchObject({
       kind: 'http',
+      errorCode: 'COMMON_RATE_LIMITED',
+      fieldErrors: {
+        identifier: [{ errorCode: 'COMMON_RATE_LIMITED' }],
+      },
+      details: { retryable: true },
+      message:
+        'Bạn thao tác quá nhanh. Vui lòng thử lại sau 45 giây.',
       requestId: 'req-rate-limit',
       retryAfterSeconds: 45,
+      serverMessage: 'Too many requests.',
       status: 429,
     } satisfies Partial<ApiError>)
   })

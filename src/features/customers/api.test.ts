@@ -4,6 +4,7 @@ import { configureAccessTokenProvider } from '@/api/client'
 
 import {
   changeCustomerPassword,
+  listCustomers,
   setInitialCustomerPassword,
 } from './api'
 
@@ -98,5 +99,42 @@ describe('customer credential API contract', () => {
     expect(options.body).toBe(
       JSON.stringify({ password: 'InitialPassword123!' }),
     )
+  })
+
+  it('fails closed when an older customer-list response has no capability', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            success: true,
+            statusCode: 200,
+            message: 'OK',
+            data: [
+              {
+                id: '42',
+                fullName: 'Khách cũ',
+                email: null,
+                phone: '0900000042',
+                status: 'ACTIVE',
+                createdAt: '2026-08-01T00:00:00.000Z',
+                updatedAt: '2026-08-01T00:00:00.000Z',
+              },
+            ],
+            path: '/api/v1/customers',
+            requestId: 'req-customer-list',
+            timestamp: '2026-08-01T00:00:00.000Z',
+          }),
+          { headers: { 'Content-Type': 'application/json' }, status: 200 },
+        ),
+      ),
+    )
+
+    const result = await listCustomers({ page: 1 })
+
+    expect(result.data[0]?.credentialCapabilities).toEqual({
+      canSetInitialPassword: false,
+      reasonCode: 'COMMON_NOT_FOUND',
+    })
   })
 })

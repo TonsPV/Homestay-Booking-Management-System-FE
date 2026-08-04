@@ -1,64 +1,39 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+
+import { useAuth } from "@/auth/useAuth";
 import {
-  NavLink,
-  Outlet,
-  useLocation,
-} from 'react-router-dom'
-
-import { useAuth } from '@/auth/useAuth'
-import { ScrollToTop } from '@/routes/RouteSupport'
-import { Button } from '@/shared/components/Button'
-import { cn } from '@/shared/components/cn'
-import { SkipLink } from '@/shared/components/SkipLink'
-
-interface ManagementNavItem {
-  adminOnly?: boolean
-  label: string
-  to: string
-}
+  MANAGEMENT_NAVIGATION,
+  MANAGEMENT_PATHS,
+  type ManagementNavItem,
+} from "@/routes/management-policy";
+import { ScrollToTop } from "@/routes/RouteSupport";
+import { Button } from "@/shared/components/Button";
+import { cn } from "@/shared/components/cn";
+import { SkipLink } from "@/shared/components/SkipLink";
 
 interface ManagementNavigationProps {
-  items: ManagementNavItem[]
-  label: string
-  onNavigate?: () => void
+  items: readonly ManagementNavItem[];
+  label: string;
+  onNavigate?: () => void;
 }
 
-const navigation: ManagementNavItem[] = [
-  { label: 'Tổng quan', to: '/management' },
-  { label: 'Phòng', to: '/management/rooms' },
-  {
-    adminOnly: true,
-    label: 'Loại phòng',
-    to: '/management/room-types',
-  },
-  {
-    adminOnly: true,
-    label: 'Tiện nghi',
-    to: '/management/amenities',
-  },
-  { label: 'Booking', to: '/management/bookings' },
-  { label: 'Đặt phòng tại quầy', to: '/management/bookings/new' },
-  { label: 'Thanh toán', to: '/management/payments' },
-  { adminOnly: true, label: 'Nhân viên', to: '/management/users' },
-  { adminOnly: true, label: 'Khách hàng', to: '/management/customers' },
-]
-
 const focusableSelector = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
   '[tabindex]:not([tabindex="-1"])',
-].join(',')
+].join(",");
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
-    'flex min-h-11 items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none',
+    "flex min-h-11 items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none",
     isActive
-      ? 'bg-brand text-white shadow-sm'
-      : 'text-on-inverse-muted hover:bg-inverse-raised hover:text-on-inverse',
-  )
+      ? "bg-brand text-white shadow-sm"
+      : "text-on-inverse-muted hover:bg-inverse-raised hover:text-on-inverse",
+  );
 }
 
 function ManagementNavigation({
@@ -71,7 +46,7 @@ function ManagementNavigation({
       {items.map((item) => (
         <NavLink
           className={navLinkClass}
-          end={item.to === '/management'}
+          end={item.end}
           key={item.to}
           onClick={onNavigate}
           to={item.to}
@@ -80,16 +55,24 @@ function ManagementNavigation({
         </NavLink>
       ))}
     </nav>
-  )
+  );
 }
 
-function Brand({ onNavigate }: { onNavigate?: () => void }) {
+function Brand({
+  home,
+  onNavigate,
+  workspaceLabel,
+}: {
+  home: string;
+  onNavigate?: () => void;
+  workspaceLabel: string;
+}) {
   return (
     <NavLink
-      aria-label="Homestay Green Management - Tổng quan"
+      aria-label={`Homestay Green - ${workspaceLabel}`}
       className="flex min-h-11 items-center gap-3 rounded-xl px-2 text-base font-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse"
       onClick={onNavigate}
-      to="/management"
+      to={home}
     >
       <span
         aria-hidden="true"
@@ -100,118 +83,113 @@ function Brand({ onNavigate }: { onNavigate?: () => void }) {
       <span>
         Homestay Green
         <span className="block text-xs font-semibold text-on-inverse-subtle">
-          Management
+          {workspaceLabel}
         </span>
       </span>
     </NavLink>
-  )
+  );
 }
 
 export function ManagementLayout() {
-  const { logout, principal } = useAuth()
-  const { pathname } = useLocation()
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const drawerRef = useRef<HTMLElement>(null)
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
-  const previousPathnameRef = useRef(pathname)
-  const isAdmin =
-    principal?.actorType === 'user' && principal.role === 'ADMIN'
-  const visibleNavigation = navigation.filter(
-    (item) => !item.adminOnly || isAdmin,
-  )
+  const { logout, principal } = useAuth();
+  const { pathname } = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const previousPathnameRef = useRef(pathname);
+  const home = MANAGEMENT_PATHS.dashboard;
+  const workspaceLabel = "Quản trị vận hành";
 
   useEffect(() => {
     if (previousPathnameRef.current !== pathname) {
-      previousPathnameRef.current = pathname
-      setDrawerOpen(false)
+      previousPathnameRef.current = pathname;
+      setDrawerOpen(false);
     }
-  }, [pathname])
+  }, [pathname]);
 
   useEffect(() => {
     if (!drawerOpen) {
-      return
+      return;
     }
 
-    const previousOverflow = document.body.style.overflow
+    const previousOverflow = document.body.style.overflow;
     const previouslyFocused =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
-        : menuButtonRef.current
-    const drawer = drawerRef.current
+        : menuButtonRef.current;
+    const drawer = drawerRef.current;
 
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflow = "hidden";
     const animationFrame = window.requestAnimationFrame(() => {
-      drawer
-        ?.querySelector<HTMLElement>(focusableSelector)
-        ?.focus()
-    })
+      drawer?.querySelector<HTMLElement>(focusableSelector)?.focus();
+    });
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        setDrawerOpen(false)
-        return
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setDrawerOpen(false);
+        return;
       }
 
-      if (event.key !== 'Tab' || !drawer) {
-        return
+      if (event.key !== "Tab" || !drawer) {
+        return;
       }
 
       const focusableElements = Array.from(
         drawer.querySelectorAll<HTMLElement>(focusableSelector),
       ).filter(
         (element) =>
-          !element.hasAttribute('disabled') &&
-          element.getAttribute('aria-hidden') !== 'true',
-      )
+          !element.hasAttribute("disabled") &&
+          element.getAttribute("aria-hidden") !== "true",
+      );
 
       if (focusableElements.length === 0) {
-        event.preventDefault()
-        drawer.focus()
-        return
+        event.preventDefault();
+        drawer.focus();
+        return;
       }
 
-      const first = focusableElements[0]
-      const last = focusableElements[focusableElements.length - 1]
+      const first = focusableElements[0];
+      const last = focusableElements[focusableElements.length - 1];
 
       if (
         event.shiftKey &&
         (document.activeElement === first ||
           !drawer.contains(document.activeElement))
       ) {
-        event.preventDefault()
-        last.focus()
+        event.preventDefault();
+        last.focus();
       } else if (
         !event.shiftKey &&
         (document.activeElement === last ||
           !drawer.contains(document.activeElement))
       ) {
-        event.preventDefault()
-        first.focus()
+        event.preventDefault();
+        first.focus();
       }
-    }
+    };
 
-    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.cancelAnimationFrame(animationFrame)
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = previousOverflow
-      previouslyFocused?.focus()
-    }
-  }, [drawerOpen])
+      window.cancelAnimationFrame(animationFrame);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus();
+    };
+  }, [drawerOpen]);
 
   useEffect(() => {
-    const desktop = window.matchMedia('(min-width: 1024px)')
+    const desktop = window.matchMedia("(min-width: 1024px)");
     const closeAtDesktop = (event: MediaQueryListEvent) => {
       if (event.matches) {
-        setDrawerOpen(false)
+        setDrawerOpen(false);
       }
-    }
+    };
 
-    desktop.addEventListener('change', closeAtDesktop)
-    return () => desktop.removeEventListener('change', closeAtDesktop)
-  }, [])
+    desktop.addEventListener("change", closeAtDesktop);
+    return () => desktop.removeEventListener("change", closeAtDesktop);
+  }, []);
 
   return (
     <div className="min-h-screen bg-canvas text-ink lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
@@ -219,19 +197,17 @@ export function ManagementLayout() {
       <ScrollToTop />
 
       <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto bg-inverse px-5 py-6 text-on-inverse lg:flex">
-        <Brand />
+        <Brand home={home} workspaceLabel={workspaceLabel} />
         <div className="mt-8">
           <ManagementNavigation
-            items={visibleNavigation}
-            label="Điều hướng quản lý"
+            items={MANAGEMENT_NAVIGATION}
+            label="Điều hướng vận hành"
           />
         </div>
 
         <div className="mt-auto border-t border-inverse-line pt-5">
           <p className="truncate text-sm font-bold">{principal?.fullName}</p>
-          <p className="mt-1 text-xs text-on-inverse-subtle">
-            {isAdmin ? 'Quản trị viên' : 'Nhân viên'}
-          </p>
+          <p className="mt-1 text-xs text-on-inverse-subtle">Quản trị viên</p>
           <Button
             className="mt-4 w-full border-inverse-line bg-transparent text-on-inverse-muted hover:bg-inverse-raised"
             onClick={logout}
@@ -247,7 +223,7 @@ export function ManagementLayout() {
           <button
             aria-controls="management-mobile-drawer"
             aria-expanded={drawerOpen}
-            aria-label="Mở menu quản lý"
+            aria-label="Mở menu vận hành"
             className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-ink transition hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
             onClick={() => setDrawerOpen(true)}
             ref={menuButtonRef}
@@ -263,9 +239,7 @@ export function ManagementLayout() {
             <p className="truncate text-sm font-bold text-ink">
               {principal?.fullName}
             </p>
-            <p className="text-xs text-muted">
-              {isAdmin ? 'Quản trị viên' : 'Nhân viên'}
-            </p>
+            <p className="text-xs text-muted">Quản trị viên</p>
           </div>
           <span className="ml-auto text-xs font-black uppercase tracking-[0.16em] text-brand">
             HG
@@ -284,7 +258,7 @@ export function ManagementLayout() {
       {drawerOpen ? (
         <>
           <button
-            aria-label="Đóng menu quản lý"
+            aria-label="Đóng menu vận hành"
             className="fixed inset-0 z-overlay bg-overlay backdrop-blur-sm lg:hidden"
             onClick={() => setDrawerOpen(false)}
             type="button"
@@ -300,10 +274,10 @@ export function ManagementLayout() {
           >
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-sm font-black" id="management-drawer-title">
-                Menu quản lý
+                Menu vận hành
               </h2>
               <button
-                aria-label="Đóng menu quản lý"
+                aria-label="Đóng menu vận hành"
                 className="inline-flex size-11 items-center justify-center rounded-xl border border-inverse-line text-xl text-on-inverse-muted transition hover:bg-inverse-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none"
                 onClick={() => setDrawerOpen(false)}
                 type="button"
@@ -313,12 +287,16 @@ export function ManagementLayout() {
             </div>
 
             <div className="mt-4">
-              <Brand onNavigate={() => setDrawerOpen(false)} />
+              <Brand
+                home={home}
+                onNavigate={() => setDrawerOpen(false)}
+                workspaceLabel={workspaceLabel}
+              />
             </div>
             <div className="mt-7">
               <ManagementNavigation
-                items={visibleNavigation}
-                label="Điều hướng quản lý trên thiết bị di động"
+                items={MANAGEMENT_NAVIGATION}
+                label="Điều hướng vận hành trên thiết bị di động"
                 onNavigate={() => setDrawerOpen(false)}
               />
             </div>
@@ -328,13 +306,13 @@ export function ManagementLayout() {
                 {principal?.fullName}
               </p>
               <p className="mt-1 text-xs text-on-inverse-subtle">
-                {isAdmin ? 'Quản trị viên' : 'Nhân viên'}
+                Quản trị viên
               </p>
               <Button
                 className="mt-4 w-full border-inverse-line bg-transparent text-on-inverse-muted hover:bg-inverse-raised"
                 onClick={() => {
-                  setDrawerOpen(false)
-                  logout()
+                  setDrawerOpen(false);
+                  logout();
                 }}
                 variant="outline"
               >
@@ -345,5 +323,5 @@ export function ManagementLayout() {
         </>
       ) : null}
     </div>
-  )
+  );
 }

@@ -5,7 +5,7 @@ export { CustomerBookingDetailPage } from './pages/CustomerBookingDetailPage'
 export { CreateBookingPage } from './pages/CreateBookingPage'
 export { ManagementBookingsPage } from './pages/ManagementBookingsPage'
 export { ManagementBookingDetailPage } from './pages/ManagementBookingDetailPage'
-export { ManagementCreateBookingPage } from './pages/ManagementCreateBookingPage'
+export { CounterBookingPage } from './pages/CounterBookingPage'
 
 export {
   useCustomerBooking,

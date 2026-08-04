@@ -74,21 +74,23 @@ test('public search sends exact filters, handles a broken image and opens detail
   })
 
   await page.goto('/rooms/search')
-  await page.getByLabel('Ngày nhận phòng').fill('2099-01-10')
-  await page.getByLabel('Ngày trả phòng').fill('2099-01-12')
-  await page.getByLabel('Số khách').fill('2')
+  await page.getByLabel('Nhận phòng').fill('2099-01-10')
+  await page.getByLabel('Trả phòng').fill('2099-01-12')
+  await page.getByText('1 khách', { exact: true }).click()
+  await page.getByRole('button', { name: 'Tăng số khách' }).click()
+  await page.getByRole('button', { name: 'Xong' }).click()
+  await page.getByRole('button', { name: 'Tìm phòng' }).click()
+  const filterToggle = page.getByRole('button', { name: /Bộ lọc/ })
+  if (await filterToggle.isVisible()) await filterToggle.click()
   await page.getByLabel('Wi-Fi').check()
   await page.getByLabel('Hồ bơi').check()
-  await page.getByRole('button', { name: 'Tìm kiếm' }).click()
 
-  expect(capturedAmenityIds).toEqual(['3', '9'])
+  await expect.poll(() => capturedAmenityIds).toEqual(['3', '9'])
   await expect(page.getByText('Không thể tải ảnh phòng')).toBeVisible()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
 
   await expect(page).toHaveURL(/\/rooms\/10$/)
-  await expect(
-    page.getByRole('heading', { name: 'Suite Vườn' }),
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Suite Vườn' })).toBeVisible()
   await expect(page.getByText('Không thể tải ảnh phòng')).toBeVisible()
 })
 
@@ -240,7 +242,9 @@ test('admin handles room status, calendar conflict and image operations', async 
   await page.getByRole('button', { name: 'Khóa ngày' }).click()
 
   await expect(
-    page.getByText('Phòng đã được đặt hoặc bị khóa trong khoảng ngày này.'),
+    page.getByText(
+      'Khoảng ngày này đã có đặt phòng hoặc vừa được cập nhật. Vui lòng kiểm tra lịch và chọn lại.',
+    ),
   ).toBeVisible()
   await expect.poll(() => calendarReads).toBeGreaterThan(1)
 
@@ -249,9 +253,7 @@ test('admin handles room status, calendar conflict and image operations', async 
   await expect(page.getByText('HBMS-RESERVED')).toBeVisible()
   await expect(page.getByText('Đã khóa').first()).toBeVisible()
 
-  await page
-    .getByRole('button', { name: 'Mở khóa khoảng đang xem' })
-    .click()
+  await page.getByRole('button', { name: 'Mở khóa khoảng đang xem' }).click()
   await expect(page.getByText('Đã mở khóa 2 đêm.')).toBeVisible()
   await expect(page.getByText('HBMS-RESERVED')).toBeVisible()
   await expect(page.getByText('Đã khóa')).toHaveCount(0)

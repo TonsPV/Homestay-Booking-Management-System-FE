@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
 
-import { getErrorMessage } from '@/api/errors'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
@@ -16,6 +15,7 @@ import { PaginationControls } from '@/shared/components/PaginationControls'
 import { formatDateTime } from '@/shared/formatting/formatters'
 
 import { AmenityForm } from '../components/AmenityForm'
+import { getAmenityActionError } from '../errors'
 import {
   useAdminAmenities,
   useCreateAmenity,
@@ -126,7 +126,7 @@ export function AmenityManagementPage() {
           </h2>
           {editorMutation.error ? (
             <Alert className="mb-5" tone="error">
-              {getErrorMessage(editorMutation.error)}
+              {getAmenityActionError(editorMutation.error)}
             </Alert>
           ) : null}
           <AmenityForm
@@ -141,7 +141,7 @@ export function AmenityManagementPage() {
       ) : null}
 
       {!editor && actionError ? (
-        <Alert tone="error">{getErrorMessage(actionError)}</Alert>
+        <Alert tone="error">{getAmenityActionError(actionError)}</Alert>
       ) : null}
 
       <Card>
@@ -179,7 +179,7 @@ export function AmenityManagementPage() {
         <LoadingState label="Đang tải tiện nghi..." />
       ) : query.isError ? (
         <ErrorState
-          description={getErrorMessage(query.error)}
+          description={getAmenityActionError(query.error)}
           onRetry={() => void query.refetch()}
         />
       ) : query.data.items.length === 0 ? (

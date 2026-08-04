@@ -53,8 +53,7 @@ function payment(status: 'PENDING' | 'SUCCESS') {
     gatewayTransactionStatus: status === 'SUCCESS' ? '00' : null,
     id: '96',
     method: 'VNPAY',
-    paidAt:
-      status === 'SUCCESS' ? '2026-07-29T00:03:00.000Z' : null,
+    paidAt: status === 'SUCCESS' ? '2026-07-29T00:03:00.000Z' : null,
     refundedAt: null,
     refundedByUser: null,
     refundedByUserId: null,
@@ -144,11 +143,7 @@ test('customer register, login, search, booking and VNPay return use authoritati
     }
 
     if (path.endsWith('/auth/me')) {
-      await fulfillJson(
-        route,
-        { actorType: 'customer', customer },
-        path,
-      )
+      await fulfillJson(route, { actorType: 'customer', customer }, path)
       return
     }
 
@@ -228,40 +223,39 @@ test('customer register, login, search, booking and VNPay return use authoritati
   await page.getByLabel('Số điện thoại').fill(customer.phone)
   await page.getByLabel('Email').fill(customer.email)
   await page.locator('input[name="password"]').fill('StrongPassword123!')
-  await page
-    .locator('input[name="confirmPassword"]')
-    .fill('StrongPassword123!')
+  await page.locator('input[name="confirmPassword"]').fill('StrongPassword123!')
   await page.getByRole('button', { name: 'Tạo tài khoản' }).click()
   await expect(page.getByText('Đăng ký thành công')).toBeVisible()
   await page.getByRole('link', { name: 'Đăng nhập ngay' }).click()
 
-  await page
-    .getByLabel('Email hoặc số điện thoại')
-    .fill(customer.email)
+  await page.getByLabel('Email hoặc số điện thoại').fill(customer.email)
   await page.getByLabel('Mật khẩu').fill('StrongPassword123!')
   await page.getByRole('button', { name: 'Đăng nhập' }).click()
   await expect(page).toHaveURL(/\/bookings$/)
 
   await page.goto('/rooms/search')
-  await page.getByLabel('Ngày nhận phòng').fill('2099-04-10')
-  await page.getByLabel('Ngày trả phòng').fill('2099-04-12')
-  await page.getByLabel('Số khách').fill('2')
-  await page.getByRole('button', { name: 'Tìm kiếm' }).click()
+  await page.getByLabel('Nhận phòng').fill('2099-04-10')
+  await page.getByLabel('Trả phòng').fill('2099-04-12')
+  await page.getByText('1 khách', { exact: true }).click()
+  await page.getByRole('button', { name: 'Tăng số khách' }).click()
+  await page.getByRole('button', { name: 'Xong' }).click()
+  await page.getByRole('button', { name: 'Tìm phòng' }).click()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
   await page.getByRole('button', { name: 'Chọn phòng này' }).click()
   await page.getByRole('button', { name: 'Tạo đặt phòng' }).click()
 
   await expect(page).toHaveURL(/\/bookings\/903$/)
-  await page
-    .getByRole('button', { name: 'Thanh toán qua VNPay' })
-    .click()
+  await expect(
+    page.getByText(
+      'Đã tạo đặt phòng. Hãy thanh toán trước thời hạn để giữ phòng.',
+    ),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Thanh toán qua VNPay' }).click()
 
   await expect(page).toHaveURL(/\/payments\/vnpay\/return/)
+  await expect(page.getByText('Thanh toán thành công')).toBeVisible()
   await expect(
-    page.getByText('Thanh toán VNPay thành công'),
-  ).toBeVisible()
-  await expect(
-    page.getByText(/trạng thái SUCCESS từ lịch sử payment/i),
+    page.getByText(/Khoản thanh toán đã được ghi nhận/i),
   ).toBeVisible()
   expect(paymentCreates).toBe(1)
 })

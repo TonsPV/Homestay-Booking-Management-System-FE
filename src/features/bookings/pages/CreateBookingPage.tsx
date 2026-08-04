@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   useLocation,
@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 
 import { Button } from '@/shared/components/Button'
+import { getApiFieldErrorCode } from '@/api/errors'
 import { Card } from '@/shared/components/Card'
 import {
   Alert,
@@ -96,12 +97,36 @@ export function CreateBookingPage() {
     formState: { errors },
     handleSubmit,
     register,
+    clearErrors,
+    setError,
     watch,
   } = useForm<CreateBookingFormValues>({
     defaultValues,
     resolver: zodResolver(createBookingFormSchema),
   })
+  const serverField = (
+    [
+      'checkInDate',
+      'checkOutDate',
+      'guestCount',
+      'contactName',
+      'contactPhone',
+      'contactEmail',
+    ] as const
+  ).find((field) => getApiFieldErrorCode(createMutation.error, field))
   const bookingForSomeoneElse = watch('bookingForSomeoneElse')
+
+  useEffect(() => {
+    if (!serverField) {
+      return
+    }
+
+    setError(
+      serverField,
+      { type: 'server', message: getBookingActionError(createMutation.error) },
+      { shouldFocus: true },
+    )
+  }, [createMutation.error, serverField, setError])
 
   if (!roomId || !/^[1-9][0-9]*$/.test(roomId)) {
     return (
@@ -110,6 +135,15 @@ export function CreateBookingPage() {
   }
 
   const submit = handleSubmit((values) => {
+    createMutation.reset()
+    clearErrors([
+      'checkInDate',
+      'checkOutDate',
+      'guestCount',
+      'contactName',
+      'contactPhone',
+      'contactEmail',
+    ])
     createMutation.mutate(
       {
         roomId,
@@ -131,7 +165,10 @@ export function CreateBookingPage() {
         onSuccess: (booking) => {
           navigate(
             state?.bookingDetailPath ?? `/bookings/${booking.id}`,
-            { replace: true },
+            {
+              replace: true,
+              state: { bookingCreated: true },
+            },
           )
         },
       },
@@ -143,24 +180,15 @@ export function CreateBookingPage() {
       <PageHeader
         eyebrow="Đặt phòng"
         title="Xác nhận kỳ nghỉ"
-        description="Giá và tình trạng phòng sẽ được máy chủ kiểm tra lại khi bạn gửi yêu cầu."
+        description="Chúng tôi sẽ kiểm tra lại giá và tình trạng phòng khi bạn xác nhận."
       />
 
-      {createMutation.isError ? (
+      {createMutation.isError && !serverField ? (
         <Alert tone="error">{getBookingActionError(createMutation.error)}</Alert>
       ) : null}
 
       <div className="grid min-w-0 items-start gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.42fr)]">
-        <Card className="overflow-hidden border-line p-0 shadow-card">
-          <div className="border-b border-line bg-brand-soft px-5 py-5 sm:px-7">
-            <p className="text-xs font-bold uppercase tracking-widest text-brand">
-              Thông tin đặt phòng
-            </p>
-            <h2 className="mt-1 text-xl font-black text-ink">
-              Chi tiết kỳ nghỉ
-            </h2>
-          </div>
-
+        <Card className="border-line p-0 shadow-card">
           <form className="grid gap-7 p-5 sm:p-7" onSubmit={submit}>
             <section
               aria-labelledby="booking-stay-details"
@@ -173,9 +201,6 @@ export function CreateBookingPage() {
                 >
                   Thời gian và số khách
                 </h3>
-                <p className="mt-1 text-sm leading-6 text-muted">
-                  Kiểm tra lại thông tin trước khi gửi yêu cầu.
-                </p>
               </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field

@@ -1,0 +1,308 @@
+[
+  {
+    "viewport": "375x812",
+    "scrollWidth": 375,
+    "clientWidth": 375,
+    "hasHorizontalScroll": false,
+    "heroTop": 65,
+    "heroHeight": 748,
+    "navHeight": 65,
+    "navOverlapsHero": false,
+    "h1Count": 1,
+    "h1s": [
+      "Tìm một nơiđể thật sự nghỉ ngơi."
+    ],
+    "h2s": [
+      "Không chỉ là một căn phòng",
+      "Tiện nghi cho kỳ nghỉ trọn vẹn",
+      "Không gian được yêu thích",
+      "Chưa có phòng",
+      "Kỳ nghỉ tiếp theo của bạn bắt đầu từ đây."
+    ],
+    "marqueeRows": [
+      {
+        "children": 2,
+        "width": 528
+      }
+    ],
+    "overflowing": [
+      "SECTION.relative -mx-4 overflow-hidden bg-inverse text-on-inverse sm right=391 left=-16",
+      "DIV.absolute inset-0 right=391 left=-16",
+      "DIV.size-full bg-linear-to-br from-inverse via-inverse-raised to right=391 left=-16",
+      "DIV.absolute inset-0 bg-linear-to-t from-inverse/90 via-inverse/ right=391 left=-16",
+      "DIV.absolute inset-0 bg-linear-to-r from-inverse/60 via-transpar right=391 left=-16",
+      "DIV.relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w right=391 left=-16",
+      "DIV.flex w-max gap-4 will-change-transform motion-reduce:animate right=515 left=-13",
+      "DIV.h-40 w-64 shrink-0 overflow-hidden rounded-card sm:h-48 sm:w right=243 left=-13",
+      "IMG.size-full object-cover right=243 left=-13",
+      "DIV.h-40 w-64 shrink-0 overflow-hidden rounded-card sm:h-48 sm:w right=515 left=259",
+      "IMG.size-full object-cover right=515 left=259"
+    ],
+    "consoleMessages": []
+  },
+  {
+    "viewport": "640x900",
+    "scrollWidth": 640,
+    "clientWidth": 640,
+    "hasHorizontalScroll": false,
+    "heroTop": 65,
+    "heroHeight": 836,
+    "navHeight": 65,
+    "navOverlapsHero": false,
+    "h1Count": 1,
+    "h1s": [
+      "Tìm một nơiđể thật sự nghỉ ngơi."
+    ],
+    "h2s": [
+      "Không chỉ là một căn phòng",
+      "Tiện nghi cho kỳ nghỉ trọn vẹn",
+      "Không gian được yêu thích",
+      "Chưa có phòng",
+      "Kỳ nghỉ tiếp theo của bạn bắt đầu từ đây."
+    ],
+    "marqueeRows": [
+      {
+        "children": 2,
+        "width": 656
+      }
+    ],
+    "overflowing": [
+      "SECTION.relative -mx-4 overflow-hidden bg-inverse text-on-inverse sm right=664 left=-24",
+      "DIV.absolute inset-0 right=664 left=-24",
+      "DIV.size-full bg-linear-to-br from-inverse via-inverse-raised to right=664 left=-24",
+      "DIV.absolute inset-0 bg-linear-to-t from-inverse/90 via-inverse/ right=664 left=-24",
+      "DIV.absolute inset-0 bg-linear-to-r from-inverse/60 via-transpar right=664 left=-24",
+      "DIV.relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w right=664 left=-24",
+      "DIV.flex w-max gap-4 will-change-transform motion-reduce:animate right=640 left=-16",
+      "DIV.h-40 w-64 shrink-0 overflow-hidden rounded-card sm:h-48 sm:w right=304 left=-16",
+      "IMG.size-full object-cover right=304 left=-16"
+    ],
+    "consoleMessages": []
+  },
+  {
+    "viewport": "768x1024",
+    "scrollWidth": 768,
+    "clientWidth": 768,
+    "hasHorizontalScroll": false,
+    "heroTop": 65,
+    "heroHeight": 960,
+    "navHeight": 65,
+    "navOverlapsHero": false,
+    "h1Count": 1,
+    "h1s": [
+      "Tìm một nơiđể thật sự nghỉ ngơi."
+    ],
+    "h2s": [
+      "Không chỉ là một căn phòng",
+      "Tiện nghi cho kỳ nghỉ trọn vẹn",
+      "Không gian được yêu thích",
+      "Chưa có phòng",
+      "Kỳ nghỉ tiếp theo của bạn bắt đầu từ đây."
+    ],
+    "marqueeRows": [
+      {
+        "children": 2,
+        "width": 656
+      }
+    ],
+    "overflowing": [
+      "SECTION.relative -mx-4 overflow-hidden bg-inverse text-on-inverse sm right=792 left=-24",
+      "DIV.absolute inset-0 right=792 left=-24",
+      "DIV.size-full bg-linear-to-br from-inverse via-inverse-raised to right=792 left=-24",
+      "DIV.absolute inset-0 bg-linear-to-t from-inverse/90 via-inverse/ right=792 left=-24",
+      "DIV.absolute inset-0 bg-linear-to-r from-inverse/60 via-transpar right=792 left=-24",
+      "DIV.relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w right=792 left=-24",
+      "DIV.flex w-max gap-4 will-change-transform motion-reduce:animate right=640 left=-16",
+      "DIV.h-40 w-64 shrink-0 overflow-hidden rounded-card sm:h-48 sm:w right=304 left=-16",
+      "IMG.size-full object-cover right=304 left=-16"
+    ],
+    "consoleMessages": []
+  },
+  {
+    "viewport": "1024x768",
+    "scrollWidth": 1024,
+    "clientWidth": 1024,
+    "hasHorizontalScroll": false,
+    "heroTop": 65,
+    "heroHeight": 704,
+    "navHeight": 65,
+    "navOverlapsHero": false,
+    "h1Count": 1,
+    "h1s": [
+      "Tìm một nơiđể thật sự nghỉ ngơi."
+    ],
+    "h2s": [
+      "Không chỉ là một căn phòng",
+      "Tiện nghi cho kỳ nghỉ trọn vẹn",
+      "Không gian được yêu thích",
+      "Chưa có phòng",
+      "Kỳ nghỉ tiếp theo của bạn bắt đầu từ đây."
+    ],
+    "marqueeRows": [
+      {
+        "children": 2,
+        "width": 656
+      }
+    ],
+    "overflowing": [
+      "SECTION.relative -mx-4 overflow-hidden bg-inverse text-on-inverse sm right=1056 left=-32",
+      "DIV.absolute inset-0 right=1056 left=-32",
+      "DIV.size-full bg-linear-to-br from-inverse via-inverse-raised to right=1056 left=-32",
+      "DIV.absolute inset-0 bg-linear-to-t from-inverse/90 via-inverse/ right=1056 left=-32",
+      "DIV.absolute inset-0 bg-linear-to-r from-inverse/60 via-transpar right=1056 left=-32",
+      "DIV.relative mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w right=1056 left=-32",
+      "DIV.flex w-max gap-4 will-change-transform motion-reduce:animate right=640 left=-16",
+      "DIV.h-40 w-64 shrink-0 overflow-hidden rounded-card sm:h-48 sm:w right=304 left=-16",
+      "IMG.size-full object-cover right=304 left=-16"
+    ],
+    "consoleMessages": []
+  },
+  {
+    "viewport": "1440x900",
+    "scrollWidth": 1440,
+    "clientWidth": 1440,
+    "hasHorizontalScroll": false,
+    "heroTop": 65,
+    "heroHeight": 836,
+    "navHeight": 65,
+    "navOverlapsHero": false,
+    "h1Count": 1,
+    "h1s": [
+      "Tìm một nơiđể thật sự nghỉ ngơi."
+    ],
+    "h2s": [
+      "Không chỉ là một căn phòng",
+      "Tiện nghi cho kỳ nghỉ trọn vẹn",
+      "Không gian được yêu thích",
+      "Chưa có phòng",
+      "Kỳ nghỉ tiếp theo của bạn bắt đầu từ đây."
+    ],
+    "marqueeRows": [
+      {
+        "children": 2,
+        "width": 656
+      }
+    ],
+    "overflowing": [],
+    "consoleMessages": []
+  },
+  {
+    "validation": {
+      "checkInDescribedBy": "home-check-in-description",
+      "checkInError": "Vui lòng chọn ngày nhận phòng.",
+      "checkOutError": "Vui lòng chọn ngày trả phòng.",
+      "guestsError": null,
+      "checkInInvalid": "true"
+    },
+    "searchUrl": "http://localhost:5173/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+    "searchPageState": {
+      "url": "http://localhost:5173/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+      "checkInValue": "2026-08-10",
+      "bodySnippet": "Bỏ qua điều hướng\nHG\n\nĐẶT PHÒNG\n\nTìm phòng trống\n\nChọn thời gian lưu trú, số khách và ngân sách để tìm những phòng đang sẵn sàng.\n\nHG\nĐặt phòng khách sạn trực tuyến\n\nNhập thông tin kỳ nghỉ để hệ thống kiểm tra phòng còn trống.\n\nNgày nhận phòng*\nNgày trả phòng*\nSố khách*\nLoại phòng\nTất cả loại phòng\nlimited\nnormal\nGiá tối thiểu / đêm\nGiá tối đa / đêm\nTìm kiếm\nTiện nghi cần có\nBan công\nĐiều hòa\nGiườ"
+    },
+    "tabOrder": [
+      {
+        "tag": "A",
+        "text": "Tìm phòng trống",
+        "href": "/rooms/search",
+        "outlineWidth": "2px",
+        "outlineStyle": "solid"
+      },
+      {
+        "tag": "A",
+        "text": "Khám phá phòng",
+        "href": "/rooms",
+        "outlineWidth": "2px",
+        "outlineStyle": "solid"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "3px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "3px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "INPUT",
+        "text": "",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "SELECT",
+        "text": "Tất cả loại phònglimitednormal",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "none"
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Tìm phòng",
+        "href": null,
+        "outlineWidth": "2px",
+        "outlineStyle": "solid"
+      },
+      {
+        "tag": "A",
+        "text": "Xem tất cả phòng",
+        "href": "/rooms",
+        "outlineWidth": "2px",
+        "outlineStyle": "solid"
+      }
+    ],
+    "reducedMotionState": {
+      "marqueeAnimations": [],
+      "staticGalleryRendered": true
+    }
+  }
+]

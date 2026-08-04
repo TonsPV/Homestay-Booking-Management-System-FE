@@ -1,36 +1,33 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from "vitest";
 
-import { ApiError } from '@/api/errors'
+import { ApiError } from "@/api/errors";
 
-import { getBookingActionError } from './errors'
+import { getBookingActionError } from "./errors";
 
-function httpError(message: string, status: number) {
-  return new ApiError(message, { kind: 'http', status })
+function httpError(errorCode?: string) {
+  return new ApiError("Backend message", {
+    errorCode,
+    kind: "http",
+    status: 409,
+  });
 }
 
-describe('getBookingActionError', () => {
-  it('translates known Backend booking errors into clear Vietnamese', () => {
+describe("getBookingActionError", () => {
+  it("translates stable Backend booking codes into clear Vietnamese", () => {
     expect(
-      getBookingActionError(
-        httpError(
-          'So luong khach vuot qua suc chua cua loai phong.',
-          400,
-        ),
-      ),
-    ).toBe('Số khách vượt quá sức chứa của phòng đã chọn.')
+      getBookingActionError(httpError("BOOKING_CHECKIN_REQUIRES_PAYMENT")),
+    ).toBe("Booking cần được thanh toán trước khi check-in.");
+    expect(getBookingActionError(httpError("BOOKING_ROOM_NOT_READY"))).toBe(
+      "Phòng chưa ở trạng thái sẵn sàng để check-in.",
+    );
     expect(
-      getBookingActionError(
-        httpError(
-          'Phong da duoc dat hoac bi khoa trong khoang ngay nay.',
-          409,
-        ),
-      ),
-    ).toBe('Phòng đã được đặt hoặc tạm khóa trong khoảng ngày này.')
-  })
+      getBookingActionError(httpError("BOOKING_CANCELLATION_NOT_ALLOWED")),
+    ).toBe("Booking không thể hủy ở trạng thái hiện tại.");
+  });
 
-  it('uses a safe fallback for an unknown booking conflict', () => {
-    expect(
-      getBookingActionError(httpError('Unknown conflict.', 409)),
-    ).toBe('Phòng vừa được người khác đặt. Vui lòng chọn lại phòng khác.')
-  })
-})
+  it("uses a safe fallback for an unknown booking conflict", () => {
+    expect(getBookingActionError(httpError())).toBe(
+      "Dữ liệu đã thay đổi hoặc xung đột. Vui lòng tải lại và thử lại.",
+    );
+  });
+});

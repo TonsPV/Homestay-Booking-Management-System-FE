@@ -28,16 +28,21 @@ function DetailItem({
   )
 }
 
-export function BookingDetails({ booking }: { booking: Booking }) {
+interface BookingDetailsProps {
+  audience?: 'customer' | 'management'
+  booking: Booking
+}
+
+export function BookingDetails({
+  audience = 'management',
+  booking,
+}: BookingDetailsProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-brand">
-              {booking.bookingCode}
-            </p>
-            <h2 className="mt-1 text-xl font-black text-ink">
+            <h2 className="text-xl font-black text-ink">
               {booking.room.name}
             </h2>
             <p className="mt-1 text-sm text-muted">
@@ -63,10 +68,6 @@ export function BookingDetails({ booking }: { booking: Booking }) {
           <DetailItem
             label="Tổng tiền"
             value={formatMoney(booking.totalAmount)}
-          />
-          <DetailItem
-            label="Hạn thanh toán"
-            value={formatDateTime(booking.paymentExpiresAt)}
           />
           <DetailItem
             label="Ngày tạo"
@@ -106,8 +107,15 @@ export function BookingDetails({ booking }: { booking: Booking }) {
           <DetailItem label="Điện thoại" value={booking.contactPhone} />
           <DetailItem label="Email" value={booking.contactEmail ?? '—'} />
           <DetailItem
-            label="Người tạo"
-            value={booking.createdByUser?.fullName ?? 'Khách hàng trực tuyến'}
+            label={audience === 'customer' ? 'Kênh đặt phòng' : 'Người tạo'}
+            value={
+              audience === 'customer'
+                ? booking.createdByUser
+                  ? 'Đặt tại quầy'
+                  : 'Đặt trực tuyến'
+                : (booking.createdByUser?.fullName ??
+                  'Khách hàng trực tuyến')
+            }
           />
         </dl>
       </Card>

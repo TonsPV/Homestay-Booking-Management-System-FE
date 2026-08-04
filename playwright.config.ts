@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173'
+
 export default defineConfig({
   expect: {
     timeout: 5_000,
@@ -21,7 +23,7 @@ export default defineConfig({
   testMatch: '**/*.pw.ts',
   workers: process.env.CI ? 2 : 4,
   use: {
-    baseURL: 'http://127.0.0.1:5173',
+    baseURL,
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },

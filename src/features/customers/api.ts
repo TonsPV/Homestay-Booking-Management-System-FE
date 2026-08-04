@@ -3,12 +3,32 @@ import type { Customer } from '@/auth/types'
 
 import type {
   ChangeCustomerPasswordInput,
+  AdminCustomer,
   CustomerListParams,
   CustomerCredentialResult,
   SetInitialCustomerPasswordInput,
   UpdateCustomerProfileInput,
   UpdateCustomerStatusInput,
 } from './types'
+
+type LegacyAdminCustomer = Omit<
+  AdminCustomer,
+  'credentialCapabilities'
+> & {
+  credentialCapabilities?: AdminCustomer['credentialCapabilities']
+}
+
+function normalizeAdminCustomer(
+  customer: LegacyAdminCustomer,
+): AdminCustomer {
+  return {
+    ...customer,
+    credentialCapabilities: customer.credentialCapabilities ?? {
+      canSetInitialPassword: false,
+      reasonCode: 'COMMON_NOT_FOUND',
+    },
+  }
+}
 
 export async function setInitialCustomerPassword({
   id,
@@ -56,20 +76,28 @@ export async function updateCustomerProfile(
   return result.data
 }
 
-export function listCustomers(params: CustomerListParams) {
-  return apiRequest<Customer[]>('/customers', {
+export async function listCustomers(params: CustomerListParams) {
+  const result = await apiRequest<LegacyAdminCustomer[]>('/customers', {
     query: { ...params },
   })
+
+  return {
+    ...result,
+    data: result.data.map(normalizeAdminCustomer),
+  }
 }
 
 export async function updateCustomerStatus({
   id,
   status,
 }: UpdateCustomerStatusInput) {
-  const result = await apiRequest<Customer>(`/customers/${id}/status`, {
+  const result = await apiRequest<LegacyAdminCustomer>(
+    `/customers/${id}/status`,
+    {
     body: { status },
     method: 'PATCH',
-  })
+    },
+  )
 
-  return result.data
+  return normalizeAdminCustomer(result.data)
 }

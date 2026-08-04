@@ -14,6 +14,7 @@ import {
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mutateMock = vi.hoisted(() => vi.fn())
+const resetMock = vi.hoisted(() => vi.fn())
 
 vi.mock('../hooks', () => ({
   useCreateCustomerBooking: () => ({
@@ -21,17 +22,26 @@ vi.mock('../hooks', () => ({
     isError: false,
     isPending: false,
     mutate: mutateMock,
+    reset: resetMock,
   }),
 }))
 
 import { CreateBookingPage } from './CreateBookingPage'
 
 function LocationProbe() {
-  return <div>location:{useLocation().pathname}</div>
+  const location = useLocation()
+  const state = location.state as { bookingCreated?: boolean } | null
+
+  return (
+    <div>
+      location:{location.pathname};created:{String(state?.bookingCreated)}
+    </div>
+  )
 }
 
 beforeEach(() => {
   mutateMock.mockReset()
+  resetMock.mockReset()
 })
 
 describe('CreateBookingPage', () => {
@@ -93,7 +103,9 @@ describe('CreateBookingPage', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText('location:/bookings/91')).toBeInTheDocument()
+      expect(
+        screen.getByText('location:/bookings/91;created:true'),
+      ).toBeInTheDocument()
     })
   })
 })

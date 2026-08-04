@@ -77,6 +77,11 @@ try {
     [playwrightCli, 'test', ...process.argv.slice(2)],
     {
       cwd: projectDirectory,
+      env: {
+        ...process.env,
+        PLAYWRIGHT_BASE_URL:
+          process.env.PLAYWRIGHT_BASE_URL ?? applicationUrl,
+      },
       stdio: 'inherit',
     },
   )

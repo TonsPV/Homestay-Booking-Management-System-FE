@@ -1,13 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useCallback,
+  useEffect,
   useState,
 } from 'react'
 import { useForm } from 'react-hook-form'
-import { useParams } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
 import {
   Alert,
   ErrorState,
@@ -19,6 +25,7 @@ import {
 } from '@/shared/components/FormControls'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { LinkButton } from '@/shared/components/LinkButton'
+import { formatDateOnly } from '@/shared/formatting/formatters'
 import { CustomerPaymentPanel } from '@/features/payments/components/CustomerPaymentPanel'
 
 import { BookingDetails } from '../components/BookingDetails'
@@ -36,13 +43,34 @@ import {
 
 export function CustomerBookingDetailPage() {
   const params = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   const bookingId = params.bookingId ?? params.id
   const bookingQuery = useCustomerBooking(bookingId)
   const cancelMutation = useCancelCustomerBooking()
   const [expiredPaymentDeadline, setExpiredPaymentDeadline] =
     useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string>()
+  const bookingCreated =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'bookingCreated' in location.state &&
+    location.state.bookingCreated === true
+  const [successMessage, setSuccessMessage] = useState<string | undefined>(
+    bookingCreated
+      ? 'Đã tạo đặt phòng. Hãy thanh toán trước thời hạn để giữ phòng.'
+      : undefined,
+  )
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const refetchBooking = bookingQuery.refetch
+  useEffect(() => {
+    if (bookingCreated) {
+      navigate(`${location.pathname}${location.search}`, {
+        replace: true,
+        state: null,
+      })
+    }
+  }, [bookingCreated, location.pathname, location.search, navigate])
+
   const handlePaymentExpired = useCallback(
     (expiresAt: string) => {
       setExpiredPaymentDeadline(expiresAt)
@@ -82,7 +110,7 @@ export function CustomerBookingDetailPage() {
     isBookingPaymentWindowOpen(booking) &&
     expiredPaymentDeadline !== booking.paymentExpiresAt
 
-  const submitCancel = handleSubmit((values) => {
+  const confirmCancel = handleSubmit((values) => {
     if (!bookingId) {
       return
     }
@@ -98,6 +126,7 @@ export function CustomerBookingDetailPage() {
       {
         onSuccess: () => {
           reset()
+          setCancelDialogOpen(false)
           setSuccessMessage('Đã hủy đặt phòng.')
         },
       },
@@ -123,7 +152,7 @@ export function CustomerBookingDetailPage() {
       {successMessage ? (
         <Alert tone="success">{successMessage}</Alert>
       ) : null}
-      <BookingDetails booking={booking} />
+      <BookingDetails audience="customer" booking={booking} />
       <CustomerPaymentPanel
         bookingId={booking.id}
         canPay={canPay}
@@ -131,40 +160,79 @@ export function CustomerBookingDetailPage() {
 
       {canCancel ? (
         <Card className="border-danger/20">
-          <h2 className="text-lg font-bold text-ink">Hủy đặt phòng</h2>
-          <p className="mt-1 text-sm leading-body text-muted">
-            Tình trạng phòng sẽ được kiểm tra lại sau khi yêu cầu hủy hoàn tất.
-          </p>
-
-          {cancelMutation.isError ? (
-            <Alert className="mt-4" tone="error">
-              {getBookingActionError(cancelMutation.error)}
-            </Alert>
-          ) : null}
-
-          <form className="mt-5 grid gap-4" onSubmit={submitCancel}>
-            <Field
-              label="Lý do hủy"
-              error={errors.reason?.message}
-              hint="Không bắt buộc, tối đa 500 ký tự."
-            >
-              <Textarea
-                {...register('reason')}
-                placeholder="Cho chúng tôi biết lý do bạn thay đổi kế hoạch"
-              />
-            </Field>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <Button
-                loading={cancelMutation.isPending}
-                type="submit"
-                variant="danger"
-              >
-                Xác nhận hủy
-              </Button>
+              <h2 className="text-lg font-bold text-ink">
+                Không tiếp tục chuyến đi?
+              </h2>
+              <p className="mt-1 text-sm leading-body text-muted">
+                Kiểm tra lại thông tin trước khi hủy đặt phòng này.
+              </p>
             </div>
-          </form>
+            <Button
+              className="shrink-0"
+              onClick={() => {
+                cancelMutation.reset()
+                setSuccessMessage(undefined)
+                setCancelDialogOpen(true)
+              }}
+              variant="danger"
+            >
+              Hủy đặt phòng
+            </Button>
+          </div>
         </Card>
       ) : null}
+
+      <ConfirmationDialog
+        busy={cancelMutation.isPending}
+        confirmDisabled={!bookingId}
+        confirmLabel="Xác nhận hủy đặt phòng"
+        description="Sau khi hủy, bạn sẽ không thể tiếp tục thanh toán cho đặt phòng này."
+        onCancel={() => {
+          cancelMutation.reset()
+          reset()
+          setCancelDialogOpen(false)
+        }}
+        onConfirm={() => void confirmCancel()}
+        open={cancelDialogOpen}
+        title={`Hủy đặt phòng ${booking.bookingCode}?`}
+      >
+        <dl className="grid grid-cols-2 gap-4 rounded-card bg-surface-muted p-4 text-sm">
+          <div>
+            <dt className="text-muted">Phòng</dt>
+            <dd className="mt-1 font-semibold text-ink">
+              {booking.room.roomNumber} · {booking.room.name}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted">Thời gian lưu trú</dt>
+            <dd className="mt-1 font-semibold text-ink">
+              {formatDateOnly(booking.checkInDate)} –{' '}
+              {formatDateOnly(booking.checkOutDate)}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="mt-4">
+          <Field
+            label="Lý do hủy"
+            error={errors.reason?.message}
+            hint="Không bắt buộc, tối đa 500 ký tự."
+          >
+            <Textarea
+              {...register('reason')}
+              placeholder="Cho chúng tôi biết lý do bạn thay đổi kế hoạch"
+            />
+          </Field>
+        </div>
+
+        {cancelMutation.isError ? (
+          <Alert className="mt-4" tone="error">
+            {getBookingActionError(cancelMutation.error)}
+          </Alert>
+        ) : null}
+      </ConfirmationDialog>
     </div>
   )
 }

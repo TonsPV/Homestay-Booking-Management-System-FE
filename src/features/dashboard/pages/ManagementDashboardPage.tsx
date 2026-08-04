@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Link } from 'react-router-dom'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
-import { getErrorMessage } from '@/api/errors'
+import { getErrorMessage } from "@/api/errors";
 import {
   createDefaultDashboardDateRange,
   dashboardDateRangeSchema,
@@ -13,26 +13,19 @@ import {
   useDashboardSummary,
   type DashboardDateRangeValues,
   type DashboardSummary,
-} from '@/features/dashboard'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import {
-  Alert,
-  ErrorState,
-  LoadingState,
-} from '@/shared/components/Feedback'
-import { Field, Input } from '@/shared/components/FormControls'
-import { LinkButton } from '@/shared/components/LinkButton'
-import { PageHeader } from '@/shared/components/PageHeader'
-import {
-  formatDateTime,
-  formatNumber,
-} from '@/shared/formatting/formatters'
+} from "@/features/dashboard";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { Alert, ErrorState, LoadingState } from "@/shared/components/Feedback";
+import { Field, Input } from "@/shared/components/FormControls";
+import { LinkButton } from "@/shared/components/LinkButton";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { formatDateTime, formatNumber } from "@/shared/formatting/formatters";
 
 interface CountRow {
-  label: string
-  to?: string
-  value: number
+  label: string;
+  to?: string;
+  value: number;
 }
 
 function SummaryRows({ rows }: { rows: CountRow[] }) {
@@ -61,76 +54,72 @@ function SummaryRows({ rows }: { rows: CountRow[] }) {
         </div>
       ))}
     </dl>
-  )
+  );
 }
 
-function DashboardSummaryContent({
-  summary,
-}: {
-  summary: DashboardSummary
-}) {
+function DashboardSummaryContent({ summary }: { summary: DashboardSummary }) {
   const bookingTotal = Object.values(summary.bookings).reduce(
     (total, count) => total + count,
     0,
-  )
+  );
   const roomsTotal = Object.values(summary.rooms).reduce(
     (total, count) => total + count,
     0,
-  )
+  );
   const paymentsNeedingAttention =
-    summary.payments.requiresReview + summary.payments.refundPending
+    summary.payments.requiresReview + summary.payments.refundPending;
   const occupancyWidth = Math.min(
     100,
     Math.max(0, summary.occupancy.occupancyRate),
-  )
+  );
   const hasNoRangeActivity =
     bookingTotal === 0 &&
     summary.revenue.total === 0 &&
     summary.totalRefunded === 0 &&
     summary.occupancy.roomNightsReserved === 0 &&
-    paymentsNeedingAttention === 0
+    paymentsNeedingAttention === 0;
 
   const bookingRows: CountRow[] = [
     {
-      label: 'Chờ thanh toán',
-      to: '/management/bookings?status=PENDING_PAYMENT',
+      label: "Chờ thanh toán",
+      to: "/management/bookings?status=PENDING_PAYMENT",
       value: summary.bookings.pendingPayment,
     },
     {
-      label: 'Đã xác nhận',
-      to: '/management/bookings?status=CONFIRMED',
+      label: "Đã xác nhận",
+      to: "/management/bookings?status=CONFIRMED",
       value: summary.bookings.confirmed,
     },
     {
-      label: 'Đang lưu trú',
-      to: '/management/bookings?status=CHECKED_IN',
+      label: "Đang lưu trú",
+      to: "/management/bookings?status=CHECKED_IN",
       value: summary.bookings.checkedIn,
     },
     {
-      label: 'Đã trả phòng',
-      to: '/management/bookings?status=CHECKED_OUT',
+      label: "Đã trả phòng",
+      to: "/management/bookings?status=CHECKED_OUT",
       value: summary.bookings.checkedOut,
     },
     {
-      label: 'Đã hủy',
-      to: '/management/bookings?status=CANCELLED',
+      label: "Đã hủy",
+      to: "/management/bookings?status=CANCELLED",
       value: summary.bookings.cancelled,
     },
-  ]
+  ];
   const roomRows: CountRow[] = [
-    { label: 'Sẵn sàng', value: summary.rooms.ready },
-    { label: 'Đang có khách', value: summary.rooms.occupied },
-    { label: 'Đang dọn', value: summary.rooms.cleaning },
-    { label: 'Bảo trì', value: summary.rooms.maintenance },
-  ]
+    { label: "Sẵn sàng đón khách", value: summary.rooms.ready },
+    { label: "Khách đang lưu trú", value: summary.rooms.occupied },
+    { label: "Đang dọn", value: summary.rooms.cleaning },
+    { label: "Bảo trì", value: summary.rooms.maintenance },
+  ];
 
   return (
     <div className="space-y-6">
       {hasNoRangeActivity ? (
         <Alert title="Không có phát sinh trong kỳ">
-          Khoảng ngày này chưa có booking, doanh thu hoặc đêm phòng đã
-          giữ chỗ. Số 0 là dữ liệu hợp lệ; trạng thái phòng hiện tại vẫn
-          được hiển thị bên dưới.
+          Khoảng ngày này chưa có booking, doanh thu hoặc đêm phòng đã giữ chỗ.
+          Số 0 là dữ liệu hợp lệ; trạng thái phòng hiện tại vẫn được hiển thị
+          bên dưới.
         </Alert>
       ) : null}
 
@@ -159,9 +148,7 @@ function DashboardSummaryContent({
           <div className="border-b border-line p-5 xl:border-b-0 xl:border-r">
             <dt className="text-sm font-semibold text-muted">Công suất</dt>
             <dd className="mt-2 text-2xl font-black tracking-tight text-ink">
-              {formatDashboardPercentage(
-                summary.occupancy.occupancyRate,
-              )}
+              {formatDashboardPercentage(summary.occupancy.occupancyRate)}
             </dd>
             <p className="mt-1 text-xs text-muted">
               Không tính đêm phòng bị khóa
@@ -242,10 +229,7 @@ function DashboardSummaryContent({
         <Card aria-labelledby="revenue-title">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2
-                className="text-lg font-black text-ink"
-                id="revenue-title"
-              >
+              <h2 className="text-lg font-black text-ink" id="revenue-title">
                 Doanh thu và hoàn tiền
               </h2>
               <p className="mt-1 text-sm text-muted">
@@ -267,9 +251,7 @@ function DashboardSummaryContent({
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-muted">
-                Tiền mặt / chuyển khoản
-              </dt>
+              <dt className="text-sm text-muted">Tiền mặt / chuyển khoản</dt>
               <dd className="mt-1 text-lg font-black text-ink">
                 {formatDashboardMoney(summary.revenue.manual)}
               </dd>
@@ -284,10 +266,7 @@ function DashboardSummaryContent({
         </Card>
 
         <Card aria-labelledby="occupancy-title">
-          <h2
-            className="text-lg font-black text-ink"
-            id="occupancy-title"
-          >
+          <h2 className="text-lg font-black text-ink" id="occupancy-title">
             Công suất phòng
           </h2>
           <p className="mt-1 text-sm text-muted">
@@ -295,12 +274,10 @@ function DashboardSummaryContent({
           </p>
           <div className="mt-6 flex items-end justify-between gap-4">
             <p className="text-3xl font-black tracking-tight text-ink">
-              {formatDashboardPercentage(
-                summary.occupancy.occupancyRate,
-              )}
+              {formatDashboardPercentage(summary.occupancy.occupancyRate)}
             </p>
             <p className="text-sm font-semibold tabular-nums text-muted">
-              {formatNumber(summary.occupancy.roomNightsReserved)} /{' '}
+              {formatNumber(summary.occupancy.roomNightsReserved)} /{" "}
               {formatNumber(summary.occupancy.roomNightsAvailable)} đêm
             </p>
           </div>
@@ -349,9 +326,7 @@ function DashboardSummaryContent({
             className="flex min-h-11 items-center justify-between gap-5 rounded-control border border-line px-4 py-2 text-sm hover:border-warning"
             to="/management/payments?status=REFUND_PENDING"
           >
-            <span className="font-semibold text-ink">
-              Chờ hoàn tiền
-            </span>
+            <span className="font-semibold text-ink">Chờ hoàn tiền</span>
             <strong className="text-lg tabular-nums text-warning">
               {formatNumber(summary.payments.refundPending)}
             </strong>
@@ -363,28 +338,22 @@ function DashboardSummaryContent({
         Dữ liệu được tổng hợp lúc {formatDateTime(summary.generatedAt)}.
       </p>
     </div>
-  )
+  );
 }
 
 export function ManagementDashboardPage() {
-  const [appliedRange, setAppliedRange] =
-    useState<DashboardDateRangeValues>(() =>
-      createDefaultDashboardDateRange(),
-    )
-  const summaryQuery = useDashboardSummary(appliedRange)
+  const [appliedRange, setAppliedRange] = useState<DashboardDateRangeValues>(
+    () => createDefaultDashboardDateRange(),
+  );
+  const summaryQuery = useDashboardSummary(appliedRange);
   const form = useForm<DashboardDateRangeValues>({
     defaultValues: appliedRange,
     resolver: zodResolver(dashboardDateRangeSchema),
-  })
+  });
 
   return (
     <div className="space-y-8">
       <PageHeader
-        actions={
-          <LinkButton to="/management/bookings/new">
-            Tạo booking tại quầy
-          </LinkButton>
-        }
         description="Theo dõi booking, phòng và thanh toán từ dữ liệu vận hành thực tế."
         eyebrow="Homestay Green"
         title="Tổng quan vận hành"
@@ -412,14 +381,14 @@ export function ManagementDashboardPage() {
             label="Từ ngày"
             required
           >
-            <Input type="date" {...form.register('from')} />
+            <Input type="date" {...form.register("from")} />
           </Field>
           <Field
             error={form.formState.errors.to?.message}
             label="Đến ngày"
             required
           >
-            <Input type="date" {...form.register('to')} />
+            <Input type="date" {...form.register("to")} />
           </Field>
           <Button
             className="w-full lg:w-auto"
@@ -443,10 +412,7 @@ export function ManagementDashboardPage() {
       )}
 
       <section aria-labelledby="quick-actions-title">
-        <h2
-          className="text-lg font-black text-ink"
-          id="quick-actions-title"
-        >
+        <h2 className="text-lg font-black text-ink" id="quick-actions-title">
           Thao tác nhanh
         </h2>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -462,5 +428,5 @@ export function ManagementDashboardPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

@@ -3,16 +3,14 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { EmptyState } from '@/shared/components/Feedback'
-import {
-  formatDateTime,
-  formatMoney,
-} from '@/shared/formatting/formatters'
+import { formatDateTime, formatMoney } from '@/shared/formatting/formatters'
 
 import type { Payment } from '../types'
 import { getPaymentMethodLabel } from './paymentLabels'
 import { PaymentStatusBadge } from './PaymentStatusBadge'
 
 interface PaymentListProps {
+  bookingBasePath?: string
   canRefund?: boolean
   management?: boolean
   onReconcile?: (payment: Payment) => void
@@ -22,6 +20,7 @@ interface PaymentListProps {
 }
 
 interface PaymentItemProps {
+  bookingBasePath?: string
   canRefund: boolean
   management: boolean
   onReconcile?: (payment: Payment) => void
@@ -34,42 +33,44 @@ function isRefundable(payment: Payment, canRefund: boolean) {
   return (
     canRefund &&
     (payment.status === 'SUCCESS' ||
-      (payment.method === 'VNPAY' &&
-        payment.status === 'REQUIRES_REVIEW'))
+      (payment.method === 'VNPAY' && payment.status === 'REQUIRES_REVIEW'))
   )
 }
 
 function BookingReference({
+  bookingBasePath,
   management,
   payment,
 }: {
+  bookingBasePath?: string
   management: boolean
   payment: Payment
 }) {
-  return management ? (
+  const basePath =
+    bookingBasePath ?? (management ? '/management/bookings' : undefined)
+
+  return basePath ? (
     <Link
       className="font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-      to={`/management/bookings/${payment.bookingId}`}
+      to={`${basePath}/${payment.bookingId}`}
     >
       #{payment.bookingId}
     </Link>
   ) : (
-    <span className="font-semibold text-ink">
-      #{payment.bookingId}
-    </span>
+    <span className="font-semibold text-ink">#{payment.bookingId}</span>
   )
 }
 
 function GatewayDetails({ payment }: { payment: Payment }) {
   const hasGatewayDetails = Boolean(
     payment.gatewayName ||
-      payment.gatewayReference ||
-      payment.gatewayTransactionId ||
-      payment.gatewayResponseCode ||
-      payment.gatewayTransactionStatus ||
-      payment.refundRequestId ||
-      payment.refundResponseCode ||
-      payment.refundTransactionStatus,
+    payment.gatewayReference ||
+    payment.gatewayTransactionId ||
+    payment.gatewayResponseCode ||
+    payment.gatewayTransactionStatus ||
+    payment.refundRequestId ||
+    payment.refundResponseCode ||
+    payment.refundTransactionStatus,
   )
 
   if (!hasGatewayDetails) {
@@ -151,16 +152,12 @@ function PaymentTimeline({ payment }: { payment: Payment }) {
     <dl className="grid gap-1 text-xs">
       <div>
         <dt className="inline text-muted">Tạo: </dt>
-        <dd className="inline text-ink">
-          {formatDateTime(payment.createdAt)}
-        </dd>
+        <dd className="inline text-ink">{formatDateTime(payment.createdAt)}</dd>
       </div>
       {payment.paidAt ? (
         <div>
           <dt className="inline text-muted">Thanh toán: </dt>
-          <dd className="inline text-ink">
-            {formatDateTime(payment.paidAt)}
-          </dd>
+          <dd className="inline text-ink">{formatDateTime(payment.paidAt)}</dd>
         </div>
       ) : null}
       {payment.refundedAt ? (
@@ -198,17 +195,13 @@ function PaymentTimeline({ payment }: { payment: Payment }) {
       {payment.createdByUser ? (
         <div>
           <dt className="inline text-muted">Người ghi nhận: </dt>
-          <dd className="inline text-ink">
-            {payment.createdByUser.fullName}
-          </dd>
+          <dd className="inline text-ink">{payment.createdByUser.fullName}</dd>
         </div>
       ) : null}
       {payment.refundedByUser ? (
         <div>
           <dt className="inline text-muted">Người hoàn: </dt>
-          <dd className="inline text-ink">
-            {payment.refundedByUser.fullName}
-          </dd>
+          <dd className="inline text-ink">{payment.refundedByUser.fullName}</dd>
         </div>
       ) : null}
     </dl>
@@ -219,8 +212,8 @@ function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   if (payment.status === 'REFUND_PENDING') {
     return (
       <p className="mt-3 rounded-card border border-warning/20 bg-warning-soft px-3 py-2 text-sm text-ink">
-        Kết quả hoàn tiền VNPay chưa được xác định. Hãy đối soát trước khi
-        gửi một yêu cầu hoàn tiền khác.
+        Kết quả hoàn tiền VNPay chưa được xác định. Hãy đối soát trước khi gửi
+        một yêu cầu hoàn tiền khác.
       </p>
     )
   }
@@ -228,8 +221,8 @@ function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   if (payment.status === 'REQUIRES_REVIEW') {
     return (
       <p className="mt-3 rounded-card border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
-        VNPay báo thành công sau khi booking đã đóng. Cần đối soát thủ
-        công; không tự khôi phục booking.
+        VNPay báo thành công sau khi booking đã đóng. Cần đối soát thủ công;
+        không tự khôi phục booking.
       </p>
     )
   }
@@ -241,8 +234,8 @@ function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   ) {
     return (
       <p className="mt-3 rounded-card bg-surface-muted px-3 py-2 text-xs text-muted">
-        Attempt đã được hệ thống đóng theo vòng đời booking. Trạng thái
-        này không tự khẳng định giao dịch ngân hàng thất bại.
+        Attempt đã được hệ thống đóng theo vòng đời booking. Trạng thái này
+        không tự khẳng định giao dịch ngân hàng thất bại.
       </p>
     )
   }
@@ -256,11 +249,7 @@ function ReconcileButton({
   payment,
   reconcilingPaymentId,
 }: Omit<PaymentItemProps, 'management' | 'onRefund'>) {
-  if (
-    !canRefund ||
-    payment.status !== 'REFUND_PENDING' ||
-    !onReconcile
-  ) {
+  if (!canRefund || payment.status !== 'REFUND_PENDING' || !onReconcile) {
     return null
   }
 
@@ -299,6 +288,7 @@ function RefundButton({
 }
 
 function PaymentCards({
+  bookingBasePath,
   canRefund,
   management,
   onReconcile,
@@ -325,6 +315,7 @@ function PaymentCards({
                 <p className="mt-1 text-sm text-muted">
                   Giao dịch #{payment.id} · Booking{' '}
                   <BookingReference
+                    bookingBasePath={bookingBasePath}
                     management={management}
                     payment={payment}
                   />
@@ -372,6 +363,7 @@ function PaymentCards({
 }
 
 function ManagementPaymentTable({
+  bookingBasePath,
   canRefund,
   onReconcile,
   onRefund,
@@ -429,7 +421,11 @@ function ManagementPaymentTable({
                 #{payment.id}
               </th>
               <td className="px-4 py-3">
-                <BookingReference management payment={payment} />
+                <BookingReference
+                  bookingBasePath={bookingBasePath}
+                  management
+                  payment={payment}
+                />
               </td>
               <td className="whitespace-nowrap px-4 py-3 font-medium text-ink">
                 {getPaymentMethodLabel(payment.method)}
@@ -475,6 +471,7 @@ function ManagementPaymentTable({
 }
 
 export function PaymentList({
+  bookingBasePath,
   canRefund = false,
   management = false,
   onReconcile,
@@ -494,6 +491,7 @@ export function PaymentList({
   if (!management) {
     return (
       <PaymentCards
+        bookingBasePath={bookingBasePath}
         canRefund={canRefund}
         management={false}
         onReconcile={onReconcile}
@@ -507,6 +505,7 @@ export function PaymentList({
   return (
     <>
       <ManagementPaymentTable
+        bookingBasePath={bookingBasePath}
         canRefund={canRefund}
         onReconcile={onReconcile}
         onRefund={onRefund}
@@ -515,6 +514,7 @@ export function PaymentList({
       />
       <div className="lg:hidden">
         <PaymentCards
+          bookingBasePath={bookingBasePath}
           canRefund={canRefund}
           management
           onReconcile={onReconcile}

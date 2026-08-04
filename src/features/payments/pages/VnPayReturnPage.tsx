@@ -134,12 +134,13 @@ export function VnPayReturnPage() {
 
   if (!hasGatewayParameters && !frontendReturnResult) {
     content = (
-      <Alert tone="error">
-        URL không chứa dữ liệu trả về từ VNPay. Không thể xác minh giao dịch.
+      <Alert tone="error" title="Không thể kiểm tra giao dịch">
+        Thông tin thanh toán trả về chưa đầy đủ. Vui lòng mở lại đặt phòng để
+        kiểm tra trạng thái hoặc thử thanh toán lại.
       </Alert>
     )
   } else if (hasGatewayParameters && returnQuery.isPending) {
-    content = <LoadingState label="Đang xác minh phản hồi VNPay…" />
+    content = <LoadingState label="Đang kiểm tra kết quả thanh toán…" />
   } else if (hasGatewayParameters && returnQuery.isError) {
     content = (
       <ErrorState
@@ -150,29 +151,28 @@ export function VnPayReturnPage() {
   } else if (!returnResult) {
     content = (
       <Alert tone="warning">
-        Máy chủ chưa trả về dữ liệu xác minh. Vui lòng kiểm tra lại.
+        Chưa thể kiểm tra kết quả thanh toán. Vui lòng thử lại sau ít phút.
       </Alert>
     )
   } else if (!returnResult.validSignature) {
     content = (
-      <Alert tone="error" title="Không thể xác thực phản hồi">
-        Chữ ký VNPay không hợp lệ. Không sử dụng thông tin trên URL để kết luận
-        trạng thái thanh toán.
+      <Alert tone="error" title="Thông tin thanh toán không hợp lệ">
+        Chúng tôi không thể xác nhận thông tin vừa nhận. Vui lòng quay lại đặt
+        phòng để kiểm tra trạng thái trước khi thanh toán lại.
       </Alert>
     )
   } else if (!returnResult.paymentId || !returnResult.paymentStatus) {
     content = (
-      <Alert tone="warning" title="Chưa tìm thấy giao dịch">
-        Phản hồi có chữ ký hợp lệ nhưng hệ thống chưa xác định được payment.
-        Vui lòng kiểm tra lịch sử booking.
+      <Alert tone="warning" title="Chưa xác định được giao dịch">
+        Hệ thống chưa tìm thấy khoản thanh toán tương ứng. Vui lòng kiểm tra
+        lịch sử trong chi tiết đặt phòng.
       </Alert>
     )
   } else if (attempt && !returnMatchesAttempt) {
     content = (
-      <Alert tone="warning" title="Phản hồi không khớp payment đã mở">
-        Booking hoặc payment trên Return không khớp attempt VNPay đã lưu trên
-        thiết bị này. Giao diện không polling và không xóa idempotency key; vui
-        lòng mở lịch sử booking để kiểm tra trạng thái chính thức.
+      <Alert tone="warning" title="Giao dịch không khớp">
+        Thông tin vừa nhận không khớp với lần thanh toán được mở trên thiết bị
+        này. Vui lòng kiểm tra trạng thái trong chi tiết đặt phòng.
       </Alert>
     )
   } else if (
@@ -180,14 +180,14 @@ export function VnPayReturnPage() {
     authStatus === 'restoring'
   ) {
     content = (
-      <LoadingState label="Đang khôi phục phiên để đọc lịch sử payment…" />
+      <LoadingState label="Đang khôi phục phiên đăng nhập…" />
     )
   } else if (
     canReadCustomerHistory &&
     paymentsQuery.isPending
   ) {
     content = (
-      <LoadingState label="Đang đọc trạng thái từ lịch sử payment…" />
+      <LoadingState label="Đang kiểm tra trạng thái thanh toán…" />
     )
   } else if (
     canReadCustomerHistory &&
@@ -204,59 +204,59 @@ export function VnPayReturnPage() {
     !authoritativePayment
   ) {
     content = (
-      <Alert tone="warning" title="Đang đồng bộ lịch sử">
-        Return đã xác định payment #{returnResult.paymentId}, nhưng lịch sử
-        booking chưa trả về bản ghi tương ứng. Giao diện sẽ tiếp tục kiểm tra
-        trong thời gian hữu hạn
-        {polling ? '…' : '.'}
+      <Alert tone="warning" title="Đang cập nhật kết quả">
+        Hệ thống chưa ghi nhận giao dịch trong lịch sử đặt phòng. Trang sẽ tiếp
+        tục kiểm tra trong ít phút{polling ? '…' : '.'}
       </Alert>
     )
   } else if (paymentStatus === 'SUCCESS') {
     content = (
       <Alert
         tone={authoritativePayment ? 'success' : 'info'}
-        title="Thanh toán VNPay thành công"
+        title={
+          authoritativePayment
+            ? 'Thanh toán thành công'
+            : 'Đang xác nhận thanh toán'
+        }
       >
         {authoritativePayment
-          ? 'Hệ thống đã ghi nhận trạng thái SUCCESS từ lịch sử payment sau khi backend xử lý callback VNPay.'
-          : 'Đây vẫn là kết quả tạm thời trên URL Return. Hãy đăng nhập và kiểm tra lịch sử booking để xác nhận trạng thái chính thức.'}
+          ? 'Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được cập nhật.'
+          : 'VNPay đã gửi kết quả về, nhưng hệ thống chưa xác nhận khoản thanh toán trong lịch sử. Vui lòng đăng nhập và kiểm tra chi tiết đặt phòng.'}
       </Alert>
     )
   } else if (paymentStatus === 'PENDING') {
     content = canReadCustomerHistory ? (
-      <Alert tone="info" title="Đang chờ backend xác nhận">
-        Return không tự đánh dấu đã thanh toán. Trang đang polling lịch sử
-        payment và sẽ tải lại booking khi có kết quả cuối
+      <Alert tone="info" title="Giao dịch đang được xử lý">
+        Hệ thống đang kiểm tra kết quả với VNPay. Bạn chưa cần thanh toán lại
         {polling ? '…' : '.'}
         {!polling
-          ? ' Thời gian chờ tự động đã kết thúc; bạn có thể bắt đầu một lượt kiểm tra hữu hạn mới.'
+          ? ' Quá trình kiểm tra tự động đã tạm dừng; bạn có thể kiểm tra lại ngay.'
           : null}
       </Alert>
     ) : (
-      <Alert tone="warning" title="Chưa thể polling lịch sử">
-        Return đang báo PENDING, nhưng không có booking attempt hoặc phiên
-        Customer phù hợp để đọc lịch sử có kiểm soát quyền sở hữu. Giao diện
-        không gửi thêm payment request; hãy đăng nhập và mở lịch sử booking.
+      <Alert tone="warning" title="Chưa thể kiểm tra tự động">
+        Vui lòng đăng nhập và mở chi tiết đặt phòng để xem kết quả. Không nên
+        tạo thêm giao dịch khi trạng thái hiện tại chưa rõ ràng.
       </Alert>
     )
   } else if (paymentStatus === 'REQUIRES_REVIEW') {
     content = (
-      <Alert tone="warning" title="Giao dịch cần đối soát">
-        VNPay báo thành công sau khi booking đã đóng. Bộ phận quản lý cần đối
-        soát thủ công; booking không được tự khôi phục.
+      <Alert tone="warning" title="Giao dịch đang được kiểm tra">
+        Kết quả thanh toán đến sau khi đặt phòng đã đóng. Homestay Green đang
+        kiểm tra và sẽ cập nhật khi có kết quả cuối cùng.
       </Alert>
     )
   } else if (paymentStatus === 'FAILED') {
     content = (
-      <Alert tone="warning" title="Attempt thanh toán đã đóng">
-        Hệ thống đã đóng attempt này. Lịch sử payment cần được tải lại trước
-        khi tạo một giao dịch mới.
+      <Alert tone="warning" title="Thanh toán chưa thành công">
+        Giao dịch đã kết thúc mà chưa ghi nhận thanh toán. Vui lòng quay lại
+        đặt phòng và kiểm tra trạng thái trước khi thử lại.
       </Alert>
     )
   } else {
     content = (
       <Alert title="Giao dịch đã hoàn tiền">
-        Trạng thái hoàn tiền đã được ghi nhận trên hệ thống.
+        Khoản thanh toán đã được ghi nhận hoàn tiền.
       </Alert>
     )
   }
@@ -264,17 +264,12 @@ export function VnPayReturnPage() {
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6">
       <PageHeader
-        eyebrow="VNPay Return"
+        eyebrow="Thanh toán VNPay"
         title="Kết quả thanh toán"
-        description="Trạng thái trong lịch sử payment sau khi backend xử lý callback VNPay mới là kết quả chính thức."
+        description="Kết quả chỉ được xác nhận sau khi hệ thống đối chiếu với lịch sử thanh toán của đặt phòng."
       />
       <Card>
         {content}
-        {returnResult?.paymentId ? (
-          <p className="mt-4 text-sm text-slate-600">
-            Mã payment: <strong>#{returnResult.paymentId}</strong>
-          </p>
-        ) : null}
         <div className="mt-5 flex flex-wrap gap-3">
           {paymentStatus === 'PENDING' ? (
             <Button
@@ -288,11 +283,11 @@ export function VnPayReturnPage() {
             <LinkButton
               to={`/bookings/${customerBookingIdForNavigation}`}
             >
-              Về chi tiết booking
+              Xem chi tiết đặt phòng
             </LinkButton>
           ) : (
             <LinkButton to="/bookings">
-              Về danh sách booking
+              Về danh sách đặt phòng
             </LinkButton>
           )}
         </div>

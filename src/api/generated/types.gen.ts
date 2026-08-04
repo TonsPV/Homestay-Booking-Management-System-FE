@@ -19,10 +19,31 @@ export type SuccessEnvelopeDto = {
     requestId: string;
 };
 
+export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+
 export type ErrorEnvelopeDto = {
     success: boolean;
     statusCode: number;
+    errorCode: ErrorCode;
     message: string | Array<string>;
+    /**
+     * Validation errors keyed by request field.
+     */
+    fieldErrors?: {
+        [key: string]: Array<{
+            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+            message?: string;
+        }>;
+    };
+    /**
+     * Safe structured context that can help a client recover.
+     */
+    details?: {
+        retryable?: boolean;
+        limit?: number;
+        maxAdvanceDays?: number;
+        maxStayNights?: number;
+    };
     error: string;
     path: string;
     timestamp: string;
@@ -45,6 +66,19 @@ export type HealthResponseDto = {
     timestamp: string;
 };
 
+export type AuthRegistrationAcceptedDto = {
+    /**
+     * The customer account was created successfully.
+     */
+    accepted: boolean;
+};
+
+export type RegisterCustomerDto = {
+    fullName: string;
+    email?: string | null;
+    phone: string;
+};
+
 export type AuthCustomerDto = {
     id: string;
     fullName: string;
@@ -53,12 +87,6 @@ export type AuthCustomerDto = {
     status: 'ACTIVE' | 'LOCKED';
     createdAt: string;
     updatedAt: string;
-};
-
-export type RegisterCustomerDto = {
-    fullName: string;
-    email?: string | null;
-    phone: string;
 };
 
 export type AuthUserDto = {
@@ -208,6 +236,45 @@ export type CancelBookingDto = {
     reason?: string;
 };
 
+export type CustomerCredentialCapabilitiesDto = {
+    canSetInitialPassword: boolean;
+    reasonCode: 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'COMMON_NOT_FOUND' | null;
+};
+
+export type BookingTransitionCapabilityDto = {
+    targetStatus: BookingStatus;
+    allowed: boolean;
+    reasonCode: 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | null;
+};
+
+export type ManagementBookingDto = {
+    id: string;
+    bookingCode: string;
+    customerId: string;
+    roomId: string;
+    createdByUserId: string | null;
+    checkInDate: string;
+    checkOutDate: string;
+    guestCount: number;
+    contactName: string;
+    contactPhone: string;
+    contactEmail: string | null;
+    totalAmount: string;
+    status: BookingStatus;
+    paymentStatus: BookingPaymentStatus;
+    paymentExpiresAt: string | null;
+    customerNote: string | null;
+    cancelledAt: string | null;
+    cancellationReason: string | null;
+    customer: BookingCustomerDto;
+    room: BookingRoomDto;
+    createdByUser: BookingUserDto | null;
+    createdAt: string;
+    updatedAt: string;
+    credentialCapabilities: CustomerCredentialCapabilitiesDto;
+    transitionCapabilities: Array<BookingTransitionCapabilityDto>;
+};
+
 export type CreateManagementBookingDto = {
     roomId: string;
     checkInDate: string;
@@ -229,7 +296,7 @@ export type CreateManagementBookingDto = {
 export type UpdateBookingStatusDto = {
     status: 'PENDING_PAYMENT' | 'CONFIRMED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'CANCELLED';
     /**
-     * Required when the target status is CANCELLED.
+     * Required when changing the booking from another status to CANCELLED.
      */
     cancellationReason?: string;
 };
@@ -247,6 +314,17 @@ export type CustomerCredentialResultDto = {
 export type ChangeCustomerPasswordDto = {
     currentPassword: string;
     newPassword: string;
+};
+
+export type AdminCustomerDto = {
+    id: string;
+    fullName: string;
+    email: string | null;
+    phone: string;
+    status: 'ACTIVE' | 'LOCKED';
+    createdAt: string;
+    updatedAt: string;
+    credentialCapabilities: CustomerCredentialCapabilitiesDto;
 };
 
 export type UpdateAccountStatusDto = {
@@ -323,6 +401,35 @@ export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'VNPAY';
 
 export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'REQUIRES_REVIEW' | 'REFUND_PENDING' | 'REFUNDED';
 
+export type CustomerPaymentDto = {
+    id: string;
+    bookingId: string;
+    amount: string;
+    currency: 'VND';
+    method: PaymentMethod;
+    status: PaymentStatus;
+    /**
+     * Safe merchant payment reference shown on customer receipts.
+     */
+    gatewayReference: string | null;
+    paidAt: string | null;
+    refundedAt: string | null;
+    expiresAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type OnlinePaymentDto = {
+    payment: CustomerPaymentDto;
+    paymentUrl: string;
+    expiresAt: string;
+};
+
+export type CreateVnpayPaymentDto = {
+    bankCode?: 'VNPAYQR' | 'VNBANK' | 'INTCARD';
+    locale?: 'vn' | 'en';
+};
+
 export type PaymentUserDto = {
     id: string;
     fullName: string;
@@ -361,17 +468,6 @@ export type PaymentDto = {
     updatedAt: string;
 };
 
-export type OnlinePaymentDto = {
-    payment: PaymentDto;
-    paymentUrl: string;
-    expiresAt: string;
-};
-
-export type CreateVnpayPaymentDto = {
-    bankCode?: 'VNPAYQR' | 'VNBANK' | 'INTCARD';
-    locale?: 'vn' | 'en';
-};
-
 export type PaymentManagementMetaDto = {
     pagination: PaginationDto;
     /**
@@ -402,8 +498,6 @@ export type VnPayReturnDto = {
     transactionStatus: string | null;
 };
 
-export type RoomStatus = 'READY' | 'OCCUPIED' | 'CLEANING' | 'MAINTENANCE' | 'HIDDEN';
-
 export type RoomTypeAmenityDto = {
     id: string;
     name: string;
@@ -414,6 +508,7 @@ export type RoomResponseRoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    bedType: string | null;
     maxGuests: number;
     basePrice: string;
     amenities: Array<RoomTypeAmenityDto>;
@@ -425,6 +520,20 @@ export type RoomImageDto = {
     sortOrder: number;
     isCover: boolean;
 };
+
+export type PublicRoomDto = {
+    id: string;
+    roomTypeId: string;
+    roomNumber: string;
+    name: string;
+    description: string | null;
+    roomType: RoomResponseRoomTypeDto;
+    images: Array<RoomImageDto>;
+};
+
+export type RoomSearchSort = 'RECOMMENDED' | 'PRICE_ASC' | 'PRICE_DESC' | 'POPULARITY' | 'NEWEST';
+
+export type RoomStatus = 'READY' | 'OCCUPIED' | 'CLEANING' | 'MAINTENANCE' | 'HIDDEN';
 
 export type RoomDto = {
     id: string;
@@ -458,6 +567,42 @@ export type UpdateRoomStatusDto = {
     status: 'READY' | 'OCCUPIED' | 'CLEANING' | 'MAINTENANCE' | 'HIDDEN';
 };
 
+export type RoomTodayAvailabilityStatus = 'AVAILABLE' | 'RESERVED' | 'BLOCKED';
+
+export type ManagementRoomCalendarBookingDto = {
+    id: string;
+    bookingCode: string;
+    checkInDate: string;
+    checkOutDate: string;
+};
+
+export type ManagementRoomCalendarEventDto = {
+    stayDate: string;
+    status: 'RESERVED' | 'BLOCKED';
+    reason: string | null;
+    booking: ManagementRoomCalendarBookingDto | null;
+};
+
+export type ManagementRoomCalendarSummaryDto = {
+    asOfDate: string;
+    todayStatus: RoomTodayAvailabilityStatus;
+    nextEvent: ManagementRoomCalendarEventDto | null;
+};
+
+export type ManagementRoomDto = {
+    id: string;
+    roomTypeId: string;
+    roomNumber: string;
+    name: string;
+    description: string | null;
+    status: RoomStatus;
+    roomType: RoomResponseRoomTypeDto;
+    images: Array<RoomImageDto>;
+    createdAt: string;
+    updatedAt: string;
+    calendarSummary: ManagementRoomCalendarSummaryDto;
+};
+
 export type RoomCalendarBookingDto = {
     id: string;
     bookingCode: string;
@@ -485,6 +630,7 @@ export type RoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    bedType: string | null;
     maxGuests: number;
     /**
      * Base price represented as a decimal string.
@@ -499,6 +645,7 @@ export type AdminRoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    bedType: string | null;
     maxGuests: number;
     /**
      * Base price represented as a decimal string.
@@ -513,6 +660,7 @@ export type AdminRoomTypeDto = {
 export type CreateRoomTypeDto = {
     name: string;
     description?: string | null;
+    bedType?: string | null;
     maxGuests: number;
     basePrice: string;
 };
@@ -520,6 +668,7 @@ export type CreateRoomTypeDto = {
 export type UpdateRoomTypeDto = {
     name?: string;
     description?: string | null;
+    bedType?: string | null;
     maxGuests?: number;
     basePrice?: string;
 };
@@ -607,6 +756,10 @@ export type HealthGetReadinessData = {
 
 export type HealthGetReadinessErrors = {
     /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
      * The database is unavailable or did not respond in time.
      */
     503: ErrorEnvelopeDto;
@@ -636,11 +789,7 @@ export type AuthRegisterCustomerErrors = {
      */
     400: ErrorEnvelopeDto;
     /**
-     * The requested resource does not exist.
-     */
-    404: ErrorEnvelopeDto;
-    /**
-     * The request conflicts with the current resource state.
+     * A customer account cannot be created with the supplied email or phone number.
      */
     409: ErrorEnvelopeDto;
     /**
@@ -654,7 +803,7 @@ export type AuthRegisterCustomerError = AuthRegisterCustomerErrors[keyof AuthReg
 export type AuthRegisterCustomerResponses = {
     201: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: AuthCustomerDto;
+        data?: AuthRegistrationAcceptedDto;
     };
 };
 
@@ -669,13 +818,9 @@ export type AuthLoginCustomerData = {
 
 export type AuthLoginCustomerErrors = {
     /**
-     * Authentication is required.
+     * The login credentials are invalid. Missing, locked, passwordless, and password-mismatch states use the same response.
      */
     401: ErrorEnvelopeDto;
-    /**
-     * The authenticated actor does not have access.
-     */
-    403: ErrorEnvelopeDto;
     /**
      * The request rate limit was exceeded.
      */
@@ -702,13 +847,9 @@ export type AuthLoginUserData = {
 
 export type AuthLoginUserErrors = {
     /**
-     * Authentication is required.
+     * The login credentials are invalid. Missing, locked, passwordless, and password-mismatch states use the same response.
      */
     401: ErrorEnvelopeDto;
-    /**
-     * The authenticated actor does not have access.
-     */
-    403: ErrorEnvelopeDto;
     /**
      * The request rate limit was exceeded.
      */
@@ -1255,7 +1396,7 @@ export type BookingManagementCreateError = BookingManagementCreateErrors[keyof B
 export type BookingManagementCreateResponses = {
     201: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: BookingDto;
+        data?: ManagementBookingDto;
     };
 };
 
@@ -1286,7 +1427,7 @@ export type BookingManagementGetByIdError = BookingManagementGetByIdErrors[keyof
 export type BookingManagementGetByIdResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: BookingDto;
+        data?: ManagementBookingDto;
     };
 };
 
@@ -1329,7 +1470,7 @@ export type BookingManagementUpdateStatusError = BookingManagementUpdateStatusEr
 export type BookingManagementUpdateStatusResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: BookingDto;
+        data?: ManagementBookingDto;
     };
 };
 
@@ -1474,7 +1615,7 @@ export type CustomerAdminListCustomersError = CustomerAdminListCustomersErrors[k
 export type CustomerAdminListCustomersResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: Array<AuthCustomerDto>;
+        data?: Array<AdminCustomerDto>;
         meta?: PaginationMetaDto;
     };
 };
@@ -1518,7 +1659,7 @@ export type CustomerAdminUpdateStatusError = CustomerAdminUpdateStatusErrors[key
 export type CustomerAdminUpdateStatusResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: AuthCustomerDto;
+        data?: AdminCustomerDto;
     };
 };
 
@@ -1633,7 +1774,7 @@ export type PaymentListError = PaymentListErrors[keyof PaymentListErrors];
 export type PaymentListResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: Array<PaymentDto>;
+        data?: Array<CustomerPaymentDto>;
         meta?: PaginationMetaDto;
     };
 };
@@ -1931,6 +2072,7 @@ export type RoomSearchData = {
         minPrice?: string;
         maxPrice?: string;
         page?: number;
+        sort?: RoomSearchSort;
         limit?: number;
     };
     url: '/api/v1/rooms/search';
@@ -1939,7 +2081,7 @@ export type RoomSearchData = {
 export type RoomSearchResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: Array<RoomDto>;
+        data?: Array<PublicRoomDto>;
         meta?: PaginationMetaDto;
     };
 };
@@ -1961,7 +2103,7 @@ export type RoomListData = {
 export type RoomListResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: Array<RoomDto>;
+        data?: Array<PublicRoomDto>;
         meta?: PaginationMetaDto;
     };
 };
@@ -2052,7 +2194,7 @@ export type RoomGetByIdData = {
 export type RoomGetByIdResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: RoomDto;
+        data?: PublicRoomDto;
     };
 };
 
@@ -2220,12 +2362,49 @@ export type RoomManagementListError = RoomManagementListErrors[keyof RoomManagem
 export type RoomManagementListResponses = {
     200: SuccessEnvelopeDto & {
         statusCode?: number;
-        data?: Array<RoomDto>;
+        data?: Array<ManagementRoomDto>;
         meta?: PaginationMetaDto;
     };
 };
 
 export type RoomManagementListResponse = RoomManagementListResponses[keyof RoomManagementListResponses];
+
+export type RoomManagementAvailableData = {
+    body?: never;
+    path?: never;
+    query: {
+        checkIn: string;
+        checkOut: string;
+        guests: number;
+        roomTypeId?: string;
+        page?: number;
+        limit?: number;
+    };
+    url: '/api/v1/management/rooms/available';
+};
+
+export type RoomManagementAvailableErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+};
+
+export type RoomManagementAvailableError = RoomManagementAvailableErrors[keyof RoomManagementAvailableErrors];
+
+export type RoomManagementAvailableResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: Array<RoomDto>;
+        meta?: PaginationMetaDto;
+    };
+};
+
+export type RoomManagementAvailableResponse = RoomManagementAvailableResponses[keyof RoomManagementAvailableResponses];
 
 export type RoomManagementCalendarData = {
     body?: never;

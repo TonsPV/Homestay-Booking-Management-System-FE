@@ -1,77 +1,74 @@
-import { useState } from 'react'
+import { useState } from "react";
 
-import { getErrorMessage } from '@/api/errors'
-import { useRoomTypeOptions } from '@/features/room-types'
-import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import {
-  Alert,
-  ErrorState,
-  LoadingState,
-} from '@/shared/components/Feedback'
-import { Select } from '@/shared/components/FormControls'
+import { getErrorMessage } from "@/api/errors";
+import { useRoomTypeOptions } from "@/features/room-types";
+import { Badge } from "@/shared/components/Badge";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { Alert, ErrorState, LoadingState } from "@/shared/components/Feedback";
+import { Select } from "@/shared/components/FormControls";
 import {
   formatDateTime,
   formatMoney,
   formatNumber,
-} from '@/shared/formatting/formatters'
+} from "@/shared/formatting/formatters";
 
-import { RoomForm } from '../components/RoomForm'
-import { RoomCalendarManager } from '../components/RoomCalendarManager'
-import { RoomImage } from '../components/RoomImage'
-import { RoomImageManager } from '../components/RoomImageManager'
-import { RoomStatusBadge } from '../components/RoomStatusBadge'
+import { RoomForm } from "../components/RoomForm";
+import { RoomCalendarManager } from "../components/RoomCalendarManager";
+import { RoomImage } from "../components/RoomImage";
+import { RoomStatusBadge } from "../components/RoomStatusBadge";
 import {
   useDeleteRoom,
   useManagementRoom,
   useUpdateRoom,
   useUpdateRoomStatus,
-} from '../hooks'
-import { resolveRoomImageUrl } from '../image-url'
-import { getRoomStatusLabel } from '../status'
+} from "../hooks";
+import { resolveRoomImageUrl } from "../image-url";
+import { getRoomStatusLabel } from "../status";
 import {
   ROOM_STATUSES,
   type CreateRoomInput,
   type ManagementRole,
   type RoomStatus,
   type UpdateRoomInput,
-} from '../types'
+} from "../types";
 
-type DetailMode = 'edit' | 'images' | null
+type DetailMode = "edit" | null;
 
 interface ManagementRoomDetailPageProps {
-  onBack?: () => void
-  onDeleted?: () => void
-  role: ManagementRole
-  roomId: string
+  onBack?: () => void;
+  onDeleted?: () => void;
+  onManageImages?: () => void;
+  role: ManagementRole;
+  roomId: string;
 }
 
 function statusOptionsFor(role: ManagementRole) {
-  return role === 'ADMIN'
+  return role === "ADMIN"
     ? ROOM_STATUSES
-    : ROOM_STATUSES.filter((status) => status !== 'HIDDEN')
+    : ROOM_STATUSES.filter((status) => status !== "HIDDEN");
 }
 
 export function ManagementRoomDetailPage({
   onBack,
   onDeleted,
+  onManageImages,
   role,
   roomId,
 }: ManagementRoomDetailPageProps) {
-  const query = useManagementRoom(roomId)
-  const roomTypesQuery = useRoomTypeOptions(role === 'ADMIN')
-  const updateMutation = useUpdateRoom()
-  const deleteMutation = useDeleteRoom()
-  const statusMutation = useUpdateRoomStatus()
-  const [mode, setMode] = useState<DetailMode>(null)
-  const [statusDraft, setStatusDraft] = useState<RoomStatus>()
-  const [successMessage, setSuccessMessage] = useState<string>()
+  const query = useManagementRoom(roomId);
+  const roomTypesQuery = useRoomTypeOptions(role === "ADMIN");
+  const updateMutation = useUpdateRoom();
+  const deleteMutation = useDeleteRoom();
+  const statusMutation = useUpdateRoomStatus();
+  const [mode, setMode] = useState<DetailMode>(null);
+  const [statusDraft, setStatusDraft] = useState<RoomStatus>();
+  const [successMessage, setSuccessMessage] = useState<string>();
   const actionError =
-    updateMutation.error ?? deleteMutation.error ?? statusMutation.error
+    updateMutation.error ?? deleteMutation.error ?? statusMutation.error;
 
   if (query.isPending) {
-    return <LoadingState label="Đang tải thông tin phòng…" />
+    return <LoadingState label="Đang tải thông tin phòng…" />;
   }
 
   if (query.isError) {
@@ -80,39 +77,36 @@ export function ManagementRoomDetailPage({
         description={getErrorMessage(query.error)}
         onRetry={() => void query.refetch()}
       />
-    )
+    );
   }
 
-  const room = query.data
-  const selectedStatus = statusDraft ?? room.status
-  const staffCannotChangeHidden =
-    role === 'STAFF' && room.status === 'HIDDEN'
+  const room = query.data;
+  const selectedStatus = statusDraft ?? room.status;
+  const staffCannotChangeHidden = role === "STAFF" && room.status === "HIDDEN";
 
-  async function submitUpdate(
-    input: CreateRoomInput | UpdateRoomInput,
-  ) {
+  async function submitUpdate(input: CreateRoomInput | UpdateRoomInput) {
     const updateInput: UpdateRoomInput = {
       description: input.description,
       name: input.name,
       roomNumber: input.roomNumber,
       roomTypeId: input.roomTypeId,
-    }
+    };
 
     try {
-      setSuccessMessage(undefined)
+      setSuccessMessage(undefined);
       await updateMutation.mutateAsync({
         id: room.id,
         input: updateInput,
-      })
-      setMode(null)
-      setSuccessMessage('Đã cập nhật phòng.')
+      });
+      setMode(null);
+      setSuccessMessage("Đã cập nhật phòng.");
     } catch {
       // Mutation state renders the normalized API error in the form.
     }
   }
 
   function saveStatus() {
-    setSuccessMessage(undefined)
+    setSuccessMessage(undefined);
     statusMutation.mutate(
       {
         id: room.id,
@@ -120,11 +114,11 @@ export function ManagementRoomDetailPage({
       },
       {
         onSuccess: () => {
-          setStatusDraft(undefined)
-          setSuccessMessage('Đã cập nhật trạng thái phòng.')
+          setStatusDraft(undefined);
+          setSuccessMessage("Đã cập nhật trạng thái phòng.");
         },
       },
-    )
+    );
   }
 
   function removeRoom() {
@@ -133,30 +127,12 @@ export function ManagementRoomDetailPage({
         `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
       )
     ) {
-      return
+      return;
     }
 
     deleteMutation.mutate(room.id, {
       onSuccess: () => onDeleted?.(),
-    })
-  }
-
-  if (mode === 'images') {
-    return (
-      <div className="grid gap-5">
-        {onBack ? (
-          <div>
-            <Button onClick={onBack} variant="text">
-              ← Quay lại danh sách phòng
-            </Button>
-          </div>
-        ) : null}
-        <RoomImageManager
-          onClose={() => setMode(null)}
-          roomId={room.id}
-        />
-      </div>
-    )
+    });
   }
 
   return (
@@ -169,7 +145,7 @@ export function ManagementRoomDetailPage({
         </div>
       ) : null}
 
-      {role === 'ADMIN' && roomTypesQuery.isError ? (
+      {role === "ADMIN" && roomTypesQuery.isError ? (
         <Alert tone="error">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span>
@@ -189,11 +165,9 @@ export function ManagementRoomDetailPage({
       {actionError ? (
         <Alert tone="error">{getErrorMessage(actionError)}</Alert>
       ) : null}
-      {successMessage ? (
-        <Alert tone="success">{successMessage}</Alert>
-      ) : null}
+      {successMessage ? <Alert tone="success">{successMessage}</Alert> : null}
 
-      {mode === 'edit' ? (
+      {mode === "edit" ? (
         <Card>
           <div className="mb-5">
             <h1 className="text-xl font-black text-slate-950">
@@ -224,12 +198,12 @@ export function ManagementRoomDetailPage({
                   {room.roomNumber} · {room.name}
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {room.description || 'Chưa có mô tả.'}
+                  {room.description || "Chưa có mô tả."}
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2 lg:max-w-md lg:justify-end">
-                {role === 'ADMIN' ? (
+                {role === "ADMIN" ? (
                   <>
                     <Button
                       disabled={
@@ -237,17 +211,16 @@ export function ManagementRoomDetailPage({
                         roomTypesQuery.isError ||
                         (roomTypesQuery.data?.length ?? 0) === 0
                       }
-                      onClick={() => setMode('edit')}
+                      onClick={() => setMode("edit")}
                       variant="outline"
                     >
                       Chỉnh sửa
                     </Button>
-                    <Button
-                      onClick={() => setMode('images')}
-                      variant="outline"
-                    >
-                      Quản lý ảnh
-                    </Button>
+                    {onManageImages ? (
+                      <Button onClick={onManageImages} variant="outline">
+                        Quản lý ảnh
+                      </Button>
+                    ) : null}
                     <Button
                       loading={deleteMutation.isPending}
                       onClick={removeRoom}
@@ -379,10 +352,7 @@ export function ManagementRoomDetailPage({
                         src={resolveRoomImageUrl(image.imageUrl)}
                       />
                       {image.isCover ? (
-                        <Badge
-                          className="absolute left-3 top-3"
-                          tone="blue"
-                        >
+                        <Badge className="absolute left-3 top-3" tone="blue">
                           Ảnh bìa
                         </Badge>
                       ) : null}
@@ -398,5 +368,5 @@ export function ManagementRoomDetailPage({
         </>
       )}
     </div>
-  )
+  );
 }

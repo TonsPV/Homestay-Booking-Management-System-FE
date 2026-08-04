@@ -102,33 +102,33 @@ test('customer searches availability and books with profile contact', async ({
     booking.status = 'CANCELLED'
     booking.paymentExpiresAt = null
     booking.cancelledAt = '2026-07-24T01:00:00.000Z'
-    booking.cancellationReason = String(
-      submittedCancellation?.reason ?? '',
-    )
+    booking.cancellationReason = String(submittedCancellation?.reason ?? '')
     await fulfillJson(route, booking, '/api/v1/bookings/900/cancel')
   })
-  await page.route(
-    '**/api/v1/bookings/900/payments?**',
-    async (route) => {
-      await fulfillJson(route, [], '/api/v1/bookings/900/payments')
-    },
-  )
+  await page.route('**/api/v1/bookings/900/payments?**', async (route) => {
+    await fulfillJson(route, [], '/api/v1/bookings/900/payments')
+  })
 
   await page.goto('/rooms/search')
-  await page.getByLabel('Ngày nhận phòng').fill('2099-01-10')
-  await page.getByLabel('Ngày trả phòng').fill('2099-01-12')
-  await page.getByLabel('Số khách').fill('2')
-  await page.getByRole('button', { name: 'Tìm kiếm' }).click()
+  await page.getByLabel('Nhận phòng').fill('2099-01-10')
+  await page.getByLabel('Trả phòng').fill('2099-01-12')
+  await page.getByText('1 khách', { exact: true }).click()
+  await page.getByRole('button', { name: 'Tăng số khách' }).click()
+  await page.getByRole('button', { name: 'Xong' }).click()
+  await page.getByRole('button', { name: 'Tìm phòng' }).click()
 
   await expect(page.getByText('Suite Vườn')).toBeVisible()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Suite Vườn' }),
-  ).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Suite Vườn' })).toBeVisible()
   await page.getByRole('button', { name: 'Chọn phòng này' }).click()
   await page.getByRole('button', { name: 'Tạo đặt phòng' }).click()
 
   await expect(page.getByText('HBMS-000900').first()).toBeVisible()
+  await expect(
+    page.getByText(
+      'Đã tạo đặt phòng. Hãy thanh toán trước thời hạn để giữ phòng.',
+    ),
+  ).toBeVisible()
   expect(submittedBooking).toEqual({
     checkInDate: '2099-01-10',
     checkOutDate: '2099-01-12',
@@ -136,8 +136,9 @@ test('customer searches availability and books with profile contact', async ({
     roomId: '10',
   })
 
+  await page.getByRole('button', { name: 'Hủy đặt phòng' }).click()
   await page.getByLabel('Lý do hủy').fill('Khách đổi kế hoạch')
-  await page.getByRole('button', { name: 'Xác nhận hủy' }).click()
+  await page.getByRole('button', { name: 'Xác nhận hủy đặt phòng' }).click()
   await expect(page.getByText('Đã hủy đặt phòng.')).toBeVisible()
   expect(submittedCancellation).toEqual({ reason: 'Khách đổi kế hoạch' })
 })

@@ -39,7 +39,7 @@ import {
   decideVnPayAttempt,
   findPendingVnPayPayment,
 } from '../safety'
-import { PaymentList } from './PaymentList'
+import { CustomerPaymentHistory } from './CustomerPaymentHistory'
 
 interface CustomerPaymentPanelProps {
   bookingId: string
@@ -146,7 +146,7 @@ export function CustomerPaymentPanel({
           if (!paymentUrl) {
             setRedirecting(false)
             setRedirectError(
-              'Không thể mở cổng thanh toán vì máy chủ trả về địa chỉ không an toàn. Giao dịch chưa bị gửi lại; vui lòng kiểm tra lịch sử thanh toán.',
+              'Không thể mở cổng thanh toán. Yêu cầu của bạn không bị gửi lại; vui lòng kiểm tra lịch sử bên dưới rồi thử lại.',
             )
             void paymentsQuery.refetch()
             return
@@ -161,36 +161,33 @@ export function CustomerPaymentPanel({
 
   return (
     <section className="grid gap-4" aria-labelledby="customer-payments-title">
-      <Card>
+      {canPay ? <Card>
         <h2 id="customer-payments-title" className="text-lg font-bold text-slate-950">
           Thanh toán
         </h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          Số tiền do máy chủ lấy trực tiếp từ booking. Không đóng hoặc gửi lại
-          liên tục khi giao dịch đang được xử lý.
+          Chọn kênh thanh toán phù hợp. Số tiền được lấy từ thông tin đặt phòng
+          đã xác nhận.
         </p>
 
-        {!canPay ? (
-          <Alert className="mt-4">
-            Booking hiện không ở trạng thái có thể tạo thanh toán mới.
-          </Alert>
-        ) : paymentsQuery.isPending ||
+        {paymentsQuery.isPending ||
           paymentsQuery.isFetching ? (
           <Alert className="mt-4">
-            Đang đối chiếu lịch sử payment trước khi cho phép tạo giao dịch
-            mới…
+            Đang kiểm tra lịch sử thanh toán…
           </Alert>
         ) : paymentsQuery.isError ? (
           <Alert className="mt-4" tone="warning">
-            Chưa thể xác nhận booking có attempt đang xử lý hay không. Thanh
-            toán mới tạm thời bị khóa.
+            Chưa thể kiểm tra các giao dịch trước đó. Tạm thời chưa thể tạo
+            thanh toán mới; vui lòng thử lại sau.
           </Alert>
         ) : conflictBlocked ? (
-          <Alert className="mt-4" tone="warning">
-            Máy chủ trả về xung đột nhưng chưa cung cấp mã lỗi nghiệp vụ để
-            phân biệt nguyên nhân. Giao diện đã khóa thao tác và tải lại dữ
-            liệu; vui lòng kiểm tra lịch sử rồi tải lại trang trước khi thao
-            tác tiếp.
+          <Alert
+            className="mt-4"
+            title="Thông tin thanh toán vừa thay đổi"
+            tone="warning"
+          >
+            Vui lòng kiểm tra lịch sử bên dưới và tải lại trang trước khi thử
+            lại. Yêu cầu sẽ không được gửi thêm trong lúc này.
           </Alert>
         ) : attemptDecision.kind === 'blocked' ? (
           <Alert
@@ -198,16 +195,13 @@ export function CustomerPaymentPanel({
             tone="warning"
             title={
               attemptDecision.reason === 'pending-without-key'
-                ? 'Đang có giao dịch VNPay chờ xử lý'
-                : 'Chưa đối chiếu được attempt đã lưu'
+                ? 'Giao dịch đang được xử lý'
+                : 'Chưa thể tiếp tục thanh toán'
             }
           >
-            Payment #{attemptDecision.paymentId}{' '}
             {attemptDecision.reason === 'pending-without-key'
-              ? 'không có idempotency key tương ứng trên thiết bị này.'
-              : 'không xuất hiện trong trang lịch sử vừa tải.'}{' '}
-            Để tránh tạo hoặc replay nhầm attempt, giao diện sẽ không gửi
-            request thanh toán mới.
+              ? 'Một giao dịch VNPay đang chờ kết quả. Để tránh thanh toán trùng, bạn chưa thể tạo giao dịch mới.'
+              : 'Thông tin thanh toán trên thiết bị này chưa đồng bộ với lịch sử. Vui lòng tải lại trang hoặc liên hệ Homestay Green nếu tình trạng vẫn tiếp diễn.'}
           </Alert>
         ) : (
           <form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={submit}>
@@ -240,9 +234,8 @@ export function CustomerPaymentPanel({
 
             {pendingPayment ? (
               <Alert className="sm:col-span-2" tone="warning">
-                Booking đang có payment #{pendingPayment.id} chờ xử lý. Thao
-                tác tiếp theo chỉ replay idempotency key đã lưu, không tạo key
-                mới.
+                Một giao dịch VNPay đang chờ kết quả. Nếu tiếp tục, hệ thống sẽ
+                mở lại đúng giao dịch đó để tránh thanh toán trùng.
               </Alert>
             ) : null}
 
@@ -258,20 +251,23 @@ export function CustomerPaymentPanel({
             </div>
           </form>
         )}
-      </Card>
+      </Card> : null}
 
-      <h2 className="text-base font-bold text-slate-950">
-        Lịch sử giao dịch
+      <h2
+        className="text-base font-bold text-slate-950"
+        id={canPay ? undefined : 'customer-payments-title'}
+      >
+        {canPay ? 'Lịch sử thanh toán' : 'Thanh toán'}
       </h2>
       {paymentsQuery.isPending ? (
-        <LoadingState label="Đang tải lịch sử thanh toán…" />
+        <LoadingState label="Đang kiểm tra lịch sử thanh toán…" />
       ) : paymentsQuery.isError ? (
         <ErrorState
           description={getPaymentActionError(paymentsQuery.error)}
           onRetry={() => void paymentsQuery.refetch()}
         />
       ) : (
-        <PaymentList payments={paymentsQuery.data.data} />
+        <CustomerPaymentHistory payments={paymentsQuery.data.data} />
       )}
     </section>
   )

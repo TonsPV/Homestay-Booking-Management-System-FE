@@ -1,121 +1,106 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from 'react'
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
-import { getErrorMessage } from '@/api/errors'
-import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import {
-  Alert,
-  ErrorState,
-  LoadingState,
-} from '@/shared/components/Feedback'
-import { Field, Input } from '@/shared/components/FormControls'
+import { getErrorMessage } from "@/api/errors";
+import { Badge } from "@/shared/components/Badge";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { Alert, ErrorState, LoadingState } from "@/shared/components/Feedback";
+import { Field, Input } from "@/shared/components/FormControls";
 
 import {
   useCreateRoomImage,
   useDeleteRoomImage,
   useManagementRoom,
   useSetRoomCoverImage,
-} from '../hooks'
-import { resolveRoomImageUrl } from '../image-url'
+} from "../hooks";
+import { resolveRoomImageUrl } from "../image-url";
 import {
   ROOM_IMAGE_ACCEPT,
   roomImageFormSchema,
   type RoomImageFormValues,
-} from '../schemas'
-import { RoomImage } from './RoomImage'
+} from "../schemas";
+import { RoomImage } from "./RoomImage";
 
 interface RoomImageManagerProps {
-  onClose: () => void
-  roomId: string
+  roomId: string;
 }
 
-type FormErrors = Partial<Record<keyof RoomImageFormValues, string>>
+type FormErrors = Partial<Record<keyof RoomImageFormValues, string>>;
 
 function formatFileSize(size: number) {
-  return new Intl.NumberFormat('vi-VN', {
+  return new Intl.NumberFormat("vi-VN", {
     maximumFractionDigits: 1,
-  }).format(size / (1024 * 1024))
+  }).format(size / (1024 * 1024));
 }
 
-export function RoomImageManager({
-  onClose,
-  roomId,
-}: RoomImageManagerProps) {
-  const roomQuery = useManagementRoom(roomId)
-  const createMutation = useCreateRoomImage()
-  const deleteMutation = useDeleteRoomImage()
-  const coverMutation = useSetRoomCoverImage()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [file, setFile] = useState<File>()
-  const [previewUrl, setPreviewUrl] = useState<string>()
-  const [sortOrder, setSortOrder] = useState('0')
-  const [isCover, setIsCover] = useState(false)
-  const [formErrors, setFormErrors] = useState<FormErrors>({})
-  const [successMessage, setSuccessMessage] = useState<string>()
+export function RoomImageManager({ roomId }: RoomImageManagerProps) {
+  const roomQuery = useManagementRoom(roomId);
+  const createMutation = useCreateRoomImage();
+  const deleteMutation = useDeleteRoomImage();
+  const coverMutation = useSetRoomCoverImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [sortOrder, setSortOrder] = useState("0");
+  const [isCover, setIsCover] = useState(false);
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [successMessage, setSuccessMessage] = useState<string>();
   const actionError =
-    createMutation.error ?? deleteMutation.error ?? coverMutation.error
+    createMutation.error ?? deleteMutation.error ?? coverMutation.error;
 
   useEffect(() => {
     if (!file) {
-      setPreviewUrl(undefined)
-      return
+      setPreviewUrl(undefined);
+      return;
     }
 
-    const objectUrl = URL.createObjectURL(file)
+    const objectUrl = URL.createObjectURL(file);
 
-    setPreviewUrl(objectUrl)
+    setPreviewUrl(objectUrl);
 
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [file])
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
 
   function resetUploadForm() {
-    setFile(undefined)
-    setSortOrder('0')
-    setIsCover(false)
-    setFormErrors({})
+    setFile(undefined);
+    setSortOrder("0");
+    setIsCover(false);
+    setFormErrors({});
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = "";
     }
   }
 
   async function submitImage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     const result = roomImageFormSchema.safeParse({
       file,
       isCover,
       sortOrder,
-    })
+    });
 
     if (!result.success) {
-      const errors: FormErrors = {}
+      const errors: FormErrors = {};
 
       for (const issue of result.error.issues) {
-        const field = issue.path[0]
+        const field = issue.path[0];
 
         if (
-          (field === 'file' ||
-            field === 'isCover' ||
-            field === 'sortOrder') &&
+          (field === "file" || field === "isCover" || field === "sortOrder") &&
           !errors[field]
         ) {
-          errors[field] = issue.message
+          errors[field] = issue.message;
         }
       }
 
-      setFormErrors(errors)
-      return
+      setFormErrors(errors);
+      return;
     }
 
-    setFormErrors({})
-    setSuccessMessage(undefined)
+    setFormErrors({});
+    setSuccessMessage(undefined);
 
     try {
       await createMutation.mutateAsync({
@@ -125,16 +110,16 @@ export function RoomImageManager({
           sortOrder: Number(result.data.sortOrder),
         },
         roomId,
-      })
-      resetUploadForm()
-      setSuccessMessage('Đã tải ảnh lên phòng.')
+      });
+      resetUploadForm();
+      setSuccessMessage("Đã tải ảnh lên phòng.");
     } catch {
       // Mutation state renders the API error without clearing the selection.
     }
   }
 
   if (roomQuery.isPending) {
-    return <LoadingState label="Đang tải thư viện ảnh…" />
+    return <LoadingState label="Đang tải thư viện ảnh…" />;
   }
 
   if (roomQuery.isError) {
@@ -143,26 +128,23 @@ export function RoomImageManager({
         description={getErrorMessage(roomQuery.error)}
         onRetry={() => void roomQuery.refetch()}
       />
-    )
+    );
   }
 
-  const room = roomQuery.data
+  const room = roomQuery.data;
 
   return (
     <Card>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
         <div>
           <h2 className="text-lg font-black text-slate-950">
             Ảnh phòng {room.roomNumber}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Chọn ảnh JPEG, PNG hoặc WebP từ máy. Ảnh đầu tiên sẽ tự động
-            được đặt làm ảnh bìa.
+            Chọn ảnh JPEG, PNG hoặc WebP từ máy. Ảnh đầu tiên sẽ tự động được
+            đặt làm ảnh bìa.
           </p>
         </div>
-        <Button onClick={onClose} variant="outline">
-          Đóng
-        </Button>
       </div>
 
       {actionError ? (
@@ -191,11 +173,11 @@ export function RoomImageManager({
             accept={ROOM_IMAGE_ACCEPT}
             disabled={createMutation.isPending}
             onChange={(event) => {
-              setFile(event.target.files?.[0])
+              setFile(event.target.files?.[0]);
               setFormErrors((current) => ({
                 ...current,
                 file: undefined,
-              }))
+              }));
             }}
             ref={fileInputRef}
             type="file"
@@ -206,11 +188,11 @@ export function RoomImageManager({
             disabled={createMutation.isPending}
             min={0}
             onChange={(event) => {
-              setSortOrder(event.target.value)
+              setSortOrder(event.target.value);
               setFormErrors((current) => ({
                 ...current,
                 sortOrder: undefined,
-              }))
+              }));
             }}
             step={1}
             type="number"
@@ -296,11 +278,11 @@ export function RoomImageManager({
                         coverMutation.variables === image.id
                       }
                       onClick={() => {
-                        setSuccessMessage(undefined)
+                        setSuccessMessage(undefined);
                         coverMutation.mutate(image.id, {
                           onSuccess: () =>
-                            setSuccessMessage('Đã đặt ảnh bìa mới.'),
-                        })
+                            setSuccessMessage("Đã đặt ảnh bìa mới."),
+                        });
                       }}
                       variant="outline"
                     >
@@ -314,12 +296,12 @@ export function RoomImageManager({
                       deleteMutation.variables === image.id
                     }
                     onClick={() => {
-                      if (window.confirm('Xóa ảnh này khỏi phòng?')) {
-                        setSuccessMessage(undefined)
+                      if (window.confirm("Xóa ảnh này khỏi phòng?")) {
+                        setSuccessMessage(undefined);
                         deleteMutation.mutate(image.id, {
                           onSuccess: () =>
-                            setSuccessMessage('Đã xóa ảnh khỏi phòng.'),
-                        })
+                            setSuccessMessage("Đã xóa ảnh khỏi phòng."),
+                        });
                       }
                     }}
                     variant="danger"
@@ -333,5 +315,5 @@ export function RoomImageManager({
         </div>
       )}
     </Card>
-  )
+  );
 }

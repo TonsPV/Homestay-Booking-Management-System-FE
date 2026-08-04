@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AppErrorBoundary } from './AppErrorBoundary'
@@ -10,6 +10,16 @@ vi.mock('./error-reporting', () => ({
 
 function BrokenSurface(): never {
   throw new Error('Render failed')
+}
+
+let shouldRecover = false
+
+function FlakySurface() {
+  if (!shouldRecover) {
+    throw new Error('Render failed')
+  }
+
+  return <h2>Đã khôi phục</h2>
 }
 
 afterEach(() => {
@@ -40,10 +50,42 @@ describe('AppErrorBoundary', () => {
       }),
     )
     expect(
-      screen.getByRole('button', { name: 'Tải lại trang' }),
+      screen.getByRole('button', { name: 'Thử lại' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('link', { name: 'Về trang chủ' }),
     ).toHaveAttribute('href', '/')
+  })
+
+  it('resets the boundary without a full page reload when retry is clicked', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    shouldRecover = false
+
+    render(
+      <AppErrorBoundary>
+        <FlakySurface />
+      </AppErrorBoundary>,
+    )
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Trang không thể hiển thị',
+      }),
+    ).toBeInTheDocument()
+
+    shouldRecover = true
+    fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }))
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: 'Đã khôi phục' }),
+      ).toBeInTheDocument()
+    })
+
+    expect(
+      screen.queryByRole('heading', {
+        name: 'Trang không thể hiển thị',
+      }),
+    ).not.toBeInTheDocument()
   })
 })

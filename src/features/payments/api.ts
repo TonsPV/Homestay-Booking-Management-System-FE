@@ -4,6 +4,7 @@ import type { QueryParams, QueryPrimitive } from '@/api/types'
 import type {
   CreateManualPaymentInput,
   CreateVnPayPaymentInput,
+  CustomerPayment,
   OnlinePayment,
   Payment,
   PaymentListQuery,
@@ -47,7 +48,7 @@ export const paymentApi = {
     query: PaymentListQuery,
     signal?: AbortSignal,
   ) {
-    return apiRequest<Payment[]>(`/bookings/${bookingId}/payments`, {
+    return apiRequest<CustomerPayment[]>(`/bookings/${bookingId}/payments`, {
       query: paymentListQuery(query),
       signal,
     })

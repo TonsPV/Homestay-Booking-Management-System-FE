@@ -24,7 +24,7 @@ const generatedSourcePrefix = normalizePath(
 )
 const entryPoints = [normalizePath(join(sourceRoot, 'main.tsx'))]
 const trackedArtifactPatterns = [
-  /(^|\/)\.env($|\.)/,
+  /(^|\/)\.env(?![^/]*\.example$)($|\.)/,
   /(^|\/)coverage\//,
   /(^|\/)debug(?:\.|\/)/i,
   /(^|\/)dist\//,

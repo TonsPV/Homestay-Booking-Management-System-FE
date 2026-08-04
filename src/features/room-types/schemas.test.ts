@@ -1,42 +1,44 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from "vitest";
 
-import { roomTypeFormSchema, roomTypeMoneySchema } from './schemas'
+import { roomTypeFormSchema, roomTypeMoneySchema } from "./schemas";
 
-describe('RoomType form validation', () => {
-  it.each(['0', '1250000', '1250000.5', '1250000.50'])(
-    'keeps valid money %s as a decimal string',
+describe("RoomType form validation", () => {
+  it.each(["0", "1250000", "1250000.5", "1250000.50"])(
+    "keeps valid money %s as a decimal string",
     (basePrice) => {
-      const result = roomTypeMoneySchema.safeParse(basePrice)
+      const result = roomTypeMoneySchema.safeParse(basePrice);
 
-      expect(result.success).toBe(true)
-      expect(result.data).toBe(basePrice)
+      expect(result.success).toBe(true);
+      expect(result.data).toBe(basePrice);
     },
-  )
+  );
 
-  it.each(['-1', '1.234', '01', '10000000000', '1e6'])(
-    'rejects invalid money %s',
+  it.each(["-1", "1.234", "01", "10000000000", "1e6"])(
+    "rejects invalid money %s",
     (basePrice) => {
-      expect(roomTypeMoneySchema.safeParse(basePrice).success).toBe(false)
+      expect(roomTypeMoneySchema.safeParse(basePrice).success).toBe(false);
     },
-  )
+  );
 
-  it('validates name, guest count and description limits', () => {
+  it("validates name, guest count and description limits", () => {
     expect(
       roomTypeFormSchema.safeParse({
-        basePrice: '850000.00',
-        description: 'Phòng dành cho gia đình.',
-        maxGuests: '4',
-        name: 'Phòng gia đình',
+        basePrice: "850000.00",
+        bedType: "1 giường đôi",
+        description: "Phòng dành cho gia đình.",
+        maxGuests: "4",
+        name: "Phòng gia đình",
       }).success,
-    ).toBe(true)
+    ).toBe(true);
 
     expect(
       roomTypeFormSchema.safeParse({
-        basePrice: '850000.00',
-        description: 'x'.repeat(10_001),
-        maxGuests: '0',
-        name: '',
+        basePrice: "850000.00",
+        bedType: "x".repeat(121),
+        description: "x".repeat(10_001),
+        maxGuests: "0",
+        name: "",
       }).success,
-    ).toBe(false)
-  })
-})
+    ).toBe(false);
+  });
+});

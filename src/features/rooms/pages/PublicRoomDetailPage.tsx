@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 
-import { getErrorMessage } from '@/api/errors'
-import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import { ErrorState, LoadingState } from '@/shared/components/Feedback'
-import { formatMoney, formatNumber } from '@/shared/formatting/formatters'
+import { getErrorMessage } from "@/api/errors";
+import { Badge } from "@/shared/components/Badge";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { ErrorState, LoadingState } from "@/shared/components/Feedback";
+import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
-import { useRoom } from '../hooks'
-import { resolveRoomImageUrl } from '../image-url'
-import { RoomImage } from '../components/RoomImage'
-import type { Room } from '../types'
+import { useRoom } from "../hooks";
+import { resolveRoomImageUrl } from "../image-url";
+import { RoomImage } from "../components/RoomImage";
+import type { PublicRoom } from "../types";
 
 interface PublicRoomDetailPageProps {
-  onBack?: () => void
-  onBook?: (room: Room) => void
-  roomId: string
+  onBack?: () => void;
+  onBook?: (room: PublicRoom) => void;
+  roomId: string;
 }
 
 export function PublicRoomDetailPage({
@@ -23,15 +23,15 @@ export function PublicRoomDetailPage({
   onBook,
   roomId,
 }: PublicRoomDetailPageProps) {
-  const query = useRoom(roomId)
-  const [selectedImageId, setSelectedImageId] = useState<string>()
+  const query = useRoom(roomId);
+  const [selectedImageId, setSelectedImageId] = useState<string>();
 
   useEffect(() => {
-    setSelectedImageId(undefined)
-  }, [roomId])
+    setSelectedImageId(undefined);
+  }, [roomId]);
 
   if (query.isPending) {
-    return <LoadingState label="Đang tải thông tin phòng…" />
+    return <LoadingState label="Đang tải thông tin phòng…" />;
   }
 
   if (query.isError) {
@@ -40,17 +40,17 @@ export function PublicRoomDetailPage({
         description={getErrorMessage(query.error)}
         onRetry={() => void query.refetch()}
       />
-    )
+    );
   }
 
-  const room = query.data
+  const room = query.data;
   const selectedImage =
     room.images.find((image) => image.id === selectedImageId) ??
     room.images.find((image) => image.isCover) ??
-    room.images[0]
+    room.images[0];
   const selectedImageIndex = selectedImage
     ? room.images.findIndex((image) => image.id === selectedImage.id)
-    : -1
+    : -1;
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -113,8 +113,8 @@ export function PublicRoomDetailPage({
                     aria-pressed={selectedImage?.id === image.id}
                     className={`aspect-square min-h-11 overflow-hidden rounded-control border-2 bg-surface-muted transition duration-base ease-calm hover:-translate-y-0.5 ${
                       selectedImage?.id === image.id
-                        ? 'border-brand ring-2 ring-brand/15'
-                        : 'border-transparent hover:border-line'
+                        ? "border-brand ring-2 ring-brand/15"
+                        : "border-transparent hover:border-line"
                     }`}
                     key={image.id}
                     onClick={() => setSelectedImageId(image.id)}
@@ -135,13 +135,11 @@ export function PublicRoomDetailPage({
           </section>
 
           <Card className="border-line p-6 shadow-card sm:p-8">
-            <h2 className="text-lg font-black text-ink">
-              Về căn phòng này
-            </h2>
+            <h2 className="text-lg font-black text-ink">Về căn phòng này</h2>
             <p className="mt-3 whitespace-pre-line text-sm leading-7 text-muted">
               {room.description ??
                 room.roomType.description ??
-                'Thông tin mô tả đang được cập nhật.'}
+                "Thông tin mô tả đang được cập nhật."}
             </p>
             {room.roomType.amenities.length > 0 ? (
               <div className="mt-6 border-t border-line pt-5">
@@ -169,9 +167,7 @@ export function PublicRoomDetailPage({
             </p>
 
             <div className="mt-6 rounded-card bg-brand-soft px-4 py-5">
-              <p className="text-xs font-bold text-brand">
-                Giá từ
-              </p>
+              <p className="text-xs font-bold text-brand">Giá từ</p>
               <p className="mt-2 text-3xl font-black leading-none text-brand">
                 {formatMoney(room.roomType.basePrice)}
                 <span className="ml-2 text-sm font-medium text-muted">
@@ -180,21 +176,11 @@ export function PublicRoomDetailPage({
               </p>
             </div>
 
-            <dl className="mt-5 grid grid-cols-2 gap-3">
+            <dl className="mt-5">
               <div className="rounded-card bg-surface-muted p-4">
-                <dt className="text-xs font-bold text-muted">
-                  Sức chứa
-                </dt>
+                <dt className="text-xs font-bold text-muted">Sức chứa</dt>
                 <dd className="mt-1 font-black text-ink">
                   {formatNumber(room.roomType.maxGuests)} khách
-                </dd>
-              </div>
-              <div className="rounded-card bg-surface-muted p-4">
-                <dt className="text-xs font-bold text-muted">
-                  Mã phòng
-                </dt>
-                <dd className="mt-1 break-words font-black text-ink">
-                  {room.roomNumber}
                 </dd>
               </div>
             </dl>
@@ -211,5 +197,5 @@ export function PublicRoomDetailPage({
         </aside>
       </div>
     </div>
-  )
+  );
 }

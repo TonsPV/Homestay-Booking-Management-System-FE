@@ -39,9 +39,10 @@ export function formatRetryAfter(seconds: number) {
 export function getRateLimitErrorMessage(
   error: unknown,
   remainingSeconds: number,
+  fallback: (error: unknown) => string = getErrorMessage,
 ) {
   if (getRetryAfterSeconds(error) === null || remainingSeconds <= 0) {
-    return getErrorMessage(error)
+    return fallback(error)
   }
 
   return `Bạn đã thao tác quá nhiều lần. Vui lòng thử lại sau ${formatRetryAfter(remainingSeconds)}.`

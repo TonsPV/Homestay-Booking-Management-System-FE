@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 
-import { getErrorMessage } from '@/api/errors'
 import type {
   AccountStatus,
   User,
@@ -24,6 +23,7 @@ import {
   CreateUserForm,
   UpdateUserForm,
 } from '../components/UserForms'
+import { getUserActionError } from '../errors'
 import {
   UserRoleBadge,
   UserStatusBadge,
@@ -194,7 +194,7 @@ export function UserAdminPage() {
 
       {statusMutation.error ? (
         <Alert title="Không thể cập nhật trạng thái" tone="error">
-          {getErrorMessage(statusMutation.error)}
+          {getUserActionError(statusMutation.error)}
         </Alert>
       ) : null}
 
@@ -202,7 +202,7 @@ export function UserAdminPage() {
         <LoadingState label="Đang tải danh sách nhân viên…" />
       ) : usersQuery.error ? (
         <ErrorState
-          description={getErrorMessage(usersQuery.error)}
+          description={getUserActionError(usersQuery.error)}
           onRetry={() => void usersQuery.refetch()}
         />
       ) : usersQuery.data.data.length === 0 ? (

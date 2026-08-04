@@ -2,10 +2,9 @@
 
 ## Trạng thái
 
-- **Mở** — chờ Backend triển khai.
-- **Chặn FE Task 12B+** (Counter Room Picker, Counter Booking flow).
-- FE Task 12A đã thêm navigation "Đặt phòng tại quầy" và khóa submit tại
-  `ManagementCreateBookingPage` cho tới khi API này sẵn sàng.
+- **Đã giải quyết ngày 2026-08-01.**
+- Backend, OpenAPI generated contract, Counter Room Picker và critical staff
+  journey đã được nối cùng một endpoint quản lý.
 
 ## Bối cảnh
 
@@ -31,7 +30,7 @@ GET /api/v1/management/rooms/available
 | `checkIn`    | string | Có       | Ngày nhận phòng, định dạng `YYYY-MM-DD` |
 | `checkOut`   | string | Có       | Ngày trả phòng, định dạng `YYYY-MM-DD`  |
 | `roomTypeId` | number | Không    | Lọc theo loại phòng                     |
-| `capacity`   | number | Không    | Sức chứa tối thiểu (số khách)           |
+| `guests`     | number | Có       | Sức chứa tối thiểu (số khách)           |
 | `page`       | number | Không    | Trang, mặc định `1`                     |
 | `limit`      | number | Không    | Số bản ghi mỗi trang, mặc định `20`     |
 
@@ -55,10 +54,13 @@ Phân trang theo chuẩn hiện có của management API. Mỗi phần tử tố
 {
   "id": 12,
   "roomNumber": "A101",
-  "roomType": { "id": 3, "name": "Deluxe Garden View" },
-  "capacity": 2,
-  "pricePerNight": 850000,
-  "status": "ACTIVE"
+  "roomType": {
+    "id": 3,
+    "name": "Deluxe Garden View",
+    "maxGuests": 2,
+    "basePrice": "850000.00"
+  },
+  "status": "READY"
 }
 ```
 
@@ -88,18 +90,19 @@ vì tạo shape mới, miễn là có đủ các trường tối thiểu ở tr�
 
 ## Tiêu chí nghiệm thu (Acceptance criteria)
 
-- [ ] Endpoint hoạt động với đầy đủ query params và validation ở trên.
-- [ ] Chỉ `ADMIN`/`STAFF` gọi được; `CUSTOMER` và anonymous bị từ chối.
-- [ ] Phòng có booking giao với khoảng ngày không xuất hiện trong kết quả.
-- [ ] Phòng `MAINTENANCE`/`INACTIVE` không xuất hiện trong kết quả.
-- [ ] Tạo booking với phòng vừa hết chỗ trả `409` (đã có hoặc cần bổ sung).
-- [ ] OpenAPI spec được cập nhật (`npm run openapi:generate` phía BE), để FE
+- [x] Endpoint hoạt động với đầy đủ query params và validation ở trên.
+- [x] Chỉ `ADMIN`/`STAFF` gọi được; `CUSTOMER` và anonymous bị từ chối.
+- [x] Phòng có booking giao với khoảng ngày không xuất hiện trong kết quả.
+- [x] Phòng `MAINTENANCE`/`HIDDEN` không xuất hiện trong kết quả.
+- [x] Tạo booking với phòng vừa hết chỗ trả `409` qua unique room-calendar
+  constraint trong transaction.
+- [x] OpenAPI spec được cập nhật (`npm run openapi:generate` phía BE), để FE
       chạy `npm run contract:generate` lấy types mới.
 
-## Việc FE sẽ làm sau khi API sẵn sàng
+## Việc FE đã hoàn tất
 
 1. Chạy `npm run contract:generate` để cập nhật generated types.
-2. Bật lại submit tại `ManagementCreateBookingPage` (gỡ cờ
-   `isAvailabilityApiReady`).
-3. Triển khai Task 12B — Counter Room Picker dùng endpoint này (không gọi
+2. Dùng generated `RoomManagementAvailableData` thay cho query type viết tay.
+3. Triển khai `CounterBookingPage` và Counter Room Picker dùng endpoint này
+   (không gọi
    calendar theo từng phòng, tránh N+1).

@@ -1,5 +1,8 @@
 import type { AccountStatus } from '@/auth/types'
-import type { CustomerCredentialResultDto } from '@/api/generated'
+import type {
+  AdminCustomerDto,
+  CustomerCredentialResultDto,
+} from '@/api/generated'
 import type { EntityId } from '@/shared/types/primitives'
 
 export interface CustomerListParams {
@@ -21,6 +24,7 @@ export interface ChangeCustomerPasswordInput {
 }
 
 export type CustomerCredentialResult = CustomerCredentialResultDto
+export type AdminCustomer = AdminCustomerDto
 
 export interface UpdateCustomerStatusInput {
   id: EntityId

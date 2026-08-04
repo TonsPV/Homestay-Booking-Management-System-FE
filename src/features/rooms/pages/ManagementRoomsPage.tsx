@@ -1,33 +1,33 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from "react";
 
-import { getErrorMessage } from '@/api/errors'
-import { useRoomTypeOptions } from '@/features/room-types'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import { Alert, EmptyState, ErrorState, LoadingState } from '@/shared/components/Feedback'
-import { Field, Input, Select } from '@/shared/components/FormControls'
-import { PageHeader } from '@/shared/components/PageHeader'
-import { PaginationControls } from '@/shared/components/PaginationControls'
+import { getErrorMessage } from "@/api/errors";
+import { useRoomTypeOptions } from "@/features/room-types";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
 import {
-  formatMoney,
-  formatNumber,
-} from '@/shared/formatting/formatters'
+  Alert,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/shared/components/Feedback";
+import { Field, Input, Select } from "@/shared/components/FormControls";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { PaginationControls } from "@/shared/components/PaginationControls";
+import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
-import { RoomForm } from '../components/RoomForm'
-import { RoomImage } from '../components/RoomImage'
-import { RoomImageManager } from '../components/RoomImageManager'
-import {
-  RoomStatusBadge,
-} from '../components/RoomStatusBadge'
+import { RoomForm } from "../components/RoomForm";
+import { RoomAvailabilitySummary } from "../components/RoomAvailabilitySummary";
+import { RoomImage } from "../components/RoomImage";
+import { RoomStatusBadge } from "../components/RoomStatusBadge";
 import {
   useCreateRoom,
   useDeleteRoom,
   useManagementRooms,
   useUpdateRoom,
   useUpdateRoomStatus,
-} from '../hooks'
-import { resolveRoomImageUrl } from '../image-url'
-import { getRoomStatusLabel } from '../status'
+} from "../hooks";
+import { resolveRoomImageUrl } from "../image-url";
+import { getRoomStatusLabel } from "../status";
 import {
   ROOM_STATUSES,
   type CreateRoomInput,
@@ -35,118 +35,114 @@ import {
   type Room,
   type RoomStatus,
   type UpdateRoomInput,
-} from '../types'
+} from "../types";
 
-type EditorState =
-  | { mode: 'create' }
-  | { mode: 'edit'; room: Room }
-  | null
+type EditorState = { mode: "create" } | { mode: "edit"; room: Room } | null;
 
 interface StatusDraft {
-  roomId: string
-  status: RoomStatus
+  roomId: string;
+  status: RoomStatus;
 }
 
 interface ManagementRoomsPageProps {
-  onViewRoom?: (roomId: string) => void
-  role: ManagementRole
+  onManageImages?: (roomId: string) => void;
+  onViewRoom?: (roomId: string) => void;
+  role: ManagementRole;
 }
 
 function statusOptionsFor(role: ManagementRole) {
-  return role === 'ADMIN'
+  return role === "ADMIN"
     ? ROOM_STATUSES
-    : ROOM_STATUSES.filter((status) => status !== 'HIDDEN')
+    : ROOM_STATUSES.filter((status) => status !== "HIDDEN");
 }
 
 export function ManagementRoomsPage({
+  onManageImages,
   onViewRoom,
   role,
 }: ManagementRoomsPageProps) {
-  const [page, setPage] = useState(1)
-  const [searchDraft, setSearchDraft] = useState('')
-  const [roomTypeDraft, setRoomTypeDraft] = useState('')
-  const [statusFilterDraft, setStatusFilterDraft] = useState('')
+  const [page, setPage] = useState(1);
+  const [searchDraft, setSearchDraft] = useState("");
+  const [roomTypeDraft, setRoomTypeDraft] = useState("");
+  const [statusFilterDraft, setStatusFilterDraft] = useState("");
   const [filters, setFilters] = useState({
-    roomTypeId: '',
-    search: '',
-    status: '',
-  })
-  const [editor, setEditor] = useState<EditorState>(null)
-  const [imageRoomId, setImageRoomId] = useState<string>()
-  const [statusDraft, setStatusDraft] = useState<StatusDraft>()
-  const [successMessage, setSuccessMessage] = useState<string>()
-  const roomTypesQuery = useRoomTypeOptions()
+    roomTypeId: "",
+    search: "",
+    status: "",
+  });
+  const [editor, setEditor] = useState<EditorState>(null);
+  const [statusDraft, setStatusDraft] = useState<StatusDraft>();
+  const [successMessage, setSuccessMessage] = useState<string>();
+  const roomTypesQuery = useRoomTypeOptions();
   const roomsQuery = useManagementRooms({
     page,
     roomTypeId: filters.roomTypeId || undefined,
     search: filters.search || undefined,
     status: (filters.status || undefined) as RoomStatus | undefined,
-  })
-  const totalPages = roomsQuery.data?.pagination?.totalPages
-  const createMutation = useCreateRoom()
-  const updateMutation = useUpdateRoom()
-  const deleteMutation = useDeleteRoom()
-  const statusMutation = useUpdateRoomStatus()
+  });
+  const totalPages = roomsQuery.data?.pagination?.totalPages;
+  const createMutation = useCreateRoom();
+  const updateMutation = useUpdateRoom();
+  const deleteMutation = useDeleteRoom();
+  const statusMutation = useUpdateRoomStatus();
   const editorMutation =
-    editor?.mode === 'edit' ? updateMutation : createMutation
+    editor?.mode === "edit" ? updateMutation : createMutation;
   const actionError =
-    editorMutation.error ?? deleteMutation.error ?? statusMutation.error
+    editorMutation.error ?? deleteMutation.error ?? statusMutation.error;
 
   useEffect(() => {
     if (totalPages === undefined) {
-      return
+      return;
     }
 
-    const lastPage = Math.max(totalPages, 1)
+    const lastPage = Math.max(totalPages, 1);
 
     if (page > lastPage) {
-      setPage(lastPage)
+      setPage(lastPage);
     }
-  }, [page, totalPages])
+  }, [page, totalPages]);
 
   function applyFilters(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
     setFilters({
       roomTypeId: roomTypeDraft,
       search: searchDraft.trim(),
       status: statusFilterDraft,
-    })
-    setPage(1)
+    });
+    setPage(1);
   }
 
   function resetFilters() {
-    setSearchDraft('')
-    setRoomTypeDraft('')
-    setStatusFilterDraft('')
-    setFilters({ roomTypeId: '', search: '', status: '' })
-    setPage(1)
+    setSearchDraft("");
+    setRoomTypeDraft("");
+    setStatusFilterDraft("");
+    setFilters({ roomTypeId: "", search: "", status: "" });
+    setPage(1);
   }
 
-  async function submitEditor(
-    input: CreateRoomInput | UpdateRoomInput,
-  ) {
-    setSuccessMessage(undefined)
+  async function submitEditor(input: CreateRoomInput | UpdateRoomInput) {
+    setSuccessMessage(undefined);
 
     try {
-      if (editor?.mode === 'edit') {
+      if (editor?.mode === "edit") {
         const updateInput: UpdateRoomInput = {
           description: input.description,
           name: input.name,
           roomNumber: input.roomNumber,
           roomTypeId: input.roomTypeId,
-        }
+        };
 
         await updateMutation.mutateAsync({
           id: editor.room.id,
           input: updateInput,
-        })
-        setSuccessMessage('Đã cập nhật phòng.')
+        });
+        setSuccessMessage("Đã cập nhật phòng.");
       } else {
-        await createMutation.mutateAsync(input as CreateRoomInput)
-        setSuccessMessage('Đã tạo phòng.')
+        await createMutation.mutateAsync(input as CreateRoomInput);
+        setSuccessMessage("Đã tạo phòng.");
       }
 
-      setEditor(null)
+      setEditor(null);
     } catch {
       // Mutation state keeps the editor open and renders the API error.
     }
@@ -158,19 +154,19 @@ export function ManagementRoomsPage({
         `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
       )
     ) {
-      setSuccessMessage(undefined)
+      setSuccessMessage(undefined);
       deleteMutation.mutate(room.id, {
-        onSuccess: () => setSuccessMessage('Đã xóa phòng.'),
-      })
+        onSuccess: () => setSuccessMessage("Đã xóa phòng."),
+      });
     }
   }
 
   function saveStatus() {
     if (!statusDraft) {
-      return
+      return;
     }
 
-    setSuccessMessage(undefined)
+    setSuccessMessage(undefined);
     statusMutation.mutate(
       {
         id: statusDraft.roomId,
@@ -178,18 +174,18 @@ export function ManagementRoomsPage({
       },
       {
         onSuccess: () => {
-          setStatusDraft(undefined)
-          setSuccessMessage('Đã cập nhật trạng thái phòng.')
+          setStatusDraft(undefined);
+          setSuccessMessage("Đã cập nhật trạng thái phòng.");
         },
       },
-    )
+    );
   }
 
   return (
     <div className="grid gap-6">
       <PageHeader
         actions={
-          role === 'ADMIN' ? (
+          role === "ADMIN" ? (
             <Button
               disabled={
                 roomTypesQuery.isPending ||
@@ -197,8 +193,7 @@ export function ManagementRoomsPage({
                 (roomTypesQuery.data?.length ?? 0) === 0
               }
               onClick={() => {
-                setImageRoomId(undefined)
-                setEditor({ mode: 'create' })
+                setEditor({ mode: "create" });
               }}
             >
               Thêm phòng
@@ -206,11 +201,11 @@ export function ManagementRoomsPage({
           ) : undefined
         }
         description={
-          role === 'ADMIN'
-            ? 'Quản lý thông tin, trạng thái vận hành và thư viện ảnh của phòng.'
-            : 'Theo dõi và cập nhật trạng thái vận hành của phòng.'
+          role === "ADMIN"
+            ? "Quản lý thông tin, trạng thái vận hành, lịch đặt và thư viện ảnh của phòng."
+            : "Booking giữ lịch phòng; trạng thái chỉ chuyển sang Khách đang lưu trú sau khi check-in."
         }
-        eyebrow="Khu vực quản lý"
+        eyebrow={role === "ADMIN" ? "Khu vực quản lý" : "Quầy lễ tân"}
         title="Phòng"
       />
 
@@ -218,7 +213,7 @@ export function ManagementRoomsPage({
         <Alert tone="error">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span>
-              Không thể tải danh sách loại phòng:{' '}
+              Không thể tải danh sách loại phòng:{" "}
               {getErrorMessage(roomTypesQuery.error)}
             </span>
             <Button
@@ -232,7 +227,7 @@ export function ManagementRoomsPage({
         </Alert>
       ) : null}
 
-      {role === 'ADMIN' &&
+      {role === "ADMIN" &&
       !roomTypesQuery.isPending &&
       !roomTypesQuery.isError &&
       roomTypesQuery.data?.length === 0 ? (
@@ -241,24 +236,15 @@ export function ManagementRoomsPage({
         </Alert>
       ) : null}
 
-      {imageRoomId ? (
-        <RoomImageManager
-          onClose={() => setImageRoomId(undefined)}
-          roomId={imageRoomId}
-        />
-      ) : null}
-
-      {successMessage ? (
-        <Alert tone="success">{successMessage}</Alert>
-      ) : null}
+      {successMessage ? <Alert tone="success">{successMessage}</Alert> : null}
 
       {editor ? (
         <Card>
           <div className="mb-5">
             <h2 className="text-lg font-black text-slate-950">
-              {editor.mode === 'edit'
+              {editor.mode === "edit"
                 ? `Chỉnh sửa phòng ${editor.room.roomNumber}`
-                : 'Tạo phòng mới'}
+                : "Tạo phòng mới"}
             </h2>
             <p className="mt-1 text-sm text-slate-600">
               Thông tin giá và sức chứa được lấy từ loại phòng.
@@ -270,9 +256,7 @@ export function ManagementRoomsPage({
             </Alert>
           ) : null}
           <RoomForm
-            initialValue={
-              editor.mode === 'edit' ? editor.room : undefined
-            }
+            initialValue={editor.mode === "edit" ? editor.room : undefined}
             loading={editorMutation.isPending}
             onCancel={() => setEditor(null)}
             onSubmit={submitEditor}
@@ -314,7 +298,7 @@ export function ManagementRoomsPage({
               ))}
             </Select>
           </Field>
-          <Field label="Trạng thái">
+          <Field label="Trạng thái vận hành">
             <Select
               aria-label="Lọc trạng thái phòng"
               onChange={(event) => setStatusFilterDraft(event.target.value)}
@@ -331,7 +315,11 @@ export function ManagementRoomsPage({
           <Button className="w-full xl:w-auto" type="submit" variant="outline">
             Lọc
           </Button>
-          <Button className="w-full xl:w-auto" onClick={resetFilters} variant="text">
+          <Button
+            className="w-full xl:w-auto"
+            onClick={resetFilters}
+            variant="text"
+          >
             Đặt lại
           </Button>
         </form>
@@ -361,11 +349,10 @@ export function ManagementRoomsPage({
           <div className="grid gap-4">
             {roomsQuery.data.items.map((room) => {
               const cover =
-                room.images.find((image) => image.isCover) ??
-                room.images[0]
-              const isEditingStatus = statusDraft?.roomId === room.id
+                room.images.find((image) => image.isCover) ?? room.images[0];
+              const isEditingStatus = statusDraft?.roomId === room.id;
               const staffCannotChangeHidden =
-                role === 'STAFF' && room.status === 'HIDDEN'
+                role === "STAFF" && room.status === "HIDDEN";
 
               return (
                 <Card key={room.id}>
@@ -391,16 +378,33 @@ export function ManagementRoomsPage({
                         <h2 className="text-lg font-black text-slate-950">
                           {room.roomNumber} · {room.name}
                         </h2>
-                        <RoomStatusBadge status={room.status} />
                       </div>
                       <p className="mt-1 text-sm text-slate-600">
-                        {room.roomType.name} · Tối đa{' '}
-                        {formatNumber(room.roomType.maxGuests)} khách ·{' '}
+                        {room.roomType.name} · Tối đa{" "}
+                        {formatNumber(room.roomType.maxGuests)} khách ·{" "}
                         {formatMoney(room.roomType.basePrice)}/đêm
                       </p>
                       <p className="mt-2 line-clamp-2 text-sm text-slate-500">
-                        {room.description || 'Chưa có mô tả.'}
+                        {room.description || "Chưa có mô tả."}
                       </p>
+
+                      <div className="mt-4 grid gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2">
+                        <RoomAvailabilitySummary
+                          summary={room.calendarSummary}
+                        />
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold text-slate-500">
+                              Hiện trạng phòng
+                            </span>
+                            <RoomStatusBadge status={room.status} />
+                          </div>
+                          <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                            Booking chỉ giữ lịch. Phòng có khách sau khi nhân
+                            viên thực hiện check-in.
+                          </p>
+                        </div>
+                      </div>
 
                       {isEditingStatus ? (
                         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -464,17 +468,16 @@ export function ManagementRoomsPage({
                           Đổi trạng thái
                         </Button>
                       ) : null}
-                      {role === 'ADMIN' ? (
+                      {role === "ADMIN" ? (
                         <>
-                          <Button
-                            onClick={() => {
-                              setEditor(null)
-                              setImageRoomId(room.id)
-                            }}
-                            variant="outline"
-                          >
-                            Quản lý ảnh
-                          </Button>
+                          {onManageImages ? (
+                            <Button
+                              onClick={() => onManageImages(room.id)}
+                              variant="outline"
+                            >
+                              Quản lý ảnh
+                            </Button>
+                          ) : null}
                           <Button
                             disabled={
                               roomTypesQuery.isPending ||
@@ -482,8 +485,7 @@ export function ManagementRoomsPage({
                               (roomTypesQuery.data?.length ?? 0) === 0
                             }
                             onClick={() => {
-                              setImageRoomId(undefined)
-                              setEditor({ mode: 'edit', room })
+                              setEditor({ mode: "edit", room });
                             }}
                             variant="outline"
                           >
@@ -504,7 +506,7 @@ export function ManagementRoomsPage({
                     </div>
                   </div>
                 </Card>
-              )
+              );
             })}
           </div>
 
@@ -515,5 +517,5 @@ export function ManagementRoomsPage({
         </>
       )}
     </div>
-  )
+  );
 }

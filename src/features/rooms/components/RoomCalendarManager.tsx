@@ -17,6 +17,7 @@ import {
   useRoomCalendar,
   useUnblockRoomDates,
 } from '../hooks'
+import { getRoomCalendarActionError } from '../errors'
 import {
   roomBlockFormSchema,
   roomCalendarRangeFormSchema,
@@ -170,7 +171,7 @@ export function RoomCalendarManager({
       ) : null}
       {actionError ? (
         <Alert className="mt-5" tone="error">
-          {getErrorMessage(actionError)}
+          {getRoomCalendarActionError(actionError)}
         </Alert>
       ) : null}
 

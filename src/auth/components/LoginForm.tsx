@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
+import type { AuthPrincipal } from '../types'
+import { getAuthActionError } from '../errors'
 import { Alert } from '@/shared/components/Feedback'
 import { Button } from '@/shared/components/Button'
 import { Field, Input } from '@/shared/components/FormControls'
@@ -26,6 +28,7 @@ interface LoginFormProps {
   mode: 'customer' | 'user'
   notice?: string
   redirectTo: string
+  resolveRedirect?: (principal: AuthPrincipal) => string
   registerPath?: string
   title: string
 }
@@ -37,6 +40,7 @@ export function LoginForm({
   mode,
   notice,
   redirectTo,
+  resolveRedirect,
   registerPath,
   title,
 }: LoginFormProps) {
@@ -66,7 +70,8 @@ export function LoginForm({
         ? auth.loginCustomer(input, persistence)
         : auth.loginUser(input, persistence)
     },
-    onSuccess: () => navigate(redirectTo, { replace: true }),
+    onSuccess: (principal) =>
+      navigate(resolveRedirect?.(principal) ?? redirectTo, { replace: true }),
   })
   const { isCoolingDown, remainingSeconds } = useRateLimitCooldown(
     loginMutation.error,
@@ -93,6 +98,7 @@ export function LoginForm({
             {getRateLimitErrorMessage(
               loginMutation.error,
               remainingSeconds,
+              getAuthActionError,
             )}
           </Alert>
         ) : null}
@@ -130,11 +136,13 @@ export function LoginForm({
 
         <Button
           className="mt-1 w-full"
-          disabled={isCoolingDown}
+          disabled={isCoolingDown || loginMutation.isPending}
           loading={loginMutation.isPending}
           type="submit"
         >
-          {isCoolingDown
+          {loginMutation.isPending
+            ? 'Đang đăng nhập...'
+            : isCoolingDown
             ? `Thử lại sau ${formatRetryAfter(remainingSeconds)}`
             : 'Đăng nhập'}
         </Button>

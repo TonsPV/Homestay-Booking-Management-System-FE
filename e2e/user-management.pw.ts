@@ -146,7 +146,7 @@ test('admin creates, edits and locks a STAFF account without role mutation', asy
   await expect(staffRow).toContainText('Đã khóa')
 })
 
-test('shows the Backend unique conflict when an email already exists', async ({
+test('explains how to resolve a duplicate staff email', async ({
   page,
 }) => {
   await installSession(page, { actorType: 'user', role: 'ADMIN' })
@@ -198,7 +198,8 @@ test('shows the Backend unique conflict when an email already exists', async ({
 
   await expect(
     page.getByText(
-      'Email đã được sử dụng bởi tài khoản khác. Mã tra cứu: req-user-conflict.',
+      'Thông tin tài khoản đã tồn tại. Vui lòng kiểm tra lại email và số điện thoại.',
     ),
   ).toBeVisible()
+  await expect(page.getByText(/req-user-conflict/)).toHaveCount(0)
 })

@@ -1,37 +1,51 @@
-import { appConfig } from '@/app/config'
+import { appConfig } from "@/app/config";
 
-import { ApiError, messageFromFailure } from './errors'
+import {
+  ApiError,
+  getServerMessageFromFailure,
+  messageFromFailure,
+} from "./errors";
 import type {
   ApiFailure,
   ApiResult,
   ApiSuccess,
   QueryParams,
   QueryPrimitive,
-} from './types'
+} from "./types";
 
-type AccessTokenProvider = () => string | null
-type UnauthorizedHandler = () => void
+type AccessTokenProvider = () => string | null;
+type UnauthorizedHandler = () => void;
 
-interface ApiRequestOptions
-  extends Omit<RequestInit, 'body' | 'headers' | 'method'> {
-  auth?: boolean
-  body?: unknown
-  headers?: HeadersInit
-  method?: 'DELETE' | 'GET' | 'PATCH' | 'POST' | 'PUT'
-  query?: QueryParams
+function resolveRequestOrigin() {
+  if (import.meta.env.DEV && typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  return appConfig.apiOrigin;
 }
 
-let accessTokenProvider: AccessTokenProvider = () => null
-let unauthorizedHandler: UnauthorizedHandler | null = null
+interface ApiRequestOptions extends Omit<
+  RequestInit,
+  "body" | "headers" | "method"
+> {
+  auth?: boolean;
+  body?: unknown;
+  headers?: HeadersInit;
+  method?: "DELETE" | "GET" | "PATCH" | "POST" | "PUT";
+  query?: QueryParams;
+}
+
+let accessTokenProvider: AccessTokenProvider = () => null;
+let unauthorizedHandler: UnauthorizedHandler | null = null;
 
 export function configureAccessTokenProvider(provider: AccessTokenProvider) {
-  accessTokenProvider = provider
+  accessTokenProvider = provider;
 }
 
 export function configureUnauthorizedHandler(
   handler: UnauthorizedHandler | null,
 ) {
-  unauthorizedHandler = handler
+  unauthorizedHandler = handler;
 }
 
 function appendQueryValue(
@@ -39,86 +53,86 @@ function appendQueryValue(
   key: string,
   value: QueryPrimitive,
 ) {
-  if (value === null || value === undefined || value === '') {
-    return
+  if (value === null || value === undefined || value === "") {
+    return;
   }
 
-  searchParams.append(key, String(value))
+  searchParams.append(key, String(value));
 }
 
 export function buildApiUrl(path: string, query?: QueryParams) {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const url = new URL(
     `${appConfig.apiPrefix}${normalizedPath}`,
-    appConfig.apiOrigin,
-  )
+    resolveRequestOrigin(),
+  );
 
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (Array.isArray(value)) {
         for (const item of value) {
-          appendQueryValue(url.searchParams, key, item)
+          appendQueryValue(url.searchParams, key, item);
         }
       } else {
-        appendQueryValue(url.searchParams, key, value)
+        appendQueryValue(url.searchParams, key, value);
       }
     }
   }
 
-  return url
+  return url;
 }
 
 function parseRetryAfter(value: string | null) {
   if (!value) {
-    return undefined
+    return undefined;
   }
 
-  const seconds = Number.parseInt(value, 10)
-  return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined
+  const seconds = Number.parseInt(value, 10);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
 }
 
 function isApiSuccess<T>(value: unknown): value is ApiSuccess<T> {
   return (
-    typeof value === 'object' &&
+    typeof value === "object" &&
     value !== null &&
-    'success' in value &&
+    "success" in value &&
     value.success === true &&
-    'data' in value &&
-    'requestId' in value &&
-    typeof value.requestId === 'string' &&
+    "data" in value &&
+    "requestId" in value &&
+    typeof value.requestId === "string" &&
     value.requestId.length > 0
-  )
+  );
 }
 
 function failureFromUnknown(value: unknown): Partial<ApiFailure> {
-  return typeof value === 'object' && value !== null
+  return typeof value === "object" && value !== null
     ? (value as Partial<ApiFailure>)
-    : {}
+    : {};
 }
 
 async function parseResponseBody(response: Response) {
   if (response.status === 204) {
-    return null
+    return null;
   }
 
-  const text = await response.text()
+  const text = await response.text();
 
   if (!text) {
-    return null
+    return null;
   }
 
   try {
-    return JSON.parse(text) as unknown
+    return JSON.parse(text) as unknown;
   } catch (cause) {
     if (!response.ok) {
-      return null
+      return null;
     }
 
-    throw new ApiError('Phản hồi từ máy chủ không đúng định dạng JSON.', {
-      kind: 'parse',
+    throw new ApiError("Phản hồi từ máy chủ không đúng định dạng JSON.", {
+      kind: "parse",
       status: response.status,
       cause,
-    })
+    });
   }
 }
 
@@ -130,31 +144,31 @@ export async function apiRequest<T>(
     auth = true,
     body,
     headers: customHeaders,
-    method = 'GET',
+    method = "GET",
     query,
     ...requestOptions
-  } = options
-  const headers = new Headers(customHeaders)
-  const token = auth ? accessTokenProvider() : null
+  } = options;
+  const headers = new Headers(customHeaders);
+  const token = auth ? accessTokenProvider() : null;
 
-  headers.set('Accept', 'application/json')
+  headers.set("Accept", "application/json");
 
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`)
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
-  let requestBody: BodyInit | undefined
+  let requestBody: BodyInit | undefined;
 
   if (body !== undefined) {
     if (body instanceof FormData) {
-      requestBody = body
+      requestBody = body;
     } else {
-      headers.set('Content-Type', 'application/json')
-      requestBody = JSON.stringify(body)
+      headers.set("Content-Type", "application/json");
+      requestBody = JSON.stringify(body);
     }
   }
 
-  let response: Response
+  let response: Response;
 
   try {
     response = await fetch(buildApiUrl(path, query), {
@@ -162,31 +176,31 @@ export async function apiRequest<T>(
       body: requestBody,
       headers,
       method,
-    })
+    });
   } catch (cause) {
-    if (cause instanceof DOMException && cause.name === 'AbortError') {
-      throw new ApiError('Yêu cầu đã bị hủy.', {
-        kind: 'aborted',
+    if (cause instanceof DOMException && cause.name === "AbortError") {
+      throw new ApiError("Yêu cầu đã bị hủy.", {
+        kind: "aborted",
         cause,
-      })
+      });
     }
 
     throw new ApiError(
-      'Không thể kết nối tới máy chủ. Vui lòng kiểm tra đường truyền.',
+      "Không thể kết nối tới máy chủ. Vui lòng kiểm tra đường truyền.",
       {
-        kind: 'network',
+        kind: "network",
         cause,
       },
-    )
+    );
   }
 
-  const payload = await parseResponseBody(response)
+  const payload = await parseResponseBody(response);
 
   if (!response.ok) {
-    const failure = failureFromUnknown(payload)
+    const failure = failureFromUnknown(payload);
     const retryAfterSeconds = parseRetryAfter(
-      response.headers.get('Retry-After'),
-    )
+      response.headers.get("Retry-After"),
+    );
 
     if (
       auth &&
@@ -196,38 +210,47 @@ export async function apiRequest<T>(
     ) {
       queueMicrotask(() => {
         if (accessTokenProvider() === token) {
-          unauthorizedHandler?.()
+          unauthorizedHandler?.();
         }
-      })
+      });
     }
 
     throw new ApiError(
       messageFromFailure(failure, response.status, retryAfterSeconds),
       {
-        kind: 'http',
+        kind: "http",
         status: response.status,
-        code: failure.code,
         retryAfterSeconds,
         requestId:
-          typeof failure.requestId === 'string'
-            ? failure.requestId
+          typeof failure.requestId === "string" ? failure.requestId : undefined,
+        errorCode:
+          typeof failure.errorCode === "string" ? failure.errorCode : undefined,
+        fieldErrors:
+          failure.fieldErrors !== null &&
+          typeof failure.fieldErrors === "object"
+            ? failure.fieldErrors
             : undefined,
+        details:
+          failure.details !== null && typeof failure.details === "object"
+            ? failure.details
+            : undefined,
+        serverMessage: getServerMessageFromFailure(failure),
         payload,
       },
-    )
+    );
   }
 
   if (!isApiSuccess<T>(payload)) {
-    throw new ApiError('Phản hồi thành công thiếu response envelope hợp lệ.', {
-      kind: 'parse',
+    throw new ApiError("Phản hồi thành công thiếu response envelope hợp lệ.", {
+      kind: "parse",
       status: response.status,
       payload,
-    })
+    });
   }
 
   return {
     data: payload.data,
     meta: payload.meta,
     requestId: payload.requestId,
-  }
+  };
 }

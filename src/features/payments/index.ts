@@ -1,5 +1,6 @@
 export { VnPayReturnPage } from './pages/VnPayReturnPage'
 export { ManagementPaymentsPage } from './pages/ManagementPaymentsPage'
+export { StaffPaymentsPage } from './pages/StaffPaymentsPage'
 
 export { CustomerPaymentPanel } from './components/CustomerPaymentPanel'
 export { ManagementBookingPaymentPanel } from './components/ManagementBookingPaymentPanel'
@@ -15,4 +16,3 @@ export type {
   PaymentStatus,
   VnPayReturnResult,
 } from './types'
-

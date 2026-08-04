@@ -1,16 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { flushSync } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 
-import { getErrorMessage } from '@/api/errors'
 import { useAuth } from '@/auth/useAuth'
+import { getApiFieldErrorCode } from '@/api/errors'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Alert } from '@/shared/components/Feedback'
 import { Field, Input } from '@/shared/components/FormControls'
 
 import { useChangeCustomerPasswordMutation } from '../queries'
+import { getCustomerPasswordActionError } from '../errors'
 import {
   customerPasswordSchema,
   type CustomerPasswordFormValues,
@@ -24,6 +26,8 @@ export function CustomerPasswordForm() {
     formState: { errors },
     handleSubmit,
     register,
+    clearErrors,
+    setError,
   } = useForm<CustomerPasswordFormValues>({
     defaultValues: {
       confirmPassword: '',
@@ -32,6 +36,44 @@ export function CustomerPasswordForm() {
     },
     resolver: zodResolver(customerPasswordSchema),
   })
+  const currentPasswordFieldError = getApiFieldErrorCode(
+    mutation.error,
+    'currentPassword',
+  )
+  const newPasswordFieldError = getApiFieldErrorCode(
+    mutation.error,
+    'newPassword',
+  )
+
+  useEffect(() => {
+    if (currentPasswordFieldError) {
+      setError(
+        'currentPassword',
+        {
+          type: 'server',
+          message: getCustomerPasswordActionError(mutation.error),
+        },
+        { shouldFocus: true },
+      )
+      return
+    }
+
+    if (newPasswordFieldError) {
+      setError(
+        'newPassword',
+        {
+          type: 'server',
+          message: getCustomerPasswordActionError(mutation.error),
+        },
+        { shouldFocus: true },
+      )
+    }
+  }, [
+    currentPasswordFieldError,
+    mutation.error,
+    newPasswordFieldError,
+    setError,
+  ])
 
   return (
     <Card className="lg:col-start-2">
@@ -45,6 +87,8 @@ export function CustomerPasswordForm() {
         className="mt-6 grid gap-5"
         noValidate
         onSubmit={handleSubmit((values) => {
+          mutation.reset()
+          clearErrors(['currentPassword', 'newPassword'])
           mutation.mutate(
             {
               currentPassword: values.currentPassword,
@@ -61,9 +105,11 @@ export function CustomerPasswordForm() {
           )
         })}
       >
-        {mutation.error ? (
+        {mutation.error &&
+        !currentPasswordFieldError &&
+        !newPasswordFieldError ? (
           <Alert title="Không thể đổi mật khẩu" tone="error">
-            {getErrorMessage(mutation.error)}
+            {getCustomerPasswordActionError(mutation.error)}
           </Alert>
         ) : null}
 

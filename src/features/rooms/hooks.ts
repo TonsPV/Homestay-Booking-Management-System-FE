@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query'
 
 import { dashboardKeys } from '@/features/dashboard/query-keys'
+import { bookingKeys } from '@/features/bookings/query-keys'
 
 import {
   blockRoomDates,
@@ -114,6 +115,7 @@ function useInvalidateRoomOperations() {
     Promise.all([
       queryClient.invalidateQueries({ queryKey: roomKeys.all }),
       queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
+      queryClient.invalidateQueries({ queryKey: bookingKeys.management() }),
     ])
 }
 

@@ -1,24 +1,17 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-import { Button } from '@/shared/components/Button'
-import {
-  Field,
-  Input,
-  Textarea,
-} from '@/shared/components/FormControls'
+import { Button } from "@/shared/components/Button";
+import { Field, Input, Textarea } from "@/shared/components/FormControls";
 
-import {
-  roomTypeFormSchema,
-  type RoomTypeFormValues,
-} from '../schemas'
-import type { AdminRoomType, CreateRoomTypeInput } from '../types'
+import { roomTypeFormSchema, type RoomTypeFormValues } from "../schemas";
+import type { AdminRoomType, CreateRoomTypeInput } from "../types";
 
 interface RoomTypeFormProps {
-  initialValue?: AdminRoomType
-  loading?: boolean
-  onCancel: () => void
-  onSubmit: (input: CreateRoomTypeInput) => Promise<void> | void
+  initialValue?: AdminRoomType;
+  loading?: boolean;
+  onCancel: () => void;
+  onSubmit: (input: CreateRoomTypeInput) => Promise<void> | void;
 }
 
 export function RoomTypeForm({
@@ -33,13 +26,14 @@ export function RoomTypeForm({
     register,
   } = useForm<RoomTypeFormValues>({
     defaultValues: {
-      basePrice: initialValue?.basePrice ?? '',
-      description: initialValue?.description ?? '',
-      maxGuests: initialValue ? String(initialValue.maxGuests) : '',
-      name: initialValue?.name ?? '',
+      basePrice: initialValue?.basePrice ?? "",
+      bedType: initialValue?.bedType ?? "",
+      description: initialValue?.description ?? "",
+      maxGuests: initialValue ? String(initialValue.maxGuests) : "",
+      name: initialValue?.name ?? "",
     },
     resolver: zodResolver(roomTypeFormSchema),
-  })
+  });
 
   return (
     <form
@@ -47,23 +41,20 @@ export function RoomTypeForm({
       onSubmit={handleSubmit(async (values) => {
         await onSubmit({
           basePrice: values.basePrice,
+          bedType: values.bedType || null,
           description: values.description || null,
           maxGuests: Number(values.maxGuests),
           name: values.name,
-        })
+        });
       })}
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          error={errors.name?.message}
-          label="Tên loại phòng"
-          required
-        >
+        <Field error={errors.name?.message} label="Tên loại phòng" required>
           <Input
             autoComplete="off"
             maxLength={120}
             placeholder="Ví dụ: Phòng gia đình"
-            {...register('name')}
+            {...register("name")}
           />
         </Field>
         <Field
@@ -76,7 +67,7 @@ export function RoomTypeForm({
             min={1}
             step={1}
             type="number"
-            {...register('maxGuests')}
+            {...register("maxGuests")}
           />
         </Field>
       </div>
@@ -93,33 +84,35 @@ export function RoomTypeForm({
           placeholder="1250000"
           step="0.01"
           type="number"
-          {...register('basePrice')}
+          {...register("basePrice")}
         />
       </Field>
 
-      <Field
-        error={errors.description?.message}
-        label="Mô tả"
-      >
+      <Field error={errors.bedType?.message} label="Loại giường">
+        <Input
+          autoComplete="off"
+          maxLength={120}
+          placeholder="Ví dụ: 1 giường đôi"
+          {...register("bedType")}
+        />
+      </Field>
+
+      <Field error={errors.description?.message} label="Mô tả">
         <Textarea
           maxLength={10_000}
           placeholder="Mô tả tiện nghi và đặc điểm của loại phòng"
-          {...register('description')}
+          {...register("description")}
         />
       </Field>
 
       <div className="flex flex-wrap justify-end gap-3">
-        <Button
-          disabled={loading}
-          onClick={onCancel}
-          variant="outline"
-        >
+        <Button disabled={loading} onClick={onCancel} variant="outline">
           Hủy
         </Button>
         <Button loading={loading} type="submit">
-          {initialValue ? 'Lưu thay đổi' : 'Tạo loại phòng'}
+          {initialValue ? "Lưu thay đổi" : "Tạo loại phòng"}
         </Button>
       </div>
     </form>
-  )
+  );
 }

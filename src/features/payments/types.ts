@@ -1,4 +1,5 @@
 import type {
+  CustomerPaymentDto,
   OnlinePaymentDto,
   PaymentCreateVnPayPaymentData,
   PaymentDto,
@@ -28,6 +29,7 @@ export const PAYMENT_STATUSES = [
 ] as const satisfies readonly GeneratedPaymentStatus[]
 
 export type PaymentStatus = GeneratedPaymentStatus
+export type CustomerPayment = CustomerPaymentDto
 export type Payment = PaymentDto
 export type OnlinePayment = OnlinePaymentDto
 export type VnPayReturnResult = VnPayReturnDto

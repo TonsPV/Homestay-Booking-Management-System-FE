@@ -6,6 +6,7 @@ import {
   blockRoomDates,
   createRoomImage,
   getRoom,
+  listAvailableRooms,
   listRoomCalendar,
   listRooms,
   listManagementRooms,
@@ -158,6 +159,37 @@ describe('rooms API contract', () => {
     )
     expect(statusOptions.method).toBe('PATCH')
     expect(statusOptions.body).toBe(JSON.stringify({ status: 'CLEANING' }))
+  })
+
+  it('uses the generated management availability query contract', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      successResponse([], {
+        page: 2,
+        limit: 12,
+        total: 0,
+        totalPages: 0,
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'staff-token')
+
+    await listAvailableRooms({
+      checkIn: '2026-08-01',
+      checkOut: '2026-08-03',
+      guests: 3,
+      limit: 12,
+      page: 2,
+      roomTypeId: '7',
+    })
+
+    const [url, options] = fetchMock.mock.calls[0] as [URL, RequestInit]
+
+    expect(url.toString()).toBe(
+      'http://localhost:3000/api/v1/management/rooms/available?checkIn=2026-08-01&checkOut=2026-08-03&guests=3&limit=12&page=2&roomTypeId=7',
+    )
+    expect(new Headers(options.headers).get('Authorization')).toBe(
+      'Bearer staff-token',
+    )
   })
 
   it('uses the authenticated management room calendar contract', async () => {

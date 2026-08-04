@@ -56,6 +56,10 @@ homestay dành cho STAFF/ADMIN trên cùng nguồn dữ liệu và quy trình ng
 - Không tiếp tục dùng “Homestay Booking” làm tên thương hiệu hiển thị trong các
   thay đổi UI mới.
 - Chưa có logo, tagline hoặc tuyên bố tiếp thị chính thức được xác nhận.
+- Public marketing surfaces follow a premium boutique-hospitality standard:
+  immersive real property imagery, a clear booking action, restrained neutral
+  surfaces, and familiar patterns comparable in craft to Airbnb, Booking.com,
+  Apple, Stripe, Linear, Notion, and Vercel.
 
 ## Evidence on Hand
 

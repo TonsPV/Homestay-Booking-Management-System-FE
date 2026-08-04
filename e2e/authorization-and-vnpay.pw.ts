@@ -13,7 +13,7 @@ test('staff cannot open an admin-only account route', async ({ page }) => {
   await expect(page).toHaveURL(/\/forbidden$/)
 })
 
-test('VNPay Return is temporary without authoritative history', async ({
+test('customer sees a pending confirmation until payment history is available', async ({
   page,
 }) => {
   await page.route('**/api/v1/payments/vnpay/return?**', async (route) => {
@@ -35,9 +35,14 @@ test('VNPay Return is temporary without authoritative history', async ({
   )
 
   await expect(
-    page.getByText('Thanh toán VNPay thành công'),
+    page.getByText('Đang xác nhận thanh toán'),
   ).toBeVisible()
   await expect(
-    page.getByText(/kết quả tạm thời trên URL Return/i),
+    page.getByText(/chưa xác nhận khoản thanh toán trong lịch sử/i),
   ).toBeVisible()
+  await expect(
+    page.getByText(
+      /\bSUCCESS\b|\bPENDING\b|backend|URL Return|polling|attempt|idempotency|Mã payment/i,
+    ),
+  ).toHaveCount(0)
 })

@@ -7,6 +7,10 @@ test('admin sets an initial password for an eligible customer', async ({
 }) => {
   const customer = {
     createdAt: '2026-07-29T00:00:00.000Z',
+    credentialCapabilities: {
+      canSetInitialPassword: true,
+      reasonCode: null,
+    },
     email: null,
     fullName: 'Khách tại quầy',
     id: '301',

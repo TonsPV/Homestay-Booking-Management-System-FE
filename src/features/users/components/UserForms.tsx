@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 
-import { getErrorMessage } from '@/api/errors'
 import type { User } from '@/auth/types'
 import { Button } from '@/shared/components/Button'
 import { Alert } from '@/shared/components/Feedback'
@@ -11,6 +10,7 @@ import {
   useCreateUserMutation,
   useUpdateUserMutation,
 } from '../queries'
+import { getUserActionError } from '../errors'
 import {
   createUserSchema,
   type CreateUserFormValues,
@@ -81,7 +81,7 @@ export function CreateUserForm({ onCancel, onSaved }: UserFormCallbacks) {
     >
       {mutation.error ? (
         <Alert title="Không thể tạo nhân viên" tone="error">
-          {getErrorMessage(mutation.error)}
+          {getUserActionError(mutation.error)}
         </Alert>
       ) : null}
 
@@ -185,7 +185,7 @@ export function UpdateUserForm({
     >
       {mutation.error ? (
         <Alert title="Không thể cập nhật nhân viên" tone="error">
-          {getErrorMessage(mutation.error)}
+          {getUserActionError(mutation.error)}
         </Alert>
       ) : null}
 

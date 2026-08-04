@@ -1,90 +1,111 @@
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
-import {
-  render,
-  screen,
-  within,
-} from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import {
-  MemoryRouter,
-  Route,
-  Routes,
-} from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import { ApiError } from '@/api/errors'
+import { ApiError } from "@/api/errors";
 
-import type { Booking } from '../types'
-import { ManagementBookingDetailPage } from './ManagementBookingDetailPage'
+import type { ManagementBooking } from "../types";
+import { ManagementBookingDetailPage } from "./ManagementBookingDetailPage";
 
-const booking: Booking = {
-  id: '42',
-  bookingCode: 'BK-2026-0042',
-  customerId: '12',
-  roomId: '8',
-  createdByUserId: '7',
-  checkInDate: '2026-08-01',
-  checkOutDate: '2026-08-03',
+const booking: ManagementBooking = {
+  id: "42",
+  bookingCode: "BK-2026-0042",
+  customerId: "12",
+  roomId: "8",
+  createdByUserId: "7",
+  checkInDate: "2026-08-01",
+  checkOutDate: "2026-08-03",
   guestCount: 2,
-  contactName: 'Nguyễn Minh',
-  contactPhone: '0901234567',
-  contactEmail: 'minh@example.com',
-  totalAmount: '1800000.00',
-  status: 'PENDING_PAYMENT',
-  paymentStatus: 'UNPAID',
-  paymentExpiresAt: '2026-07-25T08:00:00.000Z',
+  contactName: "Nguyễn Minh",
+  contactPhone: "0901234567",
+  contactEmail: "minh@example.com",
+  totalAmount: "1800000.00",
+  status: "PENDING_PAYMENT",
+  paymentStatus: "UNPAID",
+  paymentExpiresAt: "2026-07-25T08:00:00.000Z",
   customerNote: null,
   cancelledAt: null,
   cancellationReason: null,
   customer: {
-    id: '12',
-    fullName: 'Nguyễn Minh',
-    phone: '0901234567',
+    id: "12",
+    fullName: "Nguyễn Minh",
+    phone: "0901234567",
   },
   room: {
-    id: '8',
-    roomNumber: 'A102',
-    name: 'Phòng hướng vườn',
+    id: "8",
+    roomNumber: "A102",
+    name: "Phòng hướng vườn",
     roomType: {
-      id: '2',
-      name: 'Phòng đôi',
+      id: "2",
+      name: "Phòng đôi",
     },
   },
   createdByUser: {
-    id: '7',
-    fullName: 'Lễ tân ca sáng',
+    id: "7",
+    fullName: "Lễ tân ca sáng",
   },
-  createdAt: '2026-07-24T07:00:00.000Z',
-  updatedAt: '2026-07-24T07:00:00.000Z',
-}
+  createdAt: "2026-07-24T07:00:00.000Z",
+  updatedAt: "2026-07-24T07:00:00.000Z",
+  credentialCapabilities: {
+    canSetInitialPassword: true,
+    reasonCode: null,
+  },
+  transitionCapabilities: [
+    { targetStatus: "PENDING_PAYMENT", allowed: true, reasonCode: null },
+    { targetStatus: "CONFIRMED", allowed: true, reasonCode: null },
+    {
+      targetStatus: "CHECKED_IN",
+      allowed: false,
+      reasonCode: "BOOKING_TRANSITION_NOT_ALLOWED",
+    },
+    {
+      targetStatus: "CHECKED_OUT",
+      allowed: false,
+      reasonCode: "BOOKING_TRANSITION_NOT_ALLOWED",
+    },
+    { targetStatus: "CANCELLED", allowed: true, reasonCode: null },
+  ],
+};
+
+const defaultTransitionCapabilities = booking.transitionCapabilities.map(
+  (capability) => ({ ...capability }),
+);
 
 const mocks = vi.hoisted(() => ({
   mutate: vi.fn(),
+  refetch: vi.fn(),
   reset: vi.fn(),
   updateError: null as ApiError | null,
-}))
+}));
 
-vi.mock(
-  '@/features/payments/components/ManagementBookingPaymentPanel',
-  () => ({
-    ManagementBookingPaymentPanel: () => (
-      <section aria-label="Thanh toán booking" />
-    ),
-  }),
-)
+vi.mock("@/features/payments/components/ManagementBookingPaymentPanel", () => ({
+  ManagementBookingPaymentPanel: () => (
+    <section aria-label="Thanh toán booking" />
+  ),
+}));
 
-vi.mock('../hooks', () => ({
+vi.mock("@/features/customers/components/InitialCustomerPasswordForm", () => ({
+  InitialCustomerPasswordForm: ({
+    onSuccess,
+  }: {
+    onSuccess: (customer: ManagementBooking["customer"]) => void;
+  }) => (
+    <section aria-label="Đặt mật khẩu ban đầu cho khách">
+      <button onClick={() => onSuccess(booking.customer)} type="button">
+        Hoàn tất đặt mật khẩu
+      </button>
+    </section>
+  ),
+}));
+
+vi.mock("../hooks", () => ({
   useManagementBooking: () => ({
     data: booking,
     error: null,
     isError: false,
     isPending: false,
-    refetch: vi.fn(),
+    refetch: mocks.refetch,
   }),
   useUpdateBookingStatus: () => ({
     error: mocks.updateError,
@@ -93,19 +114,23 @@ vi.mock('../hooks', () => ({
     mutate: mocks.mutate,
     reset: mocks.reset,
   }),
-}))
+}));
 
-describe('ManagementBookingDetailPage cancellation safety', () => {
+describe("ManagementBookingDetailPage cancellation safety", () => {
   beforeEach(() => {
-    mocks.mutate.mockReset()
-    mocks.reset.mockReset()
-    mocks.updateError = null
-  })
+    booking.transitionCapabilities = defaultTransitionCapabilities.map(
+      (capability) => ({ ...capability }),
+    );
+    mocks.mutate.mockReset();
+    mocks.refetch.mockReset();
+    mocks.reset.mockReset();
+    mocks.updateError = null;
+  });
 
-  it('requires an explicit contextual confirmation before cancelling', async () => {
-    const user = userEvent.setup()
+  it("requires an explicit contextual confirmation before cancelling", async () => {
+    const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={['/management/bookings/42']}>
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
         <Routes>
           <Route
             element={<ManagementBookingDetailPage />}
@@ -113,61 +138,53 @@ describe('ManagementBookingDetailPage cancellation safety', () => {
           />
         </Routes>
       </MemoryRouter>,
-    )
+    );
 
     await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Trạng thái tiếp theo' }),
-      'CANCELLED',
-    )
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+      "CANCELLED",
+    );
     await user.type(
-      screen.getByRole('textbox', { name: 'Lý do hủy' }),
-      'Khách đổi kế hoạch',
-    )
+      screen.getByRole("textbox", { name: "Lý do hủy" }),
+      "Khách đổi kế hoạch",
+    );
     await user.click(
-      screen.getByRole('button', { name: 'Cập nhật trạng thái' }),
-    )
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    );
 
-    expect(mocks.mutate).not.toHaveBeenCalled()
-    const dialog = screen.getByRole('dialog', {
-        name: `Hủy booking ${booking.bookingCode}?`,
-      })
-    expect(dialog).toBeInTheDocument()
-    expect(within(dialog).getByText(booking.contactName)).toBeInTheDocument()
+    expect(mocks.mutate).not.toHaveBeenCalled();
+    const dialog = screen.getByRole("dialog", {
+      name: `Hủy booking ${booking.bookingCode}?`,
+    });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(booking.contactName)).toBeInTheDocument();
     expect(
       within(dialog).getByText(/A102 · Phòng hướng vườn/),
-    ).toBeInTheDocument()
-    expect(
-      within(dialog).getByText('Khách đổi kế hoạch'),
-    ).toBeInTheDocument()
+    ).toBeInTheDocument();
+    expect(within(dialog).getByText("Khách đổi kế hoạch")).toBeInTheDocument();
 
     await user.click(
-      screen.getByRole('button', { name: 'Xác nhận hủy booking' }),
-    )
+      screen.getByRole("button", { name: "Xác nhận hủy booking" }),
+    );
 
     expect(mocks.mutate).toHaveBeenCalledWith(
       {
         id: booking.id,
         input: {
-          status: 'CANCELLED',
-          cancellationReason: 'Khách đổi kế hoạch',
+          status: "CANCELLED",
+          cancellationReason: "Khách đổi kế hoạch",
         },
       },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       }),
-    )
-  }, 15_000)
+    );
+  }, 15_000);
 
-  it('submits the selected target status and leaves validation to Backend', async () => {
-    const user = userEvent.setup()
-    mocks.mutate.mockImplementation(
-      (
-        _variables,
-        options?: { onSuccess?: () => void },
-      ) => options?.onSuccess?.(),
-    )
+  it("lets staff open the initial-password task from a counter booking", async () => {
+    const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={['/management/bookings/42']}>
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
         <Routes>
           <Route
             element={<ManagementBookingDetailPage />}
@@ -175,39 +192,82 @@ describe('ManagementBookingDetailPage cancellation safety', () => {
           />
         </Routes>
       </MemoryRouter>,
-    )
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Đặt mật khẩu ban đầu" }),
+    );
+
+    expect(
+      screen.getByRole("region", {
+        name: "Đặt mật khẩu ban đầu cho khách",
+      }),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Hoàn tất đặt mật khẩu" }),
+    );
+    expect(mocks.refetch).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Đặt mật khẩu ban đầu" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("đã có thể đăng nhập");
+  });
+
+  it("submits a transition allowed by the Backend capability", async () => {
+    const user = userEvent.setup();
+    mocks.mutate.mockImplementation(
+      (_variables, options?: { onSuccess?: () => void }) =>
+        options?.onSuccess?.(),
+    );
+    render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
 
     await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Trạng thái tiếp theo' }),
-      'CHECKED_OUT',
-    )
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+      "CONFIRMED",
+    );
     await user.click(
-      screen.getByRole('button', { name: 'Cập nhật trạng thái' }),
-    )
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    );
 
     expect(mocks.mutate).toHaveBeenCalledWith(
       {
         id: booking.id,
         input: {
-          status: 'CHECKED_OUT',
+          status: "CONFIRMED",
           cancellationReason: undefined,
         },
       },
       expect.objectContaining({ onSuccess: expect.any(Function) }),
-    )
+    );
     expect(
-      screen.getByText('Đã cập nhật trạng thái booking.'),
-    ).toBeInTheDocument()
-  })
+      screen.getByText("Đã cập nhật trạng thái booking."),
+    ).toBeInTheDocument();
+  });
 
-  it('shows an authoritative Backend conflict', () => {
-    mocks.updateError = new ApiError(
-      'Khong the chuyen booking tu PENDING_PAYMENT sang CHECKED_OUT.',
-      { kind: 'http', status: 409 },
-    )
+  it("hides unrelated transitions and explains a dynamically blocked action", () => {
+    booking.transitionCapabilities = booking.transitionCapabilities.map(
+      (capability) =>
+        capability.targetStatus === "CONFIRMED"
+          ? {
+              ...capability,
+              allowed: false,
+              reasonCode: "BOOKING_CONFIRMATION_REQUIRES_PAYMENT",
+            }
+          : capability,
+    );
 
     render(
-      <MemoryRouter initialEntries={['/management/bookings/42']}>
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
         <Routes>
           <Route
             element={<ManagementBookingDetailPage />}
@@ -215,10 +275,68 @@ describe('ManagementBookingDetailPage cancellation safety', () => {
           />
         </Routes>
       </MemoryRouter>,
-    )
+    );
 
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Phòng vừa được người khác đặt.',
-    )
-  })
-})
+    expect(
+      screen.queryByRole("option", { name: /Đã trả phòng/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: /Đã xác nhận — chưa khả dụng/ }),
+    ).toBeDisabled();
+    expect(
+      screen.getByText(
+        "Booking online cần được thanh toán trước khi xác nhận.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("fails closed while a rolling Backend response has no transition capabilities", () => {
+    const legacyBooking = booking as unknown as {
+      transitionCapabilities?: ManagementBooking["transitionCapabilities"];
+    };
+    const originalCapabilities = legacyBooking.transitionCapabilities;
+    delete legacyBooking.transitionCapabilities;
+
+    try {
+      render(
+        <MemoryRouter initialEntries={["/management/bookings/42"]}>
+          <Routes>
+            <Route
+              element={<ManagementBookingDetailPage />}
+              path="/management/bookings/:bookingId"
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Chức năng cập nhật trạng thái đang được đồng bộ.",
+      );
+    } finally {
+      legacyBooking.transitionCapabilities = originalCapabilities;
+    }
+  });
+
+  it("shows a safe fallback for an unsupported booking state transition", () => {
+    mocks.updateError = new ApiError(
+      "Khong the chuyen booking tu PENDING_PAYMENT sang CHECKED_OUT.",
+      { kind: "http", status: 409 },
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Dữ liệu đã thay đổi hoặc xung đột. Vui lòng tải lại và thử lại.",
+    );
+  });
+});

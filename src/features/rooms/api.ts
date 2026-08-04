@@ -1,5 +1,5 @@
-import { apiRequest } from '@/api/client'
-import type { Pagination } from '@/api/types'
+import { apiRequest } from "@/api/client";
+import type { Pagination } from "@/api/types";
 
 import type {
   BlockRoomDatesInput,
@@ -8,7 +8,8 @@ import type {
   ListAvailableRoomsQuery,
   ListManagementRoomsQuery,
   ListRoomsQuery,
-
+  ManagementRoom,
+  PublicRoom,
   Room,
   RoomCalendarEntry,
   RoomCalendarRange,
@@ -17,18 +18,28 @@ import type {
   SearchRoomsQuery,
   UnblockRoomDatesResult,
   UpdateRoomInput,
-} from './types'
+} from "./types";
 
 export interface PaginatedRooms {
-  items: Room[]
-  pagination?: Pagination
+  items: Room[];
+  pagination?: Pagination;
+}
+
+export interface PaginatedManagementRooms {
+  items: ManagementRoom[];
+  pagination?: Pagination;
+}
+
+export interface PaginatedPublicRooms {
+  items: PublicRoom[];
+  pagination?: Pagination;
 }
 
 export async function listRooms(
   query: ListRoomsQuery = {},
   signal?: AbortSignal,
-): Promise<PaginatedRooms> {
-  const result = await apiRequest<Room[]>('/rooms', {
+): Promise<PaginatedPublicRooms> {
+  const result = await apiRequest<PublicRoom[]>("/rooms", {
     auth: false,
     query: {
       limit: query.limit,
@@ -37,19 +48,19 @@ export async function listRooms(
       search: query.search,
     },
     signal,
-  })
+  });
 
   return {
     items: result.data,
     pagination: result.meta?.pagination,
-  }
+  };
 }
 
 export async function searchRooms(
   query: SearchRoomsQuery,
   signal?: AbortSignal,
-): Promise<PaginatedRooms> {
-  const result = await apiRequest<Room[]>('/rooms/search', {
+): Promise<PaginatedPublicRooms> {
+  const result = await apiRequest<PublicRoom[]>("/rooms/search", {
     auth: false,
     query: {
       amenityIds: query.amenityIds,
@@ -61,33 +72,34 @@ export async function searchRooms(
       minPrice: query.minPrice,
       page: query.page,
       roomTypeId: query.roomTypeId,
+      sort: query.sort,
     },
     signal,
-  })
+  });
 
   return {
     items: result.data,
     pagination: result.meta?.pagination,
-  }
+  };
 }
 
 export async function getRoom(
   id: string,
   signal?: AbortSignal,
-): Promise<Room> {
-  const result = await apiRequest<Room>(`/rooms/${id}`, {
+): Promise<PublicRoom> {
+  const result = await apiRequest<PublicRoom>(`/rooms/${id}`, {
     auth: false,
     signal,
-  })
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function listManagementRooms(
   query: ListManagementRoomsQuery = {},
   signal?: AbortSignal,
-): Promise<PaginatedRooms> {
-  const result = await apiRequest<Room[]>('/management/rooms', {
+): Promise<PaginatedManagementRooms> {
+  const result = await apiRequest<ManagementRoom[]>("/management/rooms", {
     query: {
       limit: query.limit,
       page: query.page,
@@ -96,22 +108,19 @@ export async function listManagementRooms(
       status: query.status,
     },
     signal,
-  })
+  });
 
   return {
     items: result.data,
     pagination: result.meta?.pagination,
-  }
+  };
 }
 
-// TODO(BE-001): Endpoint is pending Backend implementation. The query
-// contract follows docs/issues/BE-001-room-availability-api.md. Regenerate
-// OpenAPI types and switch to the generated query type once available.
 export async function listAvailableRooms(
   query: ListAvailableRoomsQuery,
   signal?: AbortSignal,
 ): Promise<PaginatedRooms> {
-  const result = await apiRequest<Room[]>('/management/rooms/available', {
+  const result = await apiRequest<Room[]>("/management/rooms/available", {
     query: {
       checkIn: query.checkIn,
       checkOut: query.checkOut,
@@ -121,24 +130,23 @@ export async function listAvailableRooms(
       roomTypeId: query.roomTypeId,
     },
     signal,
-  })
+  });
 
   return {
     items: result.data,
     pagination: result.meta?.pagination,
-  }
+  };
 }
 
 export async function getManagementRoom(
-
   id: string,
   signal?: AbortSignal,
 ): Promise<Room> {
   const result = await apiRequest<Room>(`/management/rooms/${id}`, {
     signal,
-  })
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function listRoomCalendar(
@@ -155,9 +163,9 @@ export async function listRoomCalendar(
       },
       signal,
     },
-  )
+  );
 
-  return result.data
+  return result.data;
 }
 
 export async function blockRoomDates(
@@ -168,11 +176,11 @@ export async function blockRoomDates(
     `/management/rooms/${roomId}/blocks`,
     {
       body: input,
-      method: 'POST',
+      method: "POST",
     },
-  )
+  );
 
-  return result.data
+  return result.data;
 }
 
 export async function unblockRoomDates(
@@ -182,24 +190,24 @@ export async function unblockRoomDates(
   const result = await apiRequest<UnblockRoomDatesResult>(
     `/management/rooms/${roomId}/blocks`,
     {
-      method: 'DELETE',
+      method: "DELETE",
       query: {
         from: range.from,
         to: range.to,
       },
     },
-  )
+  );
 
-  return result.data
+  return result.data;
 }
 
 export async function createRoom(input: CreateRoomInput): Promise<Room> {
-  const result = await apiRequest<Room>('/rooms', {
+  const result = await apiRequest<Room>("/rooms", {
     body: input,
-    method: 'POST',
-  })
+    method: "POST",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function updateRoom(
@@ -208,18 +216,18 @@ export async function updateRoom(
 ): Promise<Room> {
   const result = await apiRequest<Room>(`/rooms/${id}`, {
     body: input,
-    method: 'PATCH',
-  })
+    method: "PATCH",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function deleteRoom(id: string): Promise<Room> {
   const result = await apiRequest<Room>(`/rooms/${id}`, {
-    method: 'DELETE',
-  })
+    method: "DELETE",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function updateRoomStatus(
@@ -228,51 +236,49 @@ export async function updateRoomStatus(
 ): Promise<Room> {
   const result = await apiRequest<Room>(`/rooms/${id}/status`, {
     body: { status },
-    method: 'PATCH',
-  })
+    method: "PATCH",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function createRoomImage(
   roomId: string,
   input: CreateRoomImageInput,
 ): Promise<RoomImage> {
-  const formData = new FormData()
+  const formData = new FormData();
 
-  formData.append('file', input.file)
+  formData.append("file", input.file);
 
   if (input.isCover !== undefined) {
-    formData.append('isCover', String(input.isCover))
+    formData.append("isCover", String(input.isCover));
   }
 
   if (input.sortOrder !== undefined) {
-    formData.append('sortOrder', String(input.sortOrder))
+    formData.append("sortOrder", String(input.sortOrder));
   }
 
   const result = await apiRequest<RoomImage>(`/rooms/${roomId}/images`, {
     body: formData,
-    method: 'POST',
-  })
+    method: "POST",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function deleteRoomImage(imageId: string): Promise<RoomImage> {
   const result = await apiRequest<RoomImage>(`/room-images/${imageId}`, {
-    method: 'DELETE',
-  })
+    method: "DELETE",
+  });
 
-  return result.data
+  return result.data;
 }
 
-export async function setRoomCoverImage(
-  imageId: string,
-): Promise<RoomImage> {
+export async function setRoomCoverImage(imageId: string): Promise<RoomImage> {
   const result = await apiRequest<RoomImage>(
     `/room-images/${imageId}/set-cover`,
-    { method: 'PATCH' },
-  )
+    { method: "PATCH" },
+  );
 
-  return result.data
+  return result.data;
 }

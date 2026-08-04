@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { getErrorMessage } from '@/api/errors'
+import { getApiFieldErrorCode, getErrorMessage } from '@/api/errors'
 import { useAuth } from '@/auth/useAuth'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
@@ -25,6 +25,7 @@ import {
   type CustomerProfileFormValues,
 } from '../validation'
 import { CustomerPasswordForm } from '../components/CustomerPasswordForm'
+import { getCustomerProfileActionError } from '../errors'
 
 export function CustomerProfilePage() {
   const auth = useAuth()
@@ -37,6 +38,8 @@ export function CustomerProfilePage() {
     handleSubmit,
     register,
     reset,
+    clearErrors,
+    setError,
   } = useForm<CustomerProfileFormValues>({
     defaultValues: {
       email: '',
@@ -45,6 +48,8 @@ export function CustomerProfilePage() {
     },
     resolver: zodResolver(customerProfileSchema),
   })
+  const emailFieldError = getApiFieldErrorCode(updateMutation.error, 'email')
+  const phoneFieldError = getApiFieldErrorCode(updateMutation.error, 'phone')
 
   useEffect(() => {
     if (!profileQuery.data) {
@@ -57,6 +62,31 @@ export function CustomerProfilePage() {
       phone: profileQuery.data.phone,
     })
   }, [profileQuery.data, reset])
+
+  useEffect(() => {
+    if (emailFieldError) {
+      setError(
+        'email',
+        {
+          type: 'server',
+          message: getCustomerProfileActionError(updateMutation.error),
+        },
+        { shouldFocus: true },
+      )
+      return
+    }
+
+    if (phoneFieldError) {
+      setError(
+        'phone',
+        {
+          type: 'server',
+          message: getCustomerProfileActionError(updateMutation.error),
+        },
+        { shouldFocus: true },
+      )
+    }
+  }, [emailFieldError, phoneFieldError, setError, updateMutation.error])
 
   if (!canLoadProfile) {
     return (
@@ -104,12 +134,6 @@ export function CustomerProfilePage() {
           </div>
           <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-5 text-sm">
             <div>
-              <dt className="text-slate-500">Mã khách hàng</dt>
-              <dd className="mt-1 font-semibold text-slate-900">
-                #{customer.id}
-              </dd>
-            </div>
-            <div>
               <dt className="text-slate-500">Ngày tham gia</dt>
               <dd className="mt-1 font-semibold text-slate-900">
                 {formatDateTime(customer.createdAt)}
@@ -130,6 +154,8 @@ export function CustomerProfilePage() {
             className="mt-6 grid gap-5"
             noValidate
             onSubmit={handleSubmit((values) => {
+              updateMutation.reset()
+              clearErrors(['email', 'phone'])
               setSaved(false)
               updateMutation.mutate(
                 {
@@ -157,9 +183,9 @@ export function CustomerProfilePage() {
             {saved ? (
               <Alert tone="success">Đã lưu thay đổi hồ sơ.</Alert>
             ) : null}
-            {updateMutation.error ? (
+            {updateMutation.error && !emailFieldError && !phoneFieldError ? (
               <Alert title="Không thể cập nhật" tone="error">
-                {getErrorMessage(updateMutation.error)}
+                {getCustomerProfileActionError(updateMutation.error)}
               </Alert>
             ) : null}
 

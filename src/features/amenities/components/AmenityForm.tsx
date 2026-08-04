@@ -58,7 +58,7 @@ export function AmenityForm({
         />
       </Field>
       <div className="flex flex-wrap justify-end gap-3">
-        <Button disabled={loading} onClick={onCancel} variant="outline">
+        <Button disabled={loading} onClick={onCancel} type="button" variant="outline">
           Hủy
         </Button>
         <Button loading={loading} type="submit">

@@ -112,7 +112,7 @@ test('admin completes the amenity soft-delete lifecycle', async ({ page }) => {
   await expect(page).toHaveTitle('Quản lý tiện nghi | Homestay Green')
 })
 
-test('shows the Backend conflict when an amenity is still in use', async ({
+test('explains how to resolve a conflict when an amenity is still in use', async ({
   page,
 }) => {
   await installSession(page, { actorType: 'user', role: 'ADMIN' })
@@ -129,6 +129,7 @@ test('shows the Backend conflict when an amenity is still in use', async ({
     if (route.request().method() === 'DELETE') {
       await route.fulfill({
         body: JSON.stringify({
+          errorCode: 'AMENITY_IN_USE',
           message: 'Không thể xóa tiện nghi đang được loại phòng sử dụng.',
           path: '/api/v1/admin/amenities/1',
           requestId: 'req-amenity-in-use',
@@ -154,7 +155,8 @@ test('shows the Backend conflict when an amenity is still in use', async ({
 
   await expect(
     page.getByText(
-      'Không thể xóa tiện nghi đang được loại phòng sử dụng. Mã tra cứu: req-amenity-in-use.',
+      'Không thể xóa tiện nghi vì đang được sử dụng. Hãy gỡ tiện nghi khỏi các loại phòng liên quan rồi thử lại.',
     ),
   ).toBeVisible()
+  await expect(page.getByText(/req-amenity-in-use/)).toHaveCount(0)
 })

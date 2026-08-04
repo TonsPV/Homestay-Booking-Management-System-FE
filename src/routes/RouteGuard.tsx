@@ -9,7 +9,7 @@ import { ErrorState, LoadingState } from '@/shared/components/Feedback'
 interface RouteGuardProps {
   actor: ActorType
   loginPath: string
-  roles?: UserRole[]
+  roles?: readonly UserRole[]
 }
 
 export function RouteGuard({ actor, loginPath, roles }: RouteGuardProps) {

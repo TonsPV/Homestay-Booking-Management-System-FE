@@ -6,7 +6,6 @@ import {
 } from '@tanstack/react-query'
 
 import { authQueryKeys } from '@/auth/query-keys'
-import type { Customer } from '@/auth/types'
 
 import {
   changeCustomerPassword,
@@ -18,6 +17,7 @@ import {
 } from './api'
 import type {
   ChangeCustomerPasswordInput,
+  AdminCustomer,
   CustomerListParams,
   SetInitialCustomerPasswordInput,
   UpdateCustomerProfileInput,
@@ -63,9 +63,15 @@ export function useChangeCustomerPasswordMutation() {
 }
 
 export function useSetInitialCustomerPasswordMutation() {
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (input: SetInitialCustomerPasswordInput) =>
       setInitialCustomerPassword(input),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: customerQueryKeys.adminLists(),
+      }),
   })
 }
 
@@ -82,7 +88,7 @@ export function useUpdateCustomerStatusMutation() {
 
   return useMutation({
     mutationFn: updateCustomerStatus,
-    onSuccess: (customer: Customer) => {
+    onSuccess: (customer: AdminCustomer) => {
       queryClient.setQueriesData(
         { queryKey: customerQueryKeys.adminLists() },
         (current: unknown) => {
@@ -97,8 +103,8 @@ export function useUpdateCustomerStatusMutation() {
 
           return {
             ...current,
-            data: current.data.map((item: Customer) =>
-              item.id === customer.id ? customer : item,
+            data: current.data.map((item: AdminCustomer) =>
+              item.id === customer.id ? { ...item, ...customer } : item,
             ),
           }
         },

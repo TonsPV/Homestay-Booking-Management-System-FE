@@ -1,24 +1,26 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useId } from 'react'
-import { useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useId } from "react";
+import { useForm } from "react-hook-form";
 
-import { getErrorMessage } from '@/api/errors'
-import type { Customer } from '@/auth/types'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import { Alert } from '@/shared/components/Feedback'
-import { Field, Input } from '@/shared/components/FormControls'
+import type { Customer } from "@/auth/types";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { Alert } from "@/shared/components/Feedback";
+import { Field, Input } from "@/shared/components/FormControls";
 
-import { useSetInitialCustomerPasswordMutation } from '../queries'
+import { useSetInitialCustomerPasswordMutation } from "../queries";
+import { getCustomerCredentialActionError } from "../errors";
 import {
   initialCustomerPasswordSchema,
   type InitialCustomerPasswordFormValues,
-} from '../validation'
+} from "../validation";
+
+type InitialPasswordCustomer = Pick<Customer, "fullName" | "id">;
 
 interface InitialCustomerPasswordFormProps {
-  customer: Customer
-  onCancel: () => void
-  onSuccess: (customer: Customer) => void
+  customer: InitialPasswordCustomer;
+  onCancel: () => void;
+  onSuccess: (customer: InitialPasswordCustomer) => void;
 }
 
 export function InitialCustomerPasswordForm({
@@ -26,8 +28,8 @@ export function InitialCustomerPasswordForm({
   onCancel,
   onSuccess,
 }: InitialCustomerPasswordFormProps) {
-  const titleId = useId()
-  const mutation = useSetInitialCustomerPasswordMutation()
+  const titleId = useId();
+  const mutation = useSetInitialCustomerPasswordMutation();
   const {
     formState: { errors },
     handleSubmit,
@@ -35,14 +37,14 @@ export function InitialCustomerPasswordForm({
     reset,
     setFocus,
   } = useForm<InitialCustomerPasswordFormValues>({
-    defaultValues: { confirmPassword: '', password: '' },
+    defaultValues: { confirmPassword: "", password: "" },
     resolver: zodResolver(initialCustomerPasswordSchema),
-  })
+  });
 
   useEffect(() => {
-    reset()
-    setFocus('password')
-  }, [customer.id, reset, setFocus])
+    reset();
+    setFocus("password");
+  }, [customer.id, reset, setFocus]);
 
   return (
     <Card aria-labelledby={titleId}>
@@ -51,8 +53,8 @@ export function InitialCustomerPasswordForm({
           Đặt mật khẩu ban đầu
         </h2>
         <p className="mt-1 text-sm leading-6 text-muted">
-          Tạo quyền đăng nhập lần đầu cho {customer.fullName}. Backend chỉ chấp
-          nhận khách được tạo từ quy trình tại quầy và chưa từng có mật khẩu.
+          Tạo quyền đăng nhập lần đầu cho {customer.fullName}. Thao tác chỉ khả
+          dụng khi tài khoản chưa có mật khẩu.
         </p>
       </div>
 
@@ -64,17 +66,17 @@ export function InitialCustomerPasswordForm({
             { id: customer.id, password: values.password },
             {
               onSuccess: () => {
-                reset()
-                onSuccess(customer)
+                reset();
+                onSuccess(customer);
               },
             },
-          )
+          );
         })}
       >
         {mutation.error ? (
           <div className="lg:col-span-2">
             <Alert title="Không thể đặt mật khẩu ban đầu" tone="error">
-              {getErrorMessage(mutation.error)}
+              {getCustomerCredentialActionError(mutation.error)}
             </Alert>
           </div>
         ) : null}
@@ -88,7 +90,7 @@ export function InitialCustomerPasswordForm({
           <Input
             autoComplete="new-password"
             type="password"
-            {...register('password')}
+            {...register("password")}
           />
         </Field>
         <Field
@@ -99,7 +101,7 @@ export function InitialCustomerPasswordForm({
           <Input
             autoComplete="new-password"
             type="password"
-            {...register('confirmPassword')}
+            {...register("confirmPassword")}
           />
         </Field>
 
@@ -118,5 +120,5 @@ export function InitialCustomerPasswordForm({
         </div>
       </form>
     </Card>
-  )
+  );
 }

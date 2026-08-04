@@ -1,23 +1,23 @@
-import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
-import { formatMoney, formatNumber } from '@/shared/formatting/formatters'
+import { Badge } from "@/shared/components/Badge";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
+import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
-import { resolveRoomImageUrl } from '../image-url'
-import type { Room } from '../types'
-import { RoomImage } from './RoomImage'
+import { resolveRoomImageUrl } from "../image-url";
+import type { PublicRoom } from "../types";
+import { RoomImage } from "./RoomImage";
 
 interface RoomCardProps {
-  onView?: (roomId: string) => void
-  room: Room
+  onView?: (roomId: string) => void;
+  room: PublicRoom;
 }
 
-function getCoverImage(room: Room) {
-  return room.images.find((image) => image.isCover) ?? room.images[0]
+function getCoverImage(room: PublicRoom) {
+  return room.images.find((image) => image.isCover) ?? room.images[0];
 }
 
 export function RoomCard({ onView, room }: RoomCardProps) {
-  const cover = getCoverImage(room)
+  const cover = getCoverImage(room);
 
   return (
     <Card className="group flex h-full min-w-0 flex-col overflow-hidden border-line p-0 shadow-card transition duration-base ease-calm hover:-translate-y-1 hover:border-brand/30 hover:shadow-elevation-3 motion-reduce:transform-none">
@@ -52,7 +52,7 @@ export function RoomCard({ onView, room }: RoomCardProps) {
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-muted">
           {room.description ??
             room.roomType.description ??
-            'Không gian nghỉ dưỡng tiện nghi và thoải mái.'}
+            "Không gian nghỉ dưỡng tiện nghi và thoải mái."}
         </p>
 
         {room.roomType.amenities.length > 0 ? (
@@ -96,5 +96,5 @@ export function RoomCard({ onView, room }: RoomCardProps) {
         </div>
       </div>
     </Card>
-  )
+  );
 }

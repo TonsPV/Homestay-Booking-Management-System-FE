@@ -9,6 +9,7 @@ import { Button } from '@/shared/components/Button'
 import { Field, Input } from '@/shared/components/FormControls'
 
 import { registerCustomer } from '../api'
+import { getAuthActionError } from '../errors'
 import { AuthPageLayout } from '../components/AuthPageLayout'
 import {
   formatRetryAfter,
@@ -96,6 +97,7 @@ export function RegisterPage({
             {getRateLimitErrorMessage(
               registerMutation.error,
               remainingSeconds,
+              getAuthActionError,
             )}
           </Alert>
         ) : null}
@@ -165,11 +167,13 @@ export function RegisterPage({
 
         <Button
           className="mt-1 w-full"
-          disabled={isCoolingDown}
+          disabled={isCoolingDown || registerMutation.isPending}
           loading={registerMutation.isPending}
           type="submit"
         >
-          {isCoolingDown
+          {registerMutation.isPending
+            ? 'Đang đăng ký...'
+            : isCoolingDown
             ? `Thử lại sau ${formatRetryAfter(remainingSeconds)}`
             : 'Tạo tài khoản'}
         </Button>

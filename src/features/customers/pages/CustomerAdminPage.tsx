@@ -1,28 +1,29 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from "react";
 
-import { getErrorMessage } from '@/api/errors'
-import type { AccountStatus, Customer } from '@/auth/types'
-import { Button } from '@/shared/components/Button'
-import { Card } from '@/shared/components/Card'
+import { getErrorMessage } from "@/api/errors";
+import type { AccountStatus } from "@/auth/types";
+import { Button } from "@/shared/components/Button";
+import { Card } from "@/shared/components/Card";
 import {
   Alert,
   EmptyState,
   ErrorState,
   LoadingState,
-} from '@/shared/components/Feedback'
-import { Field, Input, Select } from '@/shared/components/FormControls'
-import { PageHeader } from '@/shared/components/PageHeader'
-import { PaginationControls } from '@/shared/components/PaginationControls'
-import { formatDateTime } from '@/shared/formatting/formatters'
+} from "@/shared/components/Feedback";
+import { Field, Input, Select } from "@/shared/components/FormControls";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { PaginationControls } from "@/shared/components/PaginationControls";
+import { formatDateTime } from "@/shared/formatting/formatters";
 
-import { CustomerStatusBadge } from '../components/CustomerStatusBadge'
-import { InitialCustomerPasswordForm } from '../components/InitialCustomerPasswordForm'
+import { CustomerStatusBadge } from "../components/CustomerStatusBadge";
+import { InitialCustomerPasswordForm } from "../components/InitialCustomerPasswordForm";
 import {
   useAdminCustomersQuery,
   useUpdateCustomerStatusMutation,
-} from '../queries'
+} from "../queries";
+import type { AdminCustomer } from "../types";
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 20;
 
 function CustomerAction({
   customer,
@@ -30,73 +31,81 @@ function CustomerAction({
   loading,
   onChangeStatus,
   onSetInitialPassword,
+  initialPasswordConfigured,
 }: {
-  customer: Customer
-  disabled: boolean
-  loading: boolean
-  onChangeStatus: (customer: Customer) => void
-  onSetInitialPassword: (customer: Customer) => void
+  customer: AdminCustomer;
+  disabled: boolean;
+  loading: boolean;
+  onChangeStatus: (customer: AdminCustomer) => void;
+  onSetInitialPassword: (customer: AdminCustomer) => void;
+  initialPasswordConfigured: boolean;
 }) {
-  const locking = customer.status === 'ACTIVE'
+  const locking = customer.status === "ACTIVE";
 
   return (
     <div className="flex flex-wrap justify-end gap-2">
-      <Button
-        disabled={disabled}
-        onClick={() => onSetInitialPassword(customer)}
-        variant="outline"
-      >
-        Đặt mật khẩu ban đầu
-      </Button>
+      {customer.credentialCapabilities.canSetInitialPassword &&
+      !initialPasswordConfigured ? (
+        <Button
+          disabled={disabled}
+          onClick={() => onSetInitialPassword(customer)}
+          variant="outline"
+        >
+          Đặt mật khẩu ban đầu
+        </Button>
+      ) : null}
       <Button
         disabled={disabled}
         loading={loading}
         onClick={() => onChangeStatus(customer)}
-        variant={locking ? 'danger' : 'outline'}
+        variant={locking ? "danger" : "outline"}
       >
-        {locking ? 'Khóa tài khoản' : 'Mở khóa'}
+        {locking ? "Khóa tài khoản" : "Mở khóa"}
       </Button>
     </div>
-  )
+  );
 }
 
 export function CustomerAdminPage() {
-  const [draftSearch, setDraftSearch] = useState('')
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState<'' | AccountStatus>('')
+  const [draftSearch, setDraftSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<"" | AccountStatus>("");
   const [initialPasswordCustomer, setInitialPasswordCustomer] =
-    useState<Customer | null>(null)
-  const [credentialSuccess, setCredentialSuccess] = useState('')
+    useState<AdminCustomer | null>(null);
+  const [credentialSuccess, setCredentialSuccess] = useState<{
+    customerId: string;
+    message: string;
+  } | null>(null);
   const customersQuery = useAdminCustomersQuery({
     limit: PAGE_SIZE,
     page,
     search: search || undefined,
     status: status || undefined,
-  })
-  const statusMutation = useUpdateCustomerStatusMutation()
+  });
+  const statusMutation = useUpdateCustomerStatusMutation();
 
   const applySearch = (event: FormEvent) => {
-    event.preventDefault()
-    setPage(1)
-    setSearch(draftSearch.trim())
-  }
+    event.preventDefault();
+    setPage(1);
+    setSearch(draftSearch.trim());
+  };
 
-  const changeStatus = (customer: Customer) => {
+  const changeStatus = (customer: AdminCustomer) => {
     if (
-      customer.status === 'ACTIVE' &&
+      customer.status === "ACTIVE" &&
       !window.confirm(
         `Khóa tài khoản của ${customer.fullName}? Khách hàng sẽ không thể đăng nhập cho tới khi được mở khóa.`,
       )
     ) {
-      return
+      return;
     }
 
     statusMutation.mutate({
       id: customer.id,
-      status: customer.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE',
-    })
-  }
+      status: customer.status === "ACTIVE" ? "LOCKED" : "ACTIVE",
+    });
+  };
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-6">
@@ -123,8 +132,8 @@ export function CustomerAdminPage() {
             <Select
               aria-label="Lọc theo trạng thái"
               onChange={(event) => {
-                setPage(1)
-                setStatus(event.target.value as '' | AccountStatus)
+                setPage(1);
+                setStatus(event.target.value as "" | AccountStatus);
               }}
               value={status}
             >
@@ -145,7 +154,7 @@ export function CustomerAdminPage() {
 
       {credentialSuccess ? (
         <Alert title="Đã đặt mật khẩu ban đầu" tone="success">
-          {credentialSuccess}
+          {credentialSuccess.message}
         </Alert>
       ) : null}
 
@@ -154,10 +163,11 @@ export function CustomerAdminPage() {
           customer={initialPasswordCustomer}
           onCancel={() => setInitialPasswordCustomer(null)}
           onSuccess={(customer) => {
-            setCredentialSuccess(
-              `${customer.fullName} có thể dùng thông tin liên hệ để đăng nhập.`,
-            )
-            setInitialPasswordCustomer(null)
+            setCredentialSuccess({
+              customerId: customer.id,
+              message: `${customer.fullName} có thể dùng thông tin liên hệ để đăng nhập.`,
+            });
+            setInitialPasswordCustomer(null);
           }}
         />
       ) : null}
@@ -215,7 +225,7 @@ export function CustomerAdminPage() {
                       <td className="px-5 py-4 text-slate-700">
                         <p>{customer.phone}</p>
                         <p className="mt-1 text-xs text-slate-500">
-                          {customer.email ?? 'Chưa có email'}
+                          {customer.email ?? "Chưa có email"}
                         </p>
                       </td>
                       <td className="px-5 py-4">
@@ -233,9 +243,12 @@ export function CustomerAdminPage() {
                             statusMutation.variables?.id === customer.id
                           }
                           onChangeStatus={changeStatus}
+                          initialPasswordConfigured={
+                            credentialSuccess?.customerId === customer.id
+                          }
                           onSetInitialPassword={(customer) => {
-                            setCredentialSuccess('')
-                            setInitialPasswordCustomer(customer)
+                            setCredentialSuccess(null);
+                            setInitialPasswordCustomer(customer);
                           }}
                         />
                       </td>
@@ -268,7 +281,7 @@ export function CustomerAdminPage() {
                   <div>
                     <dt className="text-xs text-slate-500">Email</dt>
                     <dd className="mt-1 font-semibold">
-                      {customer.email ?? 'Chưa có'}
+                      {customer.email ?? "Chưa có"}
                     </dd>
                   </div>
                 </dl>
@@ -281,9 +294,12 @@ export function CustomerAdminPage() {
                       statusMutation.variables?.id === customer.id
                     }
                     onChangeStatus={changeStatus}
+                    initialPasswordConfigured={
+                      credentialSuccess?.customerId === customer.id
+                    }
                     onSetInitialPassword={(customer) => {
-                      setCredentialSuccess('')
-                      setInitialPasswordCustomer(customer)
+                      setCredentialSuccess(null);
+                      setInitialPasswordCustomer(customer);
                     }}
                   />
                 </div>
@@ -298,5 +314,5 @@ export function CustomerAdminPage() {
         </>
       )}
     </section>
-  )
+  );
 }
