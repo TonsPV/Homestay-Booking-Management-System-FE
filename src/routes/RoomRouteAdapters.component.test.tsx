@@ -2,15 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import type { Room, SearchRoomsQuery } from "@/features/rooms/types";
+import type { PublicRoom, SearchRoomsQuery } from "@/features/rooms/types";
 
-const room: Room = {
-  createdAt: "2026-07-26T00:00:00.000Z",
+const room: PublicRoom = {
   description: "Phòng smoke",
   id: "42",
   images: [],
   name: "Phòng Biển",
-  roomNumber: "B42",
   roomType: {
     amenities: [],
     basePrice: "1200000.00",
@@ -21,8 +19,6 @@ const room: Room = {
     name: "Deluxe",
   },
   roomTypeId: "7",
-  status: "READY",
-  updatedAt: "2026-07-26T00:00:00.000Z",
 };
 
 const search: SearchRoomsQuery = {
@@ -59,7 +55,7 @@ vi.mock("@/features/rooms/pages/PublicRoomDetailPage", () => ({
   PublicRoomDetailPage: ({
     onBook,
   }: {
-    onBook?: (selectedRoom: Room) => void;
+    onBook?: (selectedRoom: PublicRoom) => void;
   }) => (
     <button onClick={() => onBook?.(room)} type="button">
       Chọn phòng này

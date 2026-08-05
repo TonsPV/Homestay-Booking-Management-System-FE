@@ -36,9 +36,6 @@ export function RoomCard({ onView, room }: RoomCardProps) {
             Chưa có ảnh
           </div>
         )}
-        <span className="absolute left-3 top-3 rounded-control border border-white/45 bg-surface/92 px-3 py-1 text-xs font-bold text-ink shadow-elevation-1 backdrop-blur">
-          Phòng {room.roomNumber}
-        </span>
       </div>
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">

@@ -28,6 +28,21 @@ test-results
 *.sln
 *.sw?
 
+# Local AI coding agents
+.agents/
+.agent/
+.codex/
+.claude/
+.cursor/
+.continue/
+
+# Local agent instruction overrides
+AGENTS.local.md
+CLAUDE.local.md
+
+# Aider local files
+.aider*
+
 # Impeccable project integration
 .claude/settings.local.json
 

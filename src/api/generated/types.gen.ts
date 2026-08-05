@@ -524,7 +524,6 @@ export type RoomImageDto = {
 export type PublicRoomDto = {
     id: string;
     roomTypeId: string;
-    roomNumber: string;
     name: string;
     description: string | null;
     roomType: RoomResponseRoomTypeDto;

@@ -24,7 +24,6 @@ function makeRoom(overrides: Partial<PublicRoom> = {}): PublicRoom {
     id: "1",
     images: [],
     name: "Phòng vườn",
-    roomNumber: "101",
     roomType: {
       amenities: [],
       basePrice: "500000",

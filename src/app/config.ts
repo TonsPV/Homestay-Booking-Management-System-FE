@@ -1,4 +1,10 @@
 const DEFAULT_API_ORIGIN = 'http://localhost:3000'
+const LOOPBACK_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+interface ApiOriginOptions {
+  configuredOrigin?: string
+  production?: boolean
+}
 
 function resolveHttpUrl(value: string, variableName: string) {
   try {
@@ -20,34 +26,49 @@ export function isRuntimeUrlSecure(
   url: URL,
   production: boolean,
 ) {
-  if (!production || url.protocol === 'https:') {
+  if (!production) {
     return true
   }
 
-  return (
-    url.protocol === 'http:' &&
-    (url.hostname === 'localhost' ||
-      url.hostname === '127.0.0.1' ||
-      url.hostname === '[::1]')
-  )
+  return url.protocol === 'https:' && !LOOPBACK_HOSTNAMES.has(url.hostname)
 }
 
-function assertSecureRuntimeUrl(url: URL, variableName: string) {
-  if (!isRuntimeUrlSecure(url, import.meta.env.PROD)) {
+function assertSecureRuntimeUrl(
+  url: URL,
+  variableName: string,
+  production = import.meta.env.PROD,
+) {
+  if (!isRuntimeUrlSecure(url, production)) {
     throw new Error(
       `${variableName} must use HTTPS in production.`,
     )
   }
 }
 
-function resolveApiOrigin() {
-  const configuredOrigin = import.meta.env.VITE_API_ORIGIN?.trim()
+export function resolveApiOrigin(options: ApiOriginOptions = {}) {
+  const configuredOrigin = (
+    options.configuredOrigin ?? import.meta.env.VITE_API_ORIGIN
+  )?.trim()
+  const production = options.production ?? import.meta.env.PROD
+
+  if (production && !configuredOrigin) {
+    throw new Error('VITE_API_ORIGIN is required in production.')
+  }
+
   const origin = (configuredOrigin || DEFAULT_API_ORIGIN).replace(/\/+$/, '')
   const url = resolveHttpUrl(origin, 'VITE_API_ORIGIN')
 
-  assertSecureRuntimeUrl(url, 'VITE_API_ORIGIN')
+  if (url.pathname !== '/' || url.search || url.hash) {
+    throw new Error(
+      'VITE_API_ORIGIN must be an origin without a path, query, or fragment.',
+    )
+  }
 
-  return origin
+  if (!isRuntimeUrlSecure(url, production)) {
+    assertSecureRuntimeUrl(url, 'VITE_API_ORIGIN', production)
+  }
+
+  return url.origin
 }
 
 function resolveErrorReportingEndpoint() {

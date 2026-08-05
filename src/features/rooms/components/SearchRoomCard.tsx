@@ -48,7 +48,6 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-sm font-bold text-brand-strong">
-              {room.roomNumber ? `Phòng ${room.roomNumber} · ` : ""}
               {room.roomType.name}
             </p>
             <h2 className="mt-1 text-2xl font-black leading-tight tracking-tight text-ink">

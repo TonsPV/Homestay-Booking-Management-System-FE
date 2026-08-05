@@ -38,6 +38,21 @@ afterEach(() => {
 })
 
 describe('auth session storage', () => {
+  it('uses sessionStorage by default and localStorage only for explicit remember', () => {
+    const session = createSession()
+
+    saveAuthSession(session)
+
+    expect(window.sessionStorage.getItem('hbms.auth.session.v1')).not.toBeNull()
+    expect(window.localStorage.getItem('hbms.auth.session.v1')).toBeNull()
+
+    const remembered = createSession('local')
+    saveAuthSession(remembered)
+
+    expect(window.localStorage.getItem('hbms.auth.session.v1')).not.toBeNull()
+    expect(window.sessionStorage.getItem('hbms.auth.session.v1')).toBeNull()
+  })
+
   it('round-trips a session with its selected persistence', () => {
     const session = createSession('local')
 
@@ -56,6 +71,13 @@ describe('auth session storage', () => {
     saveAuthSession(session)
 
     expect(readAuthSession()).toBeNull()
+  })
+
+  it('removes malformed persisted JSON instead of keeping it in storage', () => {
+    window.sessionStorage.setItem('hbms.auth.session.v1', '{malformed')
+
+    expect(readAuthSession()).toBeNull()
+    expect(window.sessionStorage.getItem('hbms.auth.session.v1')).toBeNull()
   })
 
   it('falls back to memory when browser storage rejects writes', () => {

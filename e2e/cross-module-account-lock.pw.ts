@@ -144,7 +144,7 @@ test("locking a staff account revokes its session on the next request", async ({
 
   await targetPage.goto("/staff/counter");
   await expect(
-    targetPage.getByRole("heading", { name: "Tạo booking tại quầy" }),
+    targetPage.getByRole("heading", { name: "Tạo booking" }),
   ).toBeVisible();
 
   await page.goto("/management/users");

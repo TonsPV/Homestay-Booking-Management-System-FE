@@ -18,7 +18,7 @@ test("public and auth shells remain usable on desktop and mobile", async ({
 
   await expect(
     page.getByRole("heading", {
-      name: "Tìm một nơi để thật sự nghỉ ngơi.",
+      name: "Một nơi để thật sự nghỉ ngơi.",
     }),
   ).toBeVisible();
   await expect(page).toHaveTitle("Trang chủ | Homestay Green");

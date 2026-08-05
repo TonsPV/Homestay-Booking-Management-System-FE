@@ -27,6 +27,16 @@ describe('buildApiUrl', () => {
       `${window.location.origin}/api/v1/rooms/search?checkIn=2026-08-01&checkOut=2026-08-03&guests=2`,
     )
   })
+
+  it.each([
+    'https://evil.example/rooms',
+    '//evil.example/rooms',
+    'javascript:alert(1)',
+  ])('rejects absolute and protocol-relative API paths: %s', (path) => {
+    expect(() => buildApiUrl(path)).toThrow(
+      'API path must be relative to the configured API origin.',
+    )
+  })
 })
 
 describe('apiRequest', () => {
@@ -68,6 +78,26 @@ describe('apiRequest', () => {
     expect(new Headers(request.headers).get('Authorization')).toBe(
       'Bearer access-token',
     )
+  })
+
+  it('does not attach a bearer token to an explicitly public request', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [],
+          requestId: 'req-public',
+          success: true,
+        }),
+        { status: 200 },
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'should-not-be-sent')
+
+    await apiRequest('/rooms', { auth: false })
+
+    const request = fetchMock.mock.calls[0]?.[1] as RequestInit
+    expect(new Headers(request.headers).get('Authorization')).toBeNull()
   })
 
   it('normalizes an HTTP error and exposes Retry-After', async () => {

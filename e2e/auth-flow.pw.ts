@@ -111,7 +111,7 @@ for (const role of ["STAFF", "ADMIN"] as const) {
     const expectedPath =
       role === "STAFF" ? "/staff/counter" : "/management/dashboard";
     const expectedHeading =
-      role === "STAFF" ? "Tạo booking tại quầy" : "Tổng quan vận hành";
+      role === "STAFF" ? "Tạo booking" : "Tổng quan vận hành";
 
     await expect(page).toHaveURL(new RegExp(`${expectedPath}$`));
     await expect(

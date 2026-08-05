@@ -162,10 +162,6 @@ export function PublicRoomDetailPage({
             <h1 className="mt-3 text-3xl font-black tracking-tight text-ink">
               {room.name}
             </h1>
-            <p className="mt-1 text-sm font-medium text-muted">
-              Phòng {room.roomNumber}
-            </p>
-
             <div className="mt-6 rounded-card bg-brand-soft px-4 py-5">
               <p className="text-xs font-bold text-brand">Giá từ</p>
               <p className="mt-2 text-3xl font-black leading-none text-brand">
