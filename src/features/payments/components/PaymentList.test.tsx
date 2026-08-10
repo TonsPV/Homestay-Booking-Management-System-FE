@@ -13,6 +13,8 @@ const payment: Payment = {
   currency: 'VND',
   method: 'BANK_TRANSFER',
   status: 'SUCCESS',
+  reviewReason: null,
+  reviewCanonicalPaymentId: null,
   gatewayName: 'Internal transfer',
   gatewayReference: 'GW-REF-2026',
   gatewayTransactionId: 'BANK-TXN-91',

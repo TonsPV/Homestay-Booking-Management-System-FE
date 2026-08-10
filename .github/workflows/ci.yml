@@ -25,7 +25,7 @@ jobs:
           ref: main
           path: backend-contract
           sparse-checkout: |
-            docs/openapi.json
+            openapi/openapi.json
           sparse-checkout-cone-mode: false
 
       - name: Use Node.js 22.13.0
@@ -48,12 +48,12 @@ jobs:
 
       - name: Contract check
         env:
-          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/docs/openapi.json
+          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/openapi/openapi.json
         run: npm run contract:check
 
       - name: Contract negative test
         env:
-          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/docs/openapi.json
+          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/openapi/openapi.json
         run: npm run contract:test
 
       - name: Unit and component tests

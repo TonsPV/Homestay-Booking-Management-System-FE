@@ -73,6 +73,8 @@ const refundablePayment: Payment = {
   currency: 'VND',
   method: 'CASH',
   status: 'SUCCESS',
+  reviewReason: null,
+  reviewCanonicalPaymentId: null,
   gatewayName: null,
   gatewayReference: null,
   gatewayTransactionId: null,

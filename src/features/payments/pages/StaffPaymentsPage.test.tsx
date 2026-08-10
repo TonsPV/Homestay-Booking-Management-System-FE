@@ -42,6 +42,8 @@ function payment(method: Payment['method'], id: string): Payment {
     refundedByUser: null,
     refundedByUserId: null,
     refundTransactionStatus: null,
+    reviewCanonicalPaymentId: null,
+    reviewReason: null,
     status: 'SUCCESS',
     updatedAt: '2026-08-01T08:00:00.000Z',
   }

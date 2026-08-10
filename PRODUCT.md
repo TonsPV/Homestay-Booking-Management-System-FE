@@ -65,7 +65,7 @@ homestay dành cho STAFF/ADMIN trên cùng nguồn dữ liệu và quy trình ng
 
 - Source code và test hiện có trong repository.
 - Backend OpenAPI tại
-  `../homestay-booking-management-system-api/docs/openapi.json`.
+  `../homestay-booking-management-system-api/openapi/openapi.json`.
 - Execution plan tại `docs/FRONTEND_MODULE_BY_MODULE_EXECUTION_PLAN.md`.
 - Chưa có testimonial, giải thưởng, đối tác, số liệu kinh doanh hoặc nội dung
   marketing được xác nhận; các bằng chứng này không được tự tạo.

@@ -24,9 +24,9 @@ function resolveSpecificationPath() {
     process.env.HBMS_OPENAPI_SPEC_PATH,
     resolve(
       projectDirectory,
-      '../homestay-booking-management-system-api/docs/openapi.json',
+      '../homestay-booking-management-system-api/openapi/openapi.json',
     ),
-    resolve(projectDirectory, 'docs/openapi.json'),
+    resolve(projectDirectory, 'openapi/openapi.json'),
   ].filter(Boolean)
 
   const specificationPath = candidates.find((candidate) =>
