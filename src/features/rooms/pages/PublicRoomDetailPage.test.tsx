@@ -15,6 +15,7 @@ const room = vi.hoisted(
         amenities: [],
         basePrice: "900000.00",
         bedType: null,
+        beds: [],
         description: null,
         id: "2",
         maxGuests: 2,

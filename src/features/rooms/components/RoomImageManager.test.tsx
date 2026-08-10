@@ -22,6 +22,7 @@ const room = {
     maxGuests: 2,
     basePrice: "900000.00",
     bedType: null,
+    beds: [],
   },
   images: [],
   createdAt: "2026-07-20T01:00:00.000Z",

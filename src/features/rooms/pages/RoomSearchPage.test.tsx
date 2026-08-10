@@ -38,6 +38,7 @@ function roomFixture(): PublicRoom {
       amenities: [{ description: null, id: "7", name: "Wi-Fi" }],
       basePrice: "500000.00",
       bedType: "1 giường đôi",
+      beds: [],
       description: null,
       id: "10",
       maxGuests: 2,

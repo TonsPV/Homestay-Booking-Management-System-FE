@@ -53,6 +53,7 @@ function makeRoom(overrides: Partial<Room> = {}): Room {
       amenities: [],
       basePrice: "500000",
       bedType: null,
+      beds: [],
       description: null,
       id: "10",
       maxGuests: 2,
