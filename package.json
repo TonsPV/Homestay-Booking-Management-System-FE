@@ -45,10 +45,12 @@
     "jsdom": "^29.1.1",
     "oxlint": "^1.71.0",
     "typescript": "~6.0.2",
-    "vite": "^8.1.1",
+    "vite": "^8.2.1",
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "js-yaml": "4.3.0"
+    "@hey-api/json-schema-ref-parser": {
+      "js-yaml": "4.3.1"
+    }
   }
 }
