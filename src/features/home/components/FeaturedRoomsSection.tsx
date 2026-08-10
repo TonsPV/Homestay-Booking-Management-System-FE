@@ -74,7 +74,7 @@ function HospitalityRoomCard({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-bold text-brand-strong">
-              Phòng {room.roomNumber} · {room.roomType.name}
+              {room.roomType.name}
             </p>
             <h3
               className={`mt-1 font-black leading-tight text-ink ${featured ? "text-2xl" : "text-xl"}`}

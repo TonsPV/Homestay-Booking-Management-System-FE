@@ -20,7 +20,7 @@ Ngày kiểm chứng: 2026-07-29
 | Source files | 186 |
 | Unit/component test files | 41 |
 | API origin mặc định | `http://localhost:3000` |
-| Backend OpenAPI | `../homestay-booking-management-system-api/docs/openapi.json` |
+| Backend OpenAPI | `../homestay-booking-management-system-api/openapi/openapi.json` |
 
 Git state tại thời điểm baseline:
 

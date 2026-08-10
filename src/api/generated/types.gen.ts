@@ -19,7 +19,7 @@ export type SuccessEnvelopeDto = {
     requestId: string;
 };
 
-export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
 
 export type ErrorEnvelopeDto = {
     success: boolean;
@@ -31,7 +31,7 @@ export type ErrorEnvelopeDto = {
      */
     fieldErrors?: {
         [key: string]: Array<{
-            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
             message?: string;
         }>;
     };
@@ -430,6 +430,8 @@ export type CreateVnpayPaymentDto = {
     locale?: 'vn' | 'en';
 };
 
+export type PaymentReviewReason = 'BOOKING_CANCELLED' | 'ANOTHER_SUCCESSFUL_PAYMENT';
+
 export type PaymentUserDto = {
     id: string;
     fullName: string;
@@ -442,6 +444,8 @@ export type PaymentDto = {
     currency: 'VND';
     method: PaymentMethod;
     status: PaymentStatus;
+    reviewReason: PaymentReviewReason | null;
+    reviewCanonicalPaymentId: string | null;
     gatewayName: string | null;
     gatewayReference: string | null;
     gatewayTransactionId: string | null;
@@ -498,6 +502,13 @@ export type VnPayReturnDto = {
     transactionStatus: string | null;
 };
 
+export type BedType = 'SINGLE' | 'DOUBLE' | 'QUEEN' | 'KING' | 'BUNK' | 'SOFA_BED';
+
+export type RoomTypeBedResponseDto = {
+    type: BedType;
+    quantity: number;
+};
+
 export type RoomTypeAmenityDto = {
     id: string;
     name: string;
@@ -508,7 +519,13 @@ export type RoomResponseRoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    /**
+     * Legacy free-text bed configuration. Use beds instead.
+     *
+     * @deprecated
+     */
     bedType: string | null;
+    beds: Array<RoomTypeBedResponseDto>;
     maxGuests: number;
     basePrice: string;
     amenities: Array<RoomTypeAmenityDto>;
@@ -524,7 +541,6 @@ export type RoomImageDto = {
 export type PublicRoomDto = {
     id: string;
     roomTypeId: string;
-    roomNumber: string;
     name: string;
     description: string | null;
     roomType: RoomResponseRoomTypeDto;
@@ -630,7 +646,13 @@ export type RoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    /**
+     * Legacy free-text bed configuration. Use beds instead.
+     *
+     * @deprecated
+     */
     bedType: string | null;
+    beds: Array<RoomTypeBedResponseDto>;
     maxGuests: number;
     /**
      * Base price represented as a decimal string.
@@ -645,7 +667,13 @@ export type AdminRoomTypeDto = {
     id: string;
     name: string;
     description: string | null;
+    /**
+     * Legacy free-text bed configuration. Use beds instead.
+     *
+     * @deprecated
+     */
     bedType: string | null;
+    beds: Array<RoomTypeBedResponseDto>;
     maxGuests: number;
     /**
      * Base price represented as a decimal string.
@@ -657,10 +685,24 @@ export type AdminRoomTypeDto = {
     deletedAt: string | null;
 };
 
+export type RoomTypeBedInputDto = {
+    type: 'SINGLE' | 'DOUBLE' | 'QUEEN' | 'KING' | 'BUNK' | 'SOFA_BED';
+    quantity: number;
+};
+
 export type CreateRoomTypeDto = {
     name: string;
     description?: string | null;
+    /**
+     * Legacy free-text bed configuration. Use beds instead.
+     *
+     * @deprecated
+     */
     bedType?: string | null;
+    /**
+     * Normalized bed configuration. Do not send together with bedType.
+     */
+    beds?: Array<RoomTypeBedInputDto>;
     maxGuests: number;
     basePrice: string;
 };
@@ -668,7 +710,16 @@ export type CreateRoomTypeDto = {
 export type UpdateRoomTypeDto = {
     name?: string;
     description?: string | null;
+    /**
+     * Legacy free-text bed configuration. Use beds instead.
+     *
+     * @deprecated
+     */
     bedType?: string | null;
+    /**
+     * Normalized bed configuration. Do not send together with bedType.
+     */
+    beds?: Array<RoomTypeBedInputDto>;
     maxGuests?: number;
     basePrice?: string;
 };
@@ -1783,6 +1834,12 @@ export type PaymentListResponse = PaymentListResponses[keyof PaymentListResponse
 
 export type PaymentCreateVnPayPaymentData = {
     body: CreateVnpayPaymentDto;
+    headers: {
+        /**
+         * Unique key for this payment creation request.
+         */
+        'Idempotency-Key': string;
+    };
     path: {
         bookingId: string;
     };
@@ -1811,6 +1868,10 @@ export type PaymentCreateVnPayPaymentErrors = {
      * The request conflicts with the current resource state.
      */
     409: ErrorEnvelopeDto;
+    /**
+     * The external payment operation outcome is unavailable and requires retry or reconciliation.
+     */
+    503: ErrorEnvelopeDto;
 };
 
 export type PaymentCreateVnPayPaymentError = PaymentCreateVnPayPaymentErrors[keyof PaymentCreateVnPayPaymentErrors];
@@ -1898,6 +1959,12 @@ export type PaymentManagementListResponse = PaymentManagementListResponses[keyof
 
 export type PaymentManagementCreateData = {
     body: CreateManualPaymentDto;
+    headers: {
+        /**
+         * Unique key for this manual payment request.
+         */
+        'Idempotency-Key': string;
+    };
     path: {
         bookingId: string;
     };
@@ -1941,6 +2008,12 @@ export type PaymentManagementCreateResponse = PaymentManagementCreateResponses[k
 
 export type PaymentManagementRefundData = {
     body: RefundPaymentDto;
+    headers?: {
+        /**
+         * Required for VNPay refunds; manual refunds are lock-idempotent.
+         */
+        'Idempotency-Key'?: string;
+    };
     path: {
         id: string;
     };
@@ -1969,6 +2042,10 @@ export type PaymentManagementRefundErrors = {
      * The request conflicts with the current resource state.
      */
     409: ErrorEnvelopeDto;
+    /**
+     * The external payment operation outcome is unavailable and requires retry or reconciliation.
+     */
+    503: ErrorEnvelopeDto;
 };
 
 export type PaymentManagementRefundError = PaymentManagementRefundErrors[keyof PaymentManagementRefundErrors];
@@ -1981,6 +2058,59 @@ export type PaymentManagementRefundResponses = {
 };
 
 export type PaymentManagementRefundResponse = PaymentManagementRefundResponses[keyof PaymentManagementRefundResponses];
+
+export type PaymentManagementResolveDuplicateChargeData = {
+    body?: never;
+    headers: {
+        /**
+         * Unique key for this duplicate VNPay charge resolution.
+         */
+        'Idempotency-Key': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/management/payments/{id}/resolve-duplicate-charge';
+};
+
+export type PaymentManagementResolveDuplicateChargeErrors = {
+    /**
+     * The request data is invalid.
+     */
+    400: ErrorEnvelopeDto;
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The requested resource does not exist.
+     */
+    404: ErrorEnvelopeDto;
+    /**
+     * The request conflicts with the current resource state.
+     */
+    409: ErrorEnvelopeDto;
+    /**
+     * The external payment operation outcome is unavailable and requires retry or reconciliation.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type PaymentManagementResolveDuplicateChargeError = PaymentManagementResolveDuplicateChargeErrors[keyof PaymentManagementResolveDuplicateChargeErrors];
+
+export type PaymentManagementResolveDuplicateChargeResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: PaymentDto;
+    };
+};
+
+export type PaymentManagementResolveDuplicateChargeResponse = PaymentManagementResolveDuplicateChargeResponses[keyof PaymentManagementResolveDuplicateChargeResponses];
 
 export type PaymentManagementReconcileRefundData = {
     body?: never;
@@ -2012,6 +2142,10 @@ export type PaymentManagementReconcileRefundErrors = {
      * The request conflicts with the current resource state.
      */
     409: ErrorEnvelopeDto;
+    /**
+     * The external payment operation outcome is unavailable and requires retry or reconciliation.
+     */
+    503: ErrorEnvelopeDto;
 };
 
 export type PaymentManagementReconcileRefundError = PaymentManagementReconcileRefundErrors[keyof PaymentManagementReconcileRefundErrors];
@@ -2028,7 +2162,19 @@ export type PaymentManagementReconcileRefundResponse = PaymentManagementReconcil
 export type VnPayIpnData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        vnp_SecureHash: string;
+        /**
+         * Required for a successful transaction (yyyyMMddHHmmss).
+         */
+        vnp_PayDate?: string;
+        vnp_TransactionNo: string;
+        vnp_TransactionStatus: string;
+        vnp_ResponseCode: string;
+        vnp_Amount: string;
+        vnp_TxnRef: string;
+        vnp_TmnCode: string;
+    };
     url: '/api/v1/payments/vnpay/ipn';
 };
 
@@ -2044,7 +2190,19 @@ export type VnPayIpnResponse = VnPayIpnResponses[keyof VnPayIpnResponses];
 export type VnPayGetReturnData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        vnp_SecureHash: string;
+        /**
+         * Required for a successful transaction (yyyyMMddHHmmss).
+         */
+        vnp_PayDate?: string;
+        vnp_TransactionNo: string;
+        vnp_TransactionStatus: string;
+        vnp_ResponseCode: string;
+        vnp_Amount: string;
+        vnp_TxnRef: string;
+        vnp_TmnCode: string;
+    };
     url: '/api/v1/payments/vnpay/return';
 };
 
@@ -2736,6 +2894,10 @@ export type RoomTypeAdminSoftDeleteData = {
 
 export type RoomTypeAdminSoftDeleteErrors = {
     /**
+     * The request data is invalid.
+     */
+    400: ErrorEnvelopeDto;
+    /**
      * Authentication is required.
      */
     401: ErrorEnvelopeDto;
@@ -2743,6 +2905,14 @@ export type RoomTypeAdminSoftDeleteErrors = {
      * The authenticated actor does not have access.
      */
     403: ErrorEnvelopeDto;
+    /**
+     * The requested resource does not exist.
+     */
+    404: ErrorEnvelopeDto;
+    /**
+     * The request conflicts with the current resource state.
+     */
+    409: ErrorEnvelopeDto;
 };
 
 export type RoomTypeAdminSoftDeleteError = RoomTypeAdminSoftDeleteErrors[keyof RoomTypeAdminSoftDeleteErrors];

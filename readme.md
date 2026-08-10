@@ -3,7 +3,7 @@
 ## Backend Contract
 
 The Backend OpenAPI snapshot is stored at
-`../homestay-booking-management-system-api/docs/openapi.json`.
+`../homestay-booking-management-system-api/openapi/openapi.json`.
 
 After the Backend contract changes, regenerate its TypeScript types:
 

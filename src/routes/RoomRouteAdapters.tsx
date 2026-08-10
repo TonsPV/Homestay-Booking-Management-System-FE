@@ -48,7 +48,6 @@ export function RoomSearchRoute() {
             room: {
               id: room.id,
               name: room.name,
-              roomNumber: room.roomNumber,
               roomTypeName: room.roomType.name,
             },
             search,
@@ -95,7 +94,6 @@ export function PublicRoomDetailRoute() {
         room: {
           id: room.id,
           name: room.name,
-          roomNumber: room.roomNumber,
           roomTypeName: room.roomType.name,
         },
         search: state?.search,

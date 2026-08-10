@@ -1,4 +1,5 @@
 import { createClient } from '@hey-api/openapi-ts'
+import { existsSync } from 'node:fs'
 import {
   mkdtemp,
   readFile,
@@ -11,11 +12,32 @@ import { fileURLToPath } from 'node:url'
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const projectDirectory = resolve(scriptDirectory, '..')
-const specificationPath = resolve(
-  projectDirectory,
-  '../homestay-booking-management-system-api/docs/openapi.json',
-)
 const outputDirectory = resolve(projectDirectory, 'src/api/generated')
+
+function resolveSpecificationPath() {
+  const candidates = [
+    process.env.HBMS_OPENAPI_SPEC_PATH,
+    resolve(
+      projectDirectory,
+      '../homestay-booking-management-system-api/openapi/openapi.json',
+    ),
+    resolve(projectDirectory, 'openapi/openapi.json'),
+  ].filter(Boolean)
+
+  const specificationPath = candidates.find((candidate) =>
+    existsSync(candidate),
+  )
+
+  if (!specificationPath) {
+    throw new Error(
+      'OpenAPI specification not found. Set HBMS_OPENAPI_SPEC_PATH or provide the Backend repository next to the frontend.',
+    )
+  }
+
+  return specificationPath
+}
+
+const specificationPath = resolveSpecificationPath()
 
 async function generateContract(outputPath) {
   await createClient({

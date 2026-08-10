@@ -24,6 +24,16 @@ function resolveRequestOrigin() {
   return appConfig.apiOrigin;
 }
 
+function assertRelativeApiPath(path: string) {
+  if (
+    path.startsWith('//') ||
+    path.startsWith('\\\\') ||
+    /^[a-z][a-z\d+.-]*:/i.test(path)
+  ) {
+    throw new Error('API path must be relative to the configured API origin.');
+  }
+}
+
 interface ApiRequestOptions extends Omit<
   RequestInit,
   "body" | "headers" | "method"
@@ -61,6 +71,7 @@ function appendQueryValue(
 }
 
 export function buildApiUrl(path: string, query?: QueryParams) {
+  assertRelativeApiPath(path);
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const url = new URL(
     `${appConfig.apiPrefix}${normalizedPath}`,

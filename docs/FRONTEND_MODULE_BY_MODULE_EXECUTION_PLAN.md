@@ -5,7 +5,7 @@ Ngày lập: 2026-07-29
 Phạm vi: `D:\HBMS\homestay-booking-management-system-fe`
 
 Nguồn contract Backend:
-`D:\HBMS\homestay-booking-management-system-api\docs\openapi.json`
+`D:\HBMS\homestay-booking-management-system-api\openapi\openapi.json`
 
 ## 1. Mục tiêu
 
@@ -225,7 +225,7 @@ Mục tiêu: đóng DQ-001 trước khi sửa feature.
 Việc làm:
 
 1. Thay generator chỉ dành cho Room Calendar bằng generator toàn bộ
-   `paths/components/operations` từ `docs/openapi.json`.
+   `paths/components/operations` từ `openapi/openapi.json`.
 2. Generated output chỉ nằm trong `src/api/generated` và không sửa tay.
 3. Thêm contract drift command:
    - Generate vào output xác định.

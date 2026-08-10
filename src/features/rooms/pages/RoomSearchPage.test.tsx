@@ -34,11 +34,11 @@ function roomFixture(): PublicRoom {
     id: "1",
     images: [],
     name: "Phòng hướng vườn",
-    roomNumber: "101",
     roomType: {
       amenities: [{ description: null, id: "7", name: "Wi-Fi" }],
       basePrice: "500000.00",
       bedType: "1 giường đôi",
+      beds: [],
       description: null,
       id: "10",
       maxGuests: 2,

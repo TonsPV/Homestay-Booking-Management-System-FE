@@ -18,7 +18,7 @@ Ngày kiểm chứng: 2026-07-29
 
 Nguồn:
 
-`D:\HBMS\homestay-booking-management-system-api\docs\openapi.json`
+`D:\HBMS\homestay-booking-management-system-api\openapi\openapi.json`
 
 Generator:
 
