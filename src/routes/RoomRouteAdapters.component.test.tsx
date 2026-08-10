@@ -13,6 +13,7 @@ const room: PublicRoom = {
     amenities: [],
     basePrice: "1200000.00",
     bedType: null,
+    beds: [],
     description: "Loại phòng smoke",
     id: "7",
     maxGuests: 3,
