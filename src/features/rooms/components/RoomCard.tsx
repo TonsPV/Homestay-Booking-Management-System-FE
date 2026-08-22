@@ -1,6 +1,7 @@
 import { Badge } from "@/shared/components/Badge";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
+import { formatBedConfiguration } from "@/shared/formatting/bed-configuration";
 import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
 import { resolveRoomImageUrl } from "../image-url";
@@ -51,6 +52,13 @@ export function RoomCard({ onView, room }: RoomCardProps) {
             room.roomType.description ??
             "Không gian nghỉ dưỡng tiện nghi và thoải mái."}
         </p>
+
+        {formatBedConfiguration(room.roomType.beds, room.roomType.bedType) ? (
+          <p className="mt-3 text-sm font-semibold text-muted">
+            Giường:{" "}
+            {formatBedConfiguration(room.roomType.beds, room.roomType.bedType)}
+          </p>
+        ) : null}
 
         {room.roomType.amenities.length > 0 ? (
           <div className="mt-4 flex flex-wrap gap-2">

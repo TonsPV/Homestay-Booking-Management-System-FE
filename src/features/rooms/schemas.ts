@@ -3,6 +3,17 @@ import { z } from 'zod'
 import { compareDecimalStrings } from '@/shared/validation/decimal'
 
 import { ROOM_STATUSES } from './types'
+import {
+  ROOM_IMAGE_ACCEPTED_TYPES,
+  ROOM_IMAGE_MAX_FILE_SIZE,
+} from './room-image-files'
+
+export {
+  ROOM_IMAGE_ACCEPT,
+  ROOM_IMAGE_ACCEPTED_TYPES,
+  ROOM_IMAGE_MAX_COUNT,
+  ROOM_IMAGE_MAX_FILE_SIZE,
+} from './room-image-files'
 
 const requiredRoomTypeId = z
   .string()
@@ -165,14 +176,6 @@ export const roomSearchFormSchema = z
   })
 
 export type RoomSearchFormValues = z.infer<typeof roomSearchFormSchema>
-
-export const ROOM_IMAGE_MAX_FILE_SIZE = 8 * 1024 * 1024
-export const ROOM_IMAGE_ACCEPTED_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-] as const
-export const ROOM_IMAGE_ACCEPT = ROOM_IMAGE_ACCEPTED_TYPES.join(',')
 
 export const roomImageFormSchema = z.object({
   file: z

@@ -20,11 +20,11 @@ describe("RoomType form validation", () => {
     },
   );
 
-  it("validates name, guest count and description limits", () => {
+  it("validates name, guest count, description and bed rows", () => {
     expect(
       roomTypeFormSchema.safeParse({
         basePrice: "850000.00",
-        bedType: "1 giường đôi",
+        beds: [{ type: "DOUBLE", quantity: 1 }],
         description: "Phòng dành cho gia đình.",
         maxGuests: "4",
         name: "Phòng gia đình",
@@ -34,7 +34,10 @@ describe("RoomType form validation", () => {
     expect(
       roomTypeFormSchema.safeParse({
         basePrice: "850000.00",
-        bedType: "x".repeat(121),
+        beds: [
+          { type: "SINGLE", quantity: 1 },
+          { type: "SINGLE", quantity: 2 },
+        ],
         description: "x".repeat(10_001),
         maxGuests: "0",
         name: "",

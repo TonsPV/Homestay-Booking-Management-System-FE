@@ -5,6 +5,7 @@ import { Badge } from "@/shared/components/Badge";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
 import { ErrorState, LoadingState } from "@/shared/components/Feedback";
+import { formatBedConfiguration } from "@/shared/formatting/bed-configuration";
 import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
 import { useRoom } from "../hooks";
@@ -173,6 +174,20 @@ export function PublicRoomDetailPage({
             </div>
 
             <dl className="mt-5">
+              {formatBedConfiguration(
+                room.roomType.beds,
+                room.roomType.bedType,
+              ) ? (
+                <div className="rounded-card bg-surface-muted p-4">
+                  <dt className="text-xs font-bold text-muted">Giường</dt>
+                  <dd className="mt-1 font-black text-ink">
+                    {formatBedConfiguration(
+                      room.roomType.beds,
+                      room.roomType.bedType,
+                    )}
+                  </dd>
+                </div>
+              ) : null}
               <div className="rounded-card bg-surface-muted p-4">
                 <dt className="text-xs font-bold text-muted">Sức chứa</dt>
                 <dd className="mt-1 font-black text-ink">

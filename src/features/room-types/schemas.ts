@@ -11,10 +11,23 @@ const optionalDescription = z
   .trim()
   .max(10_000, "Mô tả không được vượt quá 10.000 ký tự.");
 
-const optionalBedType = z
-  .string()
-  .trim()
-  .max(120, "Loại giường không được vượt quá 120 ký tự.");
+export const BED_TYPES = [
+  "SINGLE",
+  "DOUBLE",
+  "QUEEN",
+  "KING",
+  "BUNK",
+  "SOFA_BED",
+] as const;
+
+const bedConfigurationSchema = z.object({
+  type: z.enum(BED_TYPES),
+  quantity: z
+    .number()
+    .int("Số lượng giường phải là số nguyên.")
+    .min(1, "Số lượng giường tối thiểu là 1.")
+    .max(20, "Số lượng giường tối đa là 20."),
+});
 
 const positiveGuestCount = z
   .string()
@@ -35,7 +48,23 @@ export const roomTypeMoneySchema = z
 
 export const roomTypeFormSchema = z.object({
   basePrice: roomTypeMoneySchema,
-  bedType: optionalBedType,
+  beds: z
+    .array(bedConfigurationSchema)
+    .max(6, "Chỉ được thêm tối đa 6 loại giường.")
+    .superRefine((beds, context) => {
+      const seen = new Set<string>();
+
+      beds.forEach((bed, index) => {
+        if (seen.has(bed.type)) {
+          context.addIssue({
+            code: "custom",
+            message: "Loại giường không được trùng.",
+            path: [index, "type"],
+          });
+        }
+        seen.add(bed.type);
+      });
+    }),
   description: optionalDescription,
   maxGuests: positiveGuestCount,
   name: requiredName,

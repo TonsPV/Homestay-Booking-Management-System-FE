@@ -13,6 +13,7 @@ import {
   formatMoney,
   formatNumber,
 } from '@/shared/formatting/formatters'
+import { formatBedConfiguration } from '@/shared/formatting/bed-configuration'
 
 import { RoomTypeForm } from '../components/RoomTypeForm'
 import { RoomTypeAmenityEditor } from '../components/RoomTypeAmenityEditor'
@@ -255,6 +256,12 @@ export function ManagementRoomTypesPage() {
 
                 <p className="mt-4 min-h-12 text-sm leading-6 text-slate-600">
                   {roomType.description || 'Chưa có mô tả.'}
+                </p>
+
+                <p className="mt-3 text-sm font-semibold text-slate-700">
+                  Giường:{' '}
+                  {formatBedConfiguration(roomType.beds, roomType.bedType) ??
+                    'Chưa cấu hình'}
                 </p>
 
                 <div className="mt-4 flex min-h-7 flex-wrap gap-2">

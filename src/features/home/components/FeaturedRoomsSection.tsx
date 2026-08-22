@@ -5,6 +5,7 @@ import { resolveRoomImageUrl } from "@/features/rooms/image-url";
 import type { PublicRoom } from "@/features/rooms/types";
 import { EmptyState, ErrorState } from "@/shared/components/Feedback";
 import { LinkButton } from "@/shared/components/LinkButton";
+import { formatBedConfiguration } from "@/shared/formatting/bed-configuration";
 import { formatMoney } from "@/shared/formatting/formatters";
 
 import { FadeIn } from "./FadeIn";
@@ -95,10 +96,10 @@ function HospitalityRoomCard({
             <Users aria-hidden="true" className="size-4" />
             Tối đa {room.roomType.maxGuests} khách
           </span>
-          {room.roomType.bedType ? (
+          {formatBedConfiguration(room.roomType.beds, room.roomType.bedType) ? (
             <span className="inline-flex items-center gap-2">
               <BedDouble aria-hidden="true" className="size-4" />
-              {room.roomType.bedType}
+              {formatBedConfiguration(room.roomType.beds, room.roomType.bedType)}
             </span>
           ) : null}
         </div>

@@ -26,10 +26,17 @@ import {
   updateRoomStatus,
   unblockRoomDates,
 } from './api'
+import {
+  createRoomWithImages,
+  uploadRoomImages,
+  type RoomImageStatusHandler,
+} from './create-room-with-images'
 import { roomKeys } from './query-keys'
+import type { PendingRoomImage } from './pending-room-images'
 import type {
   BlockRoomDatesInput,
   CreateRoomImageInput,
+  CreateRoomInput,
   ListAvailableRoomsQuery,
   ListManagementRoomsQuery,
 
@@ -124,6 +131,40 @@ export function useCreateRoom() {
 
   return useMutation({
     mutationFn: createRoom,
+    onSuccess: invalidate,
+  })
+}
+
+export function useCreateRoomWithImages() {
+  const invalidate = useInvalidateRoomOperations()
+
+  return useMutation({
+    mutationFn: ({
+      images,
+      input,
+      onImageStatus,
+    }: {
+      images: PendingRoomImage[]
+      input: CreateRoomInput
+      onImageStatus?: RoomImageStatusHandler
+    }) => createRoomWithImages(input, images, undefined, onImageStatus),
+    onSuccess: invalidate,
+  })
+}
+
+export function useUploadRoomImages() {
+  const invalidate = useInvalidateRoomOperations()
+
+  return useMutation({
+    mutationFn: ({
+      images,
+      onImageStatus,
+      roomId,
+    }: {
+      images: PendingRoomImage[]
+      onImageStatus?: RoomImageStatusHandler
+      roomId: string
+    }) => uploadRoomImages(roomId, images, undefined, onImageStatus),
     onSuccess: invalidate,
   })
 }

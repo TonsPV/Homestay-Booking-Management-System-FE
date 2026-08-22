@@ -2,6 +2,7 @@ import { ArrowRight, BedDouble, Check, Users } from "lucide-react";
 
 import { Badge } from "@/shared/components/Badge";
 import { Button } from "@/shared/components/Button";
+import { formatBedConfiguration } from "@/shared/formatting/bed-configuration";
 import { formatMoney } from "@/shared/formatting/formatters";
 
 import { resolveRoomImageUrl } from "../image-url";
@@ -67,10 +68,10 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
           Tối đa {room.roomType.maxGuests} khách
         </div>
 
-        {room.roomType.bedType ? (
+        {formatBedConfiguration(room.roomType.beds, room.roomType.bedType) ? (
           <div className="mt-2 flex items-center gap-2 text-sm font-semibold text-muted">
             <BedDouble aria-hidden="true" className="size-4" />
-            {room.roomType.bedType}
+            {formatBedConfiguration(room.roomType.beds, room.roomType.bedType)}
           </div>
         ) : null}
 

@@ -19,6 +19,7 @@ import {
   roomImageFormSchema,
   type RoomImageFormValues,
 } from "../schemas";
+import { formatFileSize } from "../room-image-files";
 import { RoomImage } from "./RoomImage";
 
 interface RoomImageManagerProps {
@@ -26,12 +27,6 @@ interface RoomImageManagerProps {
 }
 
 type FormErrors = Partial<Record<keyof RoomImageFormValues, string>>;
-
-function formatFileSize(size: number) {
-  return new Intl.NumberFormat("vi-VN", {
-    maximumFractionDigits: 1,
-  }).format(size / (1024 * 1024));
-}
 
 export function RoomImageManager({ roomId }: RoomImageManagerProps) {
   const roomQuery = useManagementRoom(roomId);
@@ -226,7 +221,7 @@ export function RoomImageManager({ roomId }: RoomImageManagerProps) {
                 {file.name}
               </p>
               <p className="mt-1 text-xs text-slate-500">
-                {formatFileSize(file.size)} MiB · {file.type}
+                {formatFileSize(file.size)} · {file.type}
               </p>
             </div>
             <Button
