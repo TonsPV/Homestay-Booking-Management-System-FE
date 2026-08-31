@@ -17,6 +17,7 @@ import { formatBedConfiguration } from '@/shared/formatting/bed-configuration'
 
 import { RoomTypeForm } from '../components/RoomTypeForm'
 import { RoomTypeAmenityEditor } from '../components/RoomTypeAmenityEditor'
+import { getRoomTypeActionError } from '../errors'
 import {
   useAdminRoomTypes,
   useCreateRoomType,
@@ -169,7 +170,7 @@ export function ManagementRoomTypesPage() {
       ) : null}
 
       {!editor && actionError ? (
-        <Alert tone="error">{getErrorMessage(actionError)}</Alert>
+        <Alert tone="error">{getRoomTypeActionError(actionError)}</Alert>
       ) : null}
 
       <Card>

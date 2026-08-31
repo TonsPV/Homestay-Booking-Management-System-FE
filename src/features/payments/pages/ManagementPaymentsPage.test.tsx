@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
   useManagementPayments: vi.fn(),
   useReconcileVnPayRefund: vi.fn(),
   useRefundPayment: vi.fn(),
+  useResolveDuplicateCharge: vi.fn(),
 }))
 
 vi.mock('@/auth/useAuth', () => ({
@@ -45,6 +46,7 @@ vi.mock('../hooks', () => ({
   useManagementPayments: mocks.useManagementPayments,
   useReconcileVnPayRefund: mocks.useReconcileVnPayRefund,
   useRefundPayment: mocks.useRefundPayment,
+  useResolveDuplicateCharge: mocks.useResolveDuplicateCharge,
 }))
 
 function LocationProbe() {
@@ -146,6 +148,14 @@ describe('ManagementPaymentsPage filters', () => {
       isPending: false,
       mutate: vi.fn(),
       reset: vi.fn(),
+    })
+    mocks.useResolveDuplicateCharge.mockReturnValue({
+      error: null,
+      isError: false,
+      isPending: false,
+      mutate: vi.fn(),
+      reset: vi.fn(),
+      variables: undefined,
     })
   })
 

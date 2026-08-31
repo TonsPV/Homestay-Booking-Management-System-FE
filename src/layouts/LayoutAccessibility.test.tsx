@@ -46,6 +46,7 @@ function authValue(principal: AuthPrincipal | null): AuthContextValue {
   return {
     error: null,
     isAuthenticated: principal !== null,
+    login: vi.fn(),
     loginCustomer: vi.fn(),
     loginUser: vi.fn(),
     logout: vi.fn(),

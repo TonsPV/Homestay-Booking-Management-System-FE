@@ -196,6 +196,44 @@ export function useReconcileVnPayRefund() {
   })
 }
 
+/**
+ * Resolves a duplicate VNPay charge. Unlike standard refund, duplicate
+ * resolution leaves the booking and its canonical payment untouched, so
+ * booking/room caches are still refreshed (refund fields on the booking can
+ * change) while payment data is always refetched authoritatively.
+ */
+export function useResolveDuplicateCharge() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      paymentId,
+      idempotencyKey,
+    }: {
+      paymentId: string
+      idempotencyKey: string
+    }) => paymentApi.resolveDuplicateCharge(paymentId, idempotencyKey),
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: paymentKeys.all,
+        refetchType: 'all',
+      })
+      void queryClient.invalidateQueries({
+        queryKey: bookingKeys.all,
+        refetchType: 'all',
+      })
+      void queryClient.invalidateQueries({
+        queryKey: roomKeys.all,
+        refetchType: 'all',
+      })
+      void queryClient.invalidateQueries({
+        queryKey: dashboardKeys.all,
+        refetchType: 'all',
+      })
+    },
+  })
+}
+
 export function useVnPayReturn(search: string) {
   return useQuery({
     queryKey: paymentKeys.vnPayReturn(search),

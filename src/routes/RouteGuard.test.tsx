@@ -58,6 +58,7 @@ function renderGuard(
   const value: AuthContextValue = {
     error: null,
     isAuthenticated: principal !== null,
+    login: vi.fn(),
     loginCustomer: vi.fn(),
     loginUser: vi.fn(),
     logout: vi.fn(),

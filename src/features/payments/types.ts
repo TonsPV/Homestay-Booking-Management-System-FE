@@ -6,7 +6,9 @@ import type {
   PaymentListData,
   PaymentManagementCreateData,
   PaymentManagementRefundData,
+  PaymentManagementResolveDuplicateChargeData,
   PaymentMethod as GeneratedPaymentMethod,
+  PaymentReviewReason as GeneratedPaymentReviewReason,
   PaymentStatus as GeneratedPaymentStatus,
   VnPayReturnDto,
 } from '@/api/generated'
@@ -18,6 +20,7 @@ export const PAYMENT_METHODS = [
 ] as const satisfies readonly GeneratedPaymentMethod[]
 
 export type PaymentMethod = GeneratedPaymentMethod
+export type PaymentReviewReason = GeneratedPaymentReviewReason
 
 export const PAYMENT_STATUSES = [
   'PENDING',
@@ -39,4 +42,6 @@ export type CreateVnPayPaymentInput =
 export type CreateManualPaymentInput =
   PaymentManagementCreateData['body']
 export type RefundPaymentInput = PaymentManagementRefundData['body']
+export type ResolveDuplicateChargeInput =
+  PaymentManagementResolveDuplicateChargeData['body']
 export type PaymentListQuery = NonNullable<PaymentListData['query']>

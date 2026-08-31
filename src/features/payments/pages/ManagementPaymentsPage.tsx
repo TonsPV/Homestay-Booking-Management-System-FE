@@ -11,6 +11,7 @@ import {
 } from 'react-router-dom'
 
 import { useAuth } from '@/auth/useAuth'
+import { ApiError } from '@/api/errors'
 import { Button } from '@/shared/components/Button'
 import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
 import {
@@ -36,13 +37,17 @@ import {
   getPaymentStatusLabel,
 } from '../components/paymentLabels'
 import { getPaymentActionError } from '../errors'
+import { getPaymentReviewReasonLabel } from '../payment-review'
 import {
   useManagementPayments,
   useReconcileVnPayRefund,
   useRefundPayment,
+  useResolveDuplicateCharge,
 } from '../hooks'
 import {
+  clearDuplicateResolutionKey,
   clearRefundPaymentKey,
+  getOrCreateDuplicateResolutionKey,
   getOrCreateRefundPaymentKey,
 } from '../idempotency'
 import {
@@ -82,6 +87,7 @@ export function ManagementPaymentsPage() {
   const { principal } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [refundTarget, setRefundTarget] = useState<Payment | null>(null)
+  const [duplicateTarget, setDuplicateTarget] = useState<Payment | null>(null)
   const [actionFeedback, setActionFeedback] =
     useState<PaymentActionFeedback>()
   const page = parsePage(searchParams.get('page'))
@@ -93,6 +99,7 @@ export function ManagementPaymentsPage() {
   )
   const paymentsQuery = useManagementPayments(query)
   const refundMutation = useRefundPayment()
+  const resolveDuplicateMutation = useResolveDuplicateCharge()
   const reconcileMutation = useReconcileVnPayRefund()
   const canRefund =
     principal?.actorType === 'user' && principal.role === 'ADMIN'
@@ -186,6 +193,54 @@ export function ManagementPaymentsPage() {
     setRefundTarget(null)
   }
 
+  const confirmResolveDuplicate = () => {
+    if (!duplicateTarget || resolveDuplicateMutation.isPending) {
+      return
+    }
+
+    setActionFeedback(undefined)
+    resolveDuplicateMutation.mutate(
+      {
+        idempotencyKey: getOrCreateDuplicateResolutionKey(
+          duplicateTarget.id,
+        ),
+        paymentId: duplicateTarget.id,
+      },
+      {
+        onSuccess: (payment) => {
+          if (payment.status === 'REFUNDED') {
+            clearDuplicateResolutionKey(payment.id)
+          }
+          setActionFeedback(
+            payment.status === 'REFUND_PENDING'
+              ? {
+                  message:
+                    'VNPay chưa trả kết quả cuối cho giao dịch trùng. Không gửi yêu cầu lần hai; hãy dùng thao tác đối soát.',
+                  title: 'Yêu cầu hoàn giao dịch trùng đang được xử lý',
+                  tone: 'warning',
+                }
+              : {
+                  message:
+                    'Backend đã xác nhận hoàn tiền giao dịch trùng và đang làm mới dữ liệu payment.',
+                  title: 'Đã xử lý giao dịch trùng',
+                  tone: 'success',
+                },
+          )
+          setDuplicateTarget(null)
+        },
+      },
+    )
+  }
+
+  const closeDuplicateDialog = () => {
+    if (resolveDuplicateMutation.isPending) {
+      return
+    }
+
+    resolveDuplicateMutation.reset()
+    setDuplicateTarget(null)
+  }
+
   return (
     <div className="grid gap-6">
       <PageHeader
@@ -229,6 +284,35 @@ export function ManagementPaymentsPage() {
       {reconcileMutation.isError ? (
         <Alert tone="error" title="Không thể đối soát refund">
           {getPaymentActionError(reconcileMutation.error)}
+        </Alert>
+      ) : null}
+
+      {resolveDuplicateMutation.isError ? (
+        <Alert tone="error" title="Không thể xử lý giao dịch trùng">
+          <div className="grid gap-2">
+            <span>
+              {getPaymentActionError(resolveDuplicateMutation.error)}
+            </span>
+            {resolveDuplicateMutation.error instanceof ApiError &&
+            (resolveDuplicateMutation.error.errorCode ===
+              'PAYMENT_REFUND_OUTCOME_UNKNOWN' ||
+              resolveDuplicateMutation.error.isStatus(503)) ? (
+              <Button
+                className="w-fit"
+                disabled={reconcileMutation.isPending}
+                onClick={() => {
+                  const paymentId =
+                    resolveDuplicateMutation.variables?.paymentId
+                  if (paymentId && !reconcileMutation.isPending) {
+                    reconcileMutation.mutate(paymentId)
+                  }
+                }}
+                variant="outline"
+              >
+                Đối soát ngay
+              </Button>
+            ) : null}
+          </div>
         </Alert>
       ) : null}
 
@@ -313,10 +397,23 @@ export function ManagementPaymentsPage() {
               refundMutation.reset()
               setRefundTarget(payment)
             }}
+            onResolveDuplicate={(payment) => {
+              if (resolveDuplicateMutation.isPending) {
+                return
+              }
+              setActionFeedback(undefined)
+              resolveDuplicateMutation.reset()
+              setDuplicateTarget(payment)
+            }}
             payments={paymentsQuery.data.data}
             reconcilingPaymentId={
               reconcileMutation.isPending
                 ? reconcileMutation.variables
+                : undefined
+            }
+            resolvingDuplicatePaymentId={
+              resolveDuplicateMutation.isPending
+                ? resolveDuplicateMutation.variables.paymentId
                 : undefined
             }
           />
@@ -401,6 +498,92 @@ export function ManagementPaymentsPage() {
                 </Alert>
               ) : null}
             </div>
+          </>
+        ) : null}
+      </ConfirmationDialog>
+
+      <ConfirmationDialog
+        busy={resolveDuplicateMutation.isPending}
+        cancelLabel="Đóng"
+        confirmDisabled={duplicateTarget === null}
+        confirmLabel="Xác nhận hoàn giao dịch trùng"
+        description="Hệ thống sẽ gửi yêu cầu hoàn tiền VNPay riêng cho giao dịch trùng này. Giao dịch chính của booking không bị ảnh hưởng."
+        onCancel={closeDuplicateDialog}
+        onConfirm={() => void confirmResolveDuplicate()}
+        open={duplicateTarget !== null}
+        tone="danger"
+        title={
+          duplicateTarget
+            ? `Xử lý giao dịch trùng #${duplicateTarget.id}?`
+            : 'Xử lý giao dịch trùng?'
+        }
+      >
+        {duplicateTarget ? (
+          <>
+            <dl className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 text-sm">
+              <div>
+                <dt className="text-slate-500">Booking</dt>
+                <dd className="mt-1 font-semibold">
+                  <Link
+                    className="text-blue-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    to={`/management/bookings/${duplicateTarget.bookingId}`}
+                  >
+                    #{duplicateTarget.bookingId}
+                  </Link>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Giao dịch trùng</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  #{duplicateTarget.id}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Giao dịch chính (thành công)</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  #{duplicateTarget.reviewCanonicalPaymentId ?? '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Số tiền hoàn</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  {formatMoney(duplicateTarget.amount)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Phương thức</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  {getPaymentMethodLabel(duplicateTarget.method)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Tham chiếu cổng</dt>
+                <dd className="mt-1 break-all font-mono text-xs text-slate-950">
+                  {duplicateTarget.gatewayReference ?? '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Lý do review</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  {duplicateTarget.reviewReason
+                    ? getPaymentReviewReasonLabel(duplicateTarget.reviewReason)
+                    : '—'}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Thanh toán lúc</dt>
+                <dd className="mt-1 font-semibold text-slate-950">
+                  {formatDateTime(duplicateTarget.paidAt)}
+                </dd>
+              </div>
+            </dl>
+
+            <Alert className="mt-4" tone="warning">
+              Chỉ hoàn tiền giao dịch trùng này. Giao dịch chính{' '}
+              #{duplicateTarget.reviewCanonicalPaymentId ?? '—'} vẫn giữ nguyên
+              cho booking. Backend sẽ kiểm tra lại trạng thái tại thời điểm xác
+              nhận.
+            </Alert>
           </>
         ) : null}
       </ConfirmationDialog>

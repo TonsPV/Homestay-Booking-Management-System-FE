@@ -95,10 +95,10 @@ function renderPage() {
 
 function fillStayCriteria() {
   fireEvent.change(screen.getByLabelText(/Ngày nhận phòng/i), {
-    target: { value: "2026-08-10" },
+    target: { value: "2099-08-10" },
   });
   fireEvent.change(screen.getByLabelText(/Ngày trả phòng/i), {
-    target: { value: "2026-08-12" },
+    target: { value: "2099-08-12" },
   });
 }
 
@@ -240,8 +240,8 @@ describe("CounterBookingPage", () => {
     await waitFor(() => expect(mutateMock).toHaveBeenCalledTimes(1));
     expect(mutateMock.mock.calls[0]?.[0]).toMatchObject({
       roomId: "1",
-      checkInDate: "2026-08-10",
-      checkOutDate: "2026-08-12",
+      checkInDate: "2099-08-10",
+      checkOutDate: "2099-08-12",
     });
   });
 
@@ -269,7 +269,7 @@ describe("CounterBookingPage", () => {
     const summary = screen.getByRole("region", { name: /Tóm tắt booking/i });
     expect(summary).toHaveTextContent("PHÒNG 101");
     expect(summary).toHaveTextContent("Phòng biển");
-    expect(summary).toHaveTextContent("10/08/2026 – 12/08/2026");
+    expect(summary).toHaveTextContent("10/08/2099 – 12/08/2099");
     expect(summary).toHaveTextContent("Số đêm");
     expect(summary).toHaveTextContent("2");
     expect(summary).toHaveTextContent("1.000.000 ₫");

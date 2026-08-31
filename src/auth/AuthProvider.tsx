@@ -12,6 +12,7 @@ import { configureUnauthorizedHandler } from '@/api/client'
 
 import {
   getMe,
+  login as requestUnifiedLogin,
   loginCustomer as requestCustomerLogin,
   loginUser as requestUserLogin,
 } from './api'
@@ -196,6 +197,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [storeLogin],
   )
 
+  const login = useCallback(
+    async (
+      input: CustomerLoginInput | UserLoginInput,
+      persistence: AuthPersistence = 'session',
+    ) => storeLogin(await requestUnifiedLogin(input), persistence),
+    [storeLogin],
+  )
+
   const restore = useCallback(async () => {
     if (!session) {
       return null
@@ -242,6 +251,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     () => ({
       error: meQuery.error,
       isAuthenticated: session !== null,
+      login,
       loginCustomer,
       loginUser,
       logout,
@@ -251,6 +261,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       updatePrincipal,
     }),
     [
+      login,
       loginCustomer,
       loginUser,
       logout,

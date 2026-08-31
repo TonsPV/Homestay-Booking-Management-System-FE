@@ -8,6 +8,7 @@ test("staff creates a counter booking and Backend decides lifecycle transitions"
   await installSession(page, { actorType: "user", role: "STAFF" });
 
   let submittedCreate: Record<string, unknown> | undefined;
+  let submittedCreateIntent: string | null = null;
   let submittedStatus: Record<string, unknown> | undefined;
   let booking = {
     bookingCode: "HBMS-COUNTER-901",
@@ -109,6 +110,7 @@ test("staff creates a counter booking and Backend decides lifecycle transitions"
 
     if (path.endsWith("/management/bookings") && method === "POST") {
       submittedCreate = request.postDataJSON();
+      submittedCreateIntent = request.headers()["idempotency-key"] ?? null;
       await fulfillJson(route, booking, path, 201);
       return;
     }
@@ -194,6 +196,7 @@ test("staff creates a counter booking and Backend decides lifecycle transitions"
     guestCount: 2,
     roomId: "10",
   });
+  expect(submittedCreateIntent).toMatch(/^booking-management-/);
 
   const transitionSelect = page.getByRole("combobox", {
     name: "Trạng thái tiếp theo",

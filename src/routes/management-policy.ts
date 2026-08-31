@@ -9,7 +9,10 @@ export const ADMIN_ONLY_ROLES = [
 
 export const MANAGEMENT_PATHS = {
   root: "/management",
-  dashboard: "/management/dashboard",
+  /* DORMANT (Phase 0): dashboard capability is absent in the Backend; the
+   * alias points at the bookings workflow so policy/layout references stay
+   * valid without rendering the dashboard. */
+  dashboard: "/management/bookings",
   rooms: "/management/rooms",
   bookings: "/management/bookings",
   payments: "/management/payments",
@@ -25,41 +28,40 @@ export interface ManagementNavItem {
   to: string;
 }
 
-export const MANAGEMENT_NAVIGATION: readonly ManagementNavItem[] = [
+export interface ManagementNavGroup {
+  items: readonly ManagementNavItem[];
+  label: string;
+}
+
+export const MANAGEMENT_NAV_GROUPS: readonly ManagementNavGroup[] = [
   {
-    end: true,
-    label: "Tổng quan",
-    to: MANAGEMENT_PATHS.dashboard,
+    items: [
+      /* DORMANT (Phase 0): dashboard entry removed while the Backend lacks
+       * /management/dashboard/summary. Bookings is the admin landing. */
+      { label: "Booking", to: MANAGEMENT_PATHS.bookings },
+      { label: "Thanh toán", to: MANAGEMENT_PATHS.payments },
+    ],
+    label: "Vận hành",
   },
   {
-    label: "Phòng",
-    to: MANAGEMENT_PATHS.rooms,
+    items: [
+      { label: "Phòng", to: MANAGEMENT_PATHS.rooms },
+      { label: "Loại phòng", to: MANAGEMENT_PATHS.roomTypes },
+      { label: "Tiện nghi", to: MANAGEMENT_PATHS.amenities },
+    ],
+    label: "Phòng và danh mục",
   },
   {
-    label: "Loại phòng",
-    to: MANAGEMENT_PATHS.roomTypes,
-  },
-  {
-    label: "Tiện nghi",
-    to: MANAGEMENT_PATHS.amenities,
-  },
-  {
-    label: "Booking",
-    to: MANAGEMENT_PATHS.bookings,
-  },
-  {
-    label: "Thanh toán",
-    to: MANAGEMENT_PATHS.payments,
-  },
-  {
-    label: "Nhân viên",
-    to: MANAGEMENT_PATHS.users,
-  },
-  {
-    label: "Khách hàng",
-    to: MANAGEMENT_PATHS.customers,
+    items: [
+      { label: "Khách hàng", to: MANAGEMENT_PATHS.customers },
+      { label: "Nhân viên", to: MANAGEMENT_PATHS.users },
+    ],
+    label: "Tài khoản",
   },
 ];
+
+export const MANAGEMENT_NAVIGATION: readonly ManagementNavItem[] =
+  MANAGEMENT_NAV_GROUPS.flatMap((group) => group.items);
 
 const MANAGEMENT_PREFIXES = [
   MANAGEMENT_PATHS.dashboard,

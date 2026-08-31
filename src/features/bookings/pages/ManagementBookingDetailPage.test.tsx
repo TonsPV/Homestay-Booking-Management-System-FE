@@ -76,6 +76,9 @@ const mocks = vi.hoisted(() => ({
   mutate: vi.fn(),
   refetch: vi.fn(),
   reset: vi.fn(),
+  isReconciling: false,
+  isStateUnknown: false,
+  retryReconciliation: vi.fn(),
   updateError: null as ApiError | null,
 }));
 
@@ -111,19 +114,27 @@ vi.mock("../hooks", () => ({
     error: mocks.updateError,
     isError: mocks.updateError !== null,
     isPending: false,
+    isReconciling: mocks.isReconciling,
+    isStateUnknown: mocks.isStateUnknown,
     mutate: mocks.mutate,
     reset: mocks.reset,
+    retryReconciliation: mocks.retryReconciliation,
   }),
 }));
 
 describe("ManagementBookingDetailPage cancellation safety", () => {
   beforeEach(() => {
+    booking.status = "PENDING_PAYMENT";
+    booking.paymentStatus = "UNPAID";
     booking.transitionCapabilities = defaultTransitionCapabilities.map(
       (capability) => ({ ...capability }),
     );
     mocks.mutate.mockReset();
     mocks.refetch.mockReset();
     mocks.reset.mockReset();
+    mocks.isReconciling = false;
+    mocks.isStateUnknown = false;
+    mocks.retryReconciliation.mockReset();
     mocks.updateError = null;
   });
 
@@ -338,5 +349,165 @@ describe("ManagementBookingDetailPage cancellation safety", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Dữ liệu đã thay đổi hoặc xung đột. Vui lòng tải lại và thử lại.",
     );
+  });
+
+  it("keeps state-changing controls disabled during authoritative reconciliation", () => {
+    mocks.isReconciling = true;
+
+    render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    ).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Đang kiểm tra trạng thái booking mới nhất",
+    );
+  });
+
+  it("keeps every transition fail-closed when authoritative refresh fails", async () => {
+    const user = userEvent.setup();
+    mocks.isStateUnknown = true;
+    const view = render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    ).toBeDisabled();
+    await user.click(
+      screen.getByRole("button", { name: "Thử tải lại trạng thái" }),
+    );
+    expect(mocks.retryReconciliation).toHaveBeenCalledWith(booking.id);
+
+    mocks.isStateUnknown = false;
+    view.rerender(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+    ).toBeEnabled();
+  });
+
+  it("cannot retry cancellation from a stale open dialog", async () => {
+    const user = userEvent.setup();
+    const view = render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+      "CANCELLED",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Lý do hủy" }),
+      "Khách đổi kế hoạch",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    );
+
+    mocks.isStateUnknown = true;
+    view.rerender(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const confirm = screen.getByRole("button", {
+      name: "Xác nhận hủy booking",
+    });
+    expect(confirm).toBeDisabled();
+    await user.click(confirm);
+    expect(mocks.mutate).not.toHaveBeenCalled();
+  });
+
+  it("closes stale cancel confirmation after authoritative cancellation", async () => {
+    const user = userEvent.setup();
+    const view = render(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Trạng thái tiếp theo" }),
+      "CANCELLED",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Lý do hủy" }),
+      "Khách đổi kế hoạch",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Cập nhật trạng thái" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Xác nhận hủy booking" }),
+    );
+    expect(mocks.mutate).toHaveBeenCalledTimes(1);
+
+    booking.status = "CANCELLED";
+    booking.transitionCapabilities = booking.transitionCapabilities.map(
+      (capability) =>
+        capability.targetStatus === "CANCELLED"
+          ? { ...capability, allowed: false }
+          : capability,
+    );
+    view.rerender(
+      <MemoryRouter initialEntries={["/management/bookings/42"]}>
+        <Routes>
+          <Route
+            element={<ManagementBookingDetailPage />}
+            path="/management/bookings/:bookingId"
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mocks.mutate).toHaveBeenCalledTimes(1);
   });
 });

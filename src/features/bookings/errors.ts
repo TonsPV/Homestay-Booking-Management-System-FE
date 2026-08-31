@@ -24,6 +24,8 @@ const bookingCodeMessages: Record<string, string> = {
     "Phòng vừa được đặt hoặc khóa trong khoảng ngày này. Vui lòng chọn phòng hoặc ngày khác.",
   BOOKING_CREATE_CONFLICT:
     "Booking chưa thể tạo vì dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại.",
+  BOOKING_REQUEST_INTENT_CONFLICT:
+    "Mã của lần tạo booking này đã xung đột với nội dung khác. Hệ thống đang đồng bộ lại dữ liệu; hãy kiểm tra danh sách booking rồi xác nhận lại thông tin để bắt đầu một lần tạo mới.",
   CUSTOMER_EMAIL_IN_USE:
     "Email đã được sử dụng. Vui lòng chọn khách hiện có hoặc dùng email khác.",
   CUSTOMER_PHONE_IN_USE:
@@ -40,6 +42,8 @@ const bookingCodeMessages: Record<string, string> = {
   BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW:
     "Chỉ có thể check-in trong khoảng thời gian lưu trú.",
   BOOKING_ROOM_NOT_FOUND: "Phòng của booking không còn tồn tại.",
+  BOOKING_ROOM_MISSING_FOR_BOOKING:
+    "Booking không còn liên kết với phòng. Không thể tiếp tục chuyển trạng thái; vui lòng kiểm tra dữ liệu booking.",
   BOOKING_ROOM_NOT_READY: "Phòng chưa ở trạng thái sẵn sàng để check-in.",
   BOOKING_CANCELLATION_ALREADY_PAID:
     "Booking đã thanh toán. Cần hoàn tiền trước khi hủy.",

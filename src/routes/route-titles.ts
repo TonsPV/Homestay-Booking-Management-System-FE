@@ -2,9 +2,10 @@ const APP_NAME = "Homestay Green";
 
 export function getPageTitle(pathname: string) {
   if (pathname === "/") return "Trang chủ";
-  if (pathname === "/login") return "Đăng nhập khách hàng";
+  if (pathname === "/login" || pathname === "/management/login") {
+    return "Đăng nhập";
+  }
   if (pathname === "/register") return "Đăng ký tài khoản";
-  if (pathname === "/management/login") return "Đăng nhập quản lý";
   if (pathname === "/account") return "Hồ sơ của tôi";
   if (pathname === "/rooms/search") return "Tìm phòng";
   if (pathname === "/rooms") return "Danh sách phòng";
@@ -15,7 +16,13 @@ export function getPageTitle(pathname: string) {
   if (/^\/bookings\/new\/[^/]+$/.test(pathname)) return "Tạo booking";
   if (/^\/bookings\/[^/]+$/.test(pathname)) return "Chi tiết booking";
   if (pathname === "/payments/vnpay/return") return "Kết quả thanh toán";
-  if (pathname === "/management" || pathname === "/management/dashboard") {
+  if (pathname === "/management") {
+    return "Quản lý booking";
+  }
+  /* DORMANT (Phase 0): /management/dashboard is unrouted while the Backend
+   * lacks the summary endpoint; the dashboard branch is kept for the
+   * possible capability return. */
+  if (pathname === "/management/dashboard") {
     return "Tổng quan vận hành";
   }
   if (pathname === "/staff/counter") {

@@ -3,13 +3,14 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
 import {
-  MANAGEMENT_NAVIGATION,
+  MANAGEMENT_NAV_GROUPS,
   MANAGEMENT_PATHS,
   type ManagementNavItem,
 } from "@/routes/management-policy";
 import { ScrollToTop } from "@/routes/RouteSupport";
 import { Button } from "@/shared/components/Button";
 import { cn } from "@/shared/components/cn";
+import { IconButton } from "@/shared/components/IconButton";
 import { SkipLink } from "@/shared/components/SkipLink";
 
 interface ManagementNavigationProps {
@@ -29,7 +30,7 @@ const focusableSelector = [
 
 function navLinkClass({ isActive }: { isActive: boolean }) {
   return cn(
-    "flex min-h-11 items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none",
+    "flex min-h-11 items-center rounded-control px-3.5 py-2.5 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none",
     isActive
       ? "bg-brand text-white shadow-sm"
       : "text-on-inverse-muted hover:bg-inverse-raised hover:text-on-inverse",
@@ -55,6 +56,29 @@ function ManagementNavigation({
         </NavLink>
       ))}
     </nav>
+  );
+}
+
+function ManagementNavigationGroups({
+  onNavigate,
+}: {
+  onNavigate?: () => void;
+}) {
+  return (
+    <div className="grid gap-6">
+      {MANAGEMENT_NAV_GROUPS.map((group) => (
+        <section key={group.label}>
+          <p className="px-3.5 pb-2 text-xs font-bold uppercase tracking-eyebrow text-on-inverse-subtle">
+            {group.label}
+          </p>
+          <ManagementNavigation
+            items={group.items}
+            label={group.label}
+            onNavigate={onNavigate}
+          />
+        </section>
+      ))}
+    </div>
   );
 }
 
@@ -199,10 +223,7 @@ export function ManagementLayout() {
       <aside className="sticky top-0 hidden h-screen flex-col overflow-y-auto bg-inverse px-5 py-6 text-on-inverse lg:flex">
         <Brand home={home} workspaceLabel={workspaceLabel} />
         <div className="mt-8">
-          <ManagementNavigation
-            items={MANAGEMENT_NAVIGATION}
-            label="Điều hướng vận hành"
-          />
+          <ManagementNavigationGroups />
         </div>
 
         <div className="mt-auto border-t border-inverse-line pt-5">
@@ -220,34 +241,33 @@ export function ManagementLayout() {
 
       <div className="min-w-0">
         <header className="sticky top-0 z-20 flex min-h-16 items-center gap-3 border-b border-line bg-surface/95 px-4 py-2 backdrop-blur lg:hidden">
-          <button
+          <IconButton
             aria-controls="management-mobile-drawer"
             aria-expanded={drawerOpen}
             aria-label="Mở menu vận hành"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-ink transition hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
             onClick={() => setDrawerOpen(true)}
             ref={menuButtonRef}
-            type="button"
+            variant="outline"
           >
             <span aria-hidden="true" className="grid gap-1">
               <span className="block h-0.5 w-5 bg-current" />
               <span className="block h-0.5 w-5 bg-current" />
               <span className="block h-0.5 w-5 bg-current" />
             </span>
-          </button>
+          </IconButton>
           <div className="min-w-0">
             <p className="truncate text-sm font-bold text-ink">
               {principal?.fullName}
             </p>
             <p className="text-xs text-muted">Quản trị viên</p>
           </div>
-          <span className="ml-auto text-xs font-black uppercase tracking-[0.16em] text-brand">
+          <span className="ml-auto text-xs font-black uppercase tracking-eyebrow text-brand">
             HG
           </span>
         </header>
 
         <main
-          className="mx-auto w-full max-w-[100rem] px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8"
+          className="mx-auto w-full max-w-management px-4 py-6 focus:outline-none sm:px-6 lg:px-8 lg:py-8"
           id="main-content"
           tabIndex={-1}
         >
@@ -273,17 +293,18 @@ export function ManagementLayout() {
             tabIndex={-1}
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-sm font-black" id="management-drawer-title">
+              <h2 className="text-sm font-bold" id="management-drawer-title">
                 Menu vận hành
               </h2>
-              <button
+              <IconButton
                 aria-label="Đóng menu vận hành"
-                className="inline-flex size-11 items-center justify-center rounded-xl border border-inverse-line text-xl text-on-inverse-muted transition hover:bg-inverse-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse motion-reduce:transition-none"
                 onClick={() => setDrawerOpen(false)}
-                type="button"
+                variant="inverse-ghost"
               >
-                <span aria-hidden="true">×</span>
-              </button>
+                <span aria-hidden="true" className="text-xl">
+                  ×
+                </span>
+              </IconButton>
             </div>
 
             <div className="mt-4">
@@ -294,9 +315,7 @@ export function ManagementLayout() {
               />
             </div>
             <div className="mt-7">
-              <ManagementNavigation
-                items={MANAGEMENT_NAVIGATION}
-                label="Điều hướng vận hành trên thiết bị di động"
+              <ManagementNavigationGroups
                 onNavigate={() => setDrawerOpen(false)}
               />
             </div>

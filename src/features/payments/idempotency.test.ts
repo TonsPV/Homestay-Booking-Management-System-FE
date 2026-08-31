@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  clearDuplicateResolutionKey,
   clearManualPaymentKey,
   clearRefundPaymentKey,
   clearVnPayAttempt,
   getCurrentVnPayAttempt,
+  getOrCreateDuplicateResolutionKey,
   getOrCreateManualPaymentKey,
   getOrCreateRefundPaymentKey,
   getOrCreateVnPayAttempt,
@@ -69,5 +71,29 @@ describe('payment idempotency storage', () => {
 
     expect(getVnPayAttempt('12')).toBeNull()
     expect(getCurrentVnPayAttempt()).toBeNull()
+  })
+
+  it('reuses one duplicate-resolution key for the same logical attempt', () => {
+    const first = getOrCreateDuplicateResolutionKey('95')
+
+    // Re-renders and dialog retries must not mint a new key.
+    expect(getOrCreateDuplicateResolutionKey('95')).toBe(first)
+    expect(getOrCreateDuplicateResolutionKey('96')).not.toBe(first)
+    expect(first).toMatch(/^duplicate-/)
+
+    // Backend enforces 8-100 chars of [A-Za-z0-9._:-], first char alnum.
+    expect(first).toMatch(/^[A-Za-z0-9][A-Za-z0-9._:-]{7,99}$/)
+    expect(first.length).toBeLessThanOrEqual(100)
+
+    clearDuplicateResolutionKey('95')
+
+    expect(getOrCreateDuplicateResolutionKey('95')).not.toBe(first)
+  })
+
+  it('keeps duplicate-resolution keys separate from refund keys', () => {
+    const duplicateKey = getOrCreateDuplicateResolutionKey('95')
+    const refundKey = getOrCreateRefundPaymentKey('95')
+
+    expect(duplicateKey).not.toBe(refundKey)
   })
 })

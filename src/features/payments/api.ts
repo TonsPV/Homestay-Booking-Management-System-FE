@@ -123,6 +123,24 @@ export const paymentApi = {
     return result.data
   },
 
+  /**
+   * Resolves a duplicate VNPay charge
+   * (REQUIRES_REVIEW + ANOTHER_SUCCESSFUL_PAYMENT). The Backend requires an
+   * Idempotency-Key and takes no body; it refunds only this duplicate
+   * payment and returns its PaymentDto with status REFUNDED or
+   * REFUND_PENDING.
+   */
+  async resolveDuplicateCharge(paymentId: string, idempotencyKey: string) {
+    const result = await apiRequest<Payment>(
+      `/management/payments/${paymentId}/resolve-duplicate-charge`,
+      {
+        headers: { 'Idempotency-Key': idempotencyKey },
+        method: 'POST',
+      },
+    )
+    return result.data
+  },
+
   async reconcileRefund(paymentId: string) {
     const result = await apiRequest<Payment>(
       `/management/payments/${paymentId}/reconcile-refund`,

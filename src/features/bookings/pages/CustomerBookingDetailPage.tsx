@@ -87,31 +87,54 @@ export function CustomerBookingDetailPage() {
     defaultValues: { reason: '' },
     resolver: zodResolver(cancelBookingFormSchema),
   })
+  const booking = bookingQuery.data
+  const canCancel = Boolean(
+    booking &&
+      booking.paymentStatus === 'UNPAID' &&
+      (booking.status === 'PENDING_PAYMENT' ||
+        booking.status === 'CONFIRMED'),
+  )
+  const cancelBusy =
+    cancelMutation.isPending || cancelMutation.isReconciling
+  const cancelBlocked = cancelBusy || cancelMutation.isStateUnknown
+
+  useEffect(() => {
+    if (booking && !canCancel && cancelDialogOpen) {
+      reset()
+      setCancelDialogOpen(false)
+    }
+  }, [booking, canCancel, cancelDialogOpen, reset])
 
   if (bookingQuery.isPending) {
     return <LoadingState label="Đang tải chi tiết đặt phòng…" />
   }
 
-  if (bookingQuery.isError || !bookingQuery.data) {
+  if (bookingQuery.isError || !booking) {
     return (
       <ErrorState
-        description={getBookingActionError(bookingQuery.error)}
-        onRetry={() => void bookingQuery.refetch()}
+        description={
+          cancelMutation.isStateUnknown
+            ? 'Không xác định được trạng thái booking hiện tại. Vui lòng làm mới/kiểm tra lại trước khi thao tác tiếp.'
+            : getBookingActionError(bookingQuery.error)
+        }
+        onRetry={() => {
+          if (cancelMutation.isStateUnknown && bookingId) {
+            void cancelMutation.retryReconciliation(bookingId)
+            return
+          }
+
+          void bookingQuery.refetch()
+        }}
       />
     )
   }
 
-  const booking = bookingQuery.data
-  const canCancel =
-    booking.paymentStatus === 'UNPAID' &&
-    (booking.status === 'PENDING_PAYMENT' ||
-      booking.status === 'CONFIRMED')
   const canPay =
     isBookingPaymentWindowOpen(booking) &&
     expiredPaymentDeadline !== booking.paymentExpiresAt
 
   const confirmCancel = handleSubmit((values) => {
-    if (!bookingId) {
+    if (!bookingId || !canCancel || cancelBlocked) {
       return
     }
 
@@ -152,6 +175,25 @@ export function CustomerBookingDetailPage() {
       {successMessage ? (
         <Alert tone="success">{successMessage}</Alert>
       ) : null}
+      {cancelMutation.isStateUnknown ? (
+        <Alert title="Chưa xác định được trạng thái booking" tone="warning">
+          <p>
+            Không xác định được trạng thái booking hiện tại. Vui lòng làm
+            mới/kiểm tra lại trước khi thao tác tiếp.
+          </p>
+          <Button
+            className="mt-3"
+            onClick={() => {
+              if (bookingId) {
+                void cancelMutation.retryReconciliation(bookingId)
+              }
+            }}
+            variant="outline"
+          >
+            Thử tải lại trạng thái
+          </Button>
+        </Alert>
+      ) : null}
       <BookingDetails audience="customer" booking={booking} />
       <CustomerPaymentPanel
         bookingId={booking.id}
@@ -171,6 +213,7 @@ export function CustomerBookingDetailPage() {
             </div>
             <Button
               className="shrink-0"
+              disabled={cancelBlocked}
               onClick={() => {
                 cancelMutation.reset()
                 setSuccessMessage(undefined)
@@ -185,11 +228,14 @@ export function CustomerBookingDetailPage() {
       ) : null}
 
       <ConfirmationDialog
-        busy={cancelMutation.isPending}
-        confirmDisabled={!bookingId}
+        busy={cancelBusy}
+        confirmDisabled={!bookingId || !canCancel || cancelBlocked}
         confirmLabel="Xác nhận hủy đặt phòng"
         description="Sau khi hủy, bạn sẽ không thể tiếp tục thanh toán cho đặt phòng này."
         onCancel={() => {
+          if (cancelBusy) {
+            return
+          }
           cancelMutation.reset()
           reset()
           setCancelDialogOpen(false)
@@ -227,9 +273,38 @@ export function CustomerBookingDetailPage() {
           </Field>
         </div>
 
-        {cancelMutation.isError ? (
+        {cancelMutation.isError && !cancelMutation.isStateUnknown ? (
           <Alert className="mt-4" tone="error">
             {getBookingActionError(cancelMutation.error)}
+          </Alert>
+        ) : null}
+        {cancelMutation.isReconciling ? (
+          <Alert className="mt-4" tone="info">
+            Đang kiểm tra trạng thái hủy mới nhất. Vui lòng chờ trước khi thao
+            tác lại.
+          </Alert>
+        ) : null}
+        {cancelMutation.isStateUnknown ? (
+          <Alert
+            className="mt-4"
+            title="Chưa xác định được trạng thái booking"
+            tone="warning"
+          >
+            <p>
+              Không xác định được trạng thái booking hiện tại. Vui lòng làm
+              mới/kiểm tra lại trước khi thao tác tiếp.
+            </p>
+            <Button
+              className="mt-3"
+              onClick={() => {
+                if (bookingId) {
+                  void cancelMutation.retryReconciliation(bookingId)
+                }
+              }}
+              variant="outline"
+            >
+              Thử tải lại trạng thái
+            </Button>
           </Alert>
         ) : null}
       </ConfirmationDialog>

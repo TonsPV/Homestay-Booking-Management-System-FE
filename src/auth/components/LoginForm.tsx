@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { resolvePostLoginRoute } from '@/routes/workspace-policy'
+
 import type { AuthPrincipal } from '../types'
 import { getAuthActionError } from '../errors'
 import { Alert } from '@/shared/components/Feedback'
@@ -22,25 +24,17 @@ import {
 import { AuthPageLayout } from './AuthPageLayout'
 
 interface LoginFormProps {
-  alternateLabel: string
-  alternatePath: string
   description: string
-  mode: 'customer' | 'user'
+  locationState?: unknown
   notice?: string
-  redirectTo: string
-  resolveRedirect?: (principal: AuthPrincipal) => string
   registerPath?: string
   title: string
 }
 
 export function LoginForm({
-  alternateLabel,
-  alternatePath,
   description,
-  mode,
+  locationState,
   notice,
-  redirectTo,
-  resolveRedirect,
   registerPath,
   title,
 }: LoginFormProps) {
@@ -64,14 +58,14 @@ export function LoginForm({
         identifier: values.identifier,
         password: values.password,
       }
-      const persistence = values.remember ? 'local' : 'session'
+      const persistence = values.remember ? ('local' as const) : ('session' as const)
 
-      return mode === 'customer'
-        ? auth.loginCustomer(input, persistence)
-        : auth.loginUser(input, persistence)
+      return auth.login(input, persistence)
     },
-    onSuccess: (principal) =>
-      navigate(resolveRedirect?.(principal) ?? redirectTo, { replace: true }),
+    onSuccess: (principal: AuthPrincipal) =>
+      navigate(resolvePostLoginRoute(principal, locationState), {
+        replace: true,
+      }),
   })
   const { isCoolingDown, remainingSeconds } = useRateLimitCooldown(
     loginMutation.error,
@@ -80,7 +74,7 @@ export function LoginForm({
   return (
     <AuthPageLayout
       description={description}
-      eyebrow={mode === 'customer' ? 'Dành cho khách hàng' : 'Khu vực vận hành'}
+      eyebrow="Homestay Green"
       title={title}
     >
       <form
@@ -148,8 +142,8 @@ export function LoginForm({
         </Button>
       </form>
 
-      <div className="mt-6 flex flex-col gap-3 border-t border-line pt-6 text-center text-sm">
-        {registerPath ? (
+      {registerPath ? (
+        <div className="mt-6 border-t border-line pt-6 text-center text-sm">
           <p className="text-muted">
             Chưa có tài khoản?{' '}
             <Link
@@ -159,14 +153,8 @@ export function LoginForm({
               Đăng ký ngay
             </Link>
           </p>
-        ) : null}
-        <Link
-          className="inline-flex min-h-11 items-center justify-center font-semibold text-muted hover:text-brand-strong"
-          to={alternatePath}
-        >
-          {alternateLabel}
-        </Link>
-      </div>
+        </div>
+      ) : null}
     </AuthPageLayout>
   )
 }

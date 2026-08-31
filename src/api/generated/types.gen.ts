@@ -19,7 +19,7 @@ export type SuccessEnvelopeDto = {
     requestId: string;
 };
 
-export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
 
 export type ErrorEnvelopeDto = {
     success: boolean;
@@ -31,7 +31,7 @@ export type ErrorEnvelopeDto = {
      */
     fieldErrors?: {
         [key: string]: Array<{
-            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
             message?: string;
         }>;
     };
@@ -244,7 +244,7 @@ export type CustomerCredentialCapabilitiesDto = {
 export type BookingTransitionCapabilityDto = {
     targetStatus: BookingStatus;
     allowed: boolean;
-    reasonCode: 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | null;
+    reasonCode: 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | null;
 };
 
 export type ManagementBookingDto = {
@@ -333,68 +333,6 @@ export type UpdateAccountStatusDto = {
 
 export type SetInitialCustomerPasswordDto = {
     password: string;
-};
-
-export type BookingStatusCount = {
-    pendingPayment: number;
-    confirmed: number;
-    checkedIn: number;
-    checkedOut: number;
-    cancelled: number;
-};
-
-export type RoomStatusCount = {
-    ready: number;
-    occupied: number;
-    cleaning: number;
-    maintenance: number;
-};
-
-export type RevenueByMethod = {
-    /**
-     * Collected VNPay amount in VND.
-     */
-    vnpay: number;
-    /**
-     * Collected CASH and BANK_TRANSFER amount in VND.
-     */
-    manual: number;
-    /**
-     * Gross collected amount in VND.
-     */
-    total: number;
-};
-
-export type PaymentMetrics = {
-    requiresReview: number;
-    refundPending: number;
-};
-
-export type OccupancyMetrics = {
-    roomNightsReserved: number;
-    /**
-     * Operational room-night capacity after blocked nights are excluded.
-     */
-    roomNightsAvailable: number;
-    /**
-     * Percentage from 0 to 100.
-     */
-    occupancyRate: number;
-};
-
-export type DashboardSummaryResponse = {
-    fromDate: string;
-    toDate: string;
-    bookings: BookingStatusCount;
-    rooms: RoomStatusCount;
-    revenue: RevenueByMethod;
-    /**
-     * Amount with completed REFUNDED status in VND.
-     */
-    totalRefunded: number;
-    payments: PaymentMetrics;
-    occupancy: OccupancyMetrics;
-    generatedAt: string;
 };
 
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'VNPAY';
@@ -704,6 +642,9 @@ export type CreateRoomTypeDto = {
      */
     beds?: Array<RoomTypeBedInputDto>;
     maxGuests: number;
+    /**
+     * Positive base price; zero is not accepted.
+     */
     basePrice: string;
 };
 
@@ -721,6 +662,9 @@ export type UpdateRoomTypeDto = {
      */
     beds?: Array<RoomTypeBedInputDto>;
     maxGuests?: number;
+    /**
+     * Positive base price; zero is not accepted.
+     */
     basePrice?: string;
 };
 
@@ -1262,6 +1206,12 @@ export type BookingListResponse = BookingListResponses[keyof BookingListResponse
 
 export type BookingCreateData = {
     body: CreateBookingDto;
+    headers?: {
+        /**
+         * Optional request identity. Reusing it with the same booking request replays the committed booking.
+         */
+        'Idempotency-Key'?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v1/bookings';
@@ -1414,6 +1364,12 @@ export type BookingManagementListResponse = BookingManagementListResponses[keyof
 
 export type BookingManagementCreateData = {
     body: CreateManagementBookingDto;
+    headers?: {
+        /**
+         * Optional request identity. Reusing it with the same counter-booking request replays the committed booking.
+         */
+        'Idempotency-Key'?: string;
+    };
     path?: never;
     query?: never;
     url: '/api/v1/management/bookings';
@@ -1758,42 +1714,6 @@ export type CustomerCredentialManagementSetInitialPasswordResponses = {
 };
 
 export type CustomerCredentialManagementSetInitialPasswordResponse = CustomerCredentialManagementSetInitialPasswordResponses[keyof CustomerCredentialManagementSetInitialPasswordResponses];
-
-export type DashboardGetSummaryData = {
-    body?: never;
-    path?: never;
-    query: {
-        from: string;
-        to: string;
-    };
-    url: '/api/v1/management/dashboard/summary';
-};
-
-export type DashboardGetSummaryErrors = {
-    /**
-     * The dashboard date range is invalid.
-     */
-    400: ErrorEnvelopeDto;
-    /**
-     * Authentication is required.
-     */
-    401: ErrorEnvelopeDto;
-    /**
-     * The authenticated actor does not have access.
-     */
-    403: ErrorEnvelopeDto;
-};
-
-export type DashboardGetSummaryError = DashboardGetSummaryErrors[keyof DashboardGetSummaryErrors];
-
-export type DashboardGetSummaryResponses = {
-    200: SuccessEnvelopeDto & {
-        statusCode?: number;
-        data?: DashboardSummaryResponse;
-    };
-};
-
-export type DashboardGetSummaryResponse = DashboardGetSummaryResponses[keyof DashboardGetSummaryResponses];
 
 export type PaymentListData = {
     body?: never;
@@ -2219,6 +2139,8 @@ export type RoomSearchData = {
     body?: never;
     path?: never;
     query: {
+        page?: number;
+        limit?: number;
         checkIn: string;
         checkOut: string;
         guests: number;
@@ -2229,9 +2151,7 @@ export type RoomSearchData = {
         amenityIds?: Array<string>;
         minPrice?: string;
         maxPrice?: string;
-        page?: number;
         sort?: RoomSearchSort;
-        limit?: number;
     };
     url: '/api/v1/rooms/search';
 };
@@ -2531,12 +2451,12 @@ export type RoomManagementAvailableData = {
     body?: never;
     path?: never;
     query: {
+        page?: number;
+        limit?: number;
         checkIn: string;
         checkOut: string;
         guests: number;
         roomTypeId?: string;
-        page?: number;
-        limit?: number;
     };
     url: '/api/v1/management/rooms/available';
 };

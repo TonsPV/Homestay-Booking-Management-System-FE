@@ -24,9 +24,9 @@ test("a current-session 401 clears private access and returns to management logi
 
   await page.goto("/staff/payments");
 
-  await expect(page).toHaveURL(/\/management\/login$/);
+  await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole("heading", { name: "Đăng nhập quản lý" }),
+    page.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
 });
 

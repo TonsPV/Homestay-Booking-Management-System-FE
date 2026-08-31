@@ -10,7 +10,7 @@ import {
 describe("management route policy", () => {
   it("uses a role-specific workspace home", () => {
     expect(getUserWorkspaceHome("STAFF")).toBe("/staff/counter");
-    expect(getUserWorkspaceHome("ADMIN")).toBe("/management/dashboard");
+    expect(getUserWorkspaceHome("ADMIN")).toBe("/management/bookings");
   });
 
   it("preserves deep links inside the actor workspace", () => {

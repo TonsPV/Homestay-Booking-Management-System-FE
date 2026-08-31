@@ -383,7 +383,7 @@ export function PublicLayout() {
             </NavLink>
           </nav>
           <nav
-            aria-label="Tài khoản và vận hành"
+            aria-label="Tài khoản"
             className="grid content-start gap-1 text-sm"
           >
             <p className="mb-2 font-black text-ink">Tài khoản</p>
@@ -391,13 +391,13 @@ export function PublicLayout() {
               className="inline-flex min-h-11 items-center text-muted hover:text-brand-strong"
               to="/login"
             >
-              Đăng nhập khách hàng
+              Đăng nhập
             </NavLink>
             <NavLink
               className="inline-flex min-h-11 items-center text-muted hover:text-brand-strong"
-              to="/management/login"
+              to="/register"
             >
-              Đăng nhập nhân viên
+              Đăng ký
             </NavLink>
           </nav>
         </div>

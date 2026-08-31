@@ -152,3 +152,156 @@ describe('PaymentList management view', () => {
     }
   })
 })
+
+describe('PaymentList review-reason business-state matrix', () => {
+  it('REQUIRES_REVIEW + BOOKING_CANCELLED: standard refund shown, duplicate resolution hidden, late-payment copy', () => {
+    const latePayment: Payment = {
+      ...payment,
+      method: 'VNPAY',
+      status: 'REQUIRES_REVIEW',
+      reviewReason: 'BOOKING_CANCELLED',
+      gatewayReference: 'P91',
+      gatewayTransactionId: 'TXN91',
+    }
+
+    render(
+      <MemoryRouter>
+        <PaymentList
+          canRefund
+          management
+          onRefund={vi.fn()}
+          onResolveDuplicate={vi.fn()}
+          payments={[latePayment]}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getAllByText('Thanh toán sau khi booking đã hủy').length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(/VNPay báo thành công sau khi booking đã bị hủy/)
+        .length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole('button', { name: 'Hoàn tiền giao dịch #91' })
+        .length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole('button', { name: 'Xử lý giao dịch trùng #91' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('REQUIRES_REVIEW + ANOTHER_SUCCESSFUL_PAYMENT: duplicate resolution shown, standard refund hidden', () => {
+    const duplicateCharge: Payment = {
+      ...payment,
+      method: 'VNPAY',
+      status: 'REQUIRES_REVIEW',
+      reviewReason: 'ANOTHER_SUCCESSFUL_PAYMENT',
+      reviewCanonicalPaymentId: '90',
+      gatewayReference: 'P91',
+      gatewayTransactionId: 'TXN91',
+    }
+    const onResolveDuplicate = vi.fn()
+
+    render(
+      <MemoryRouter>
+        <PaymentList
+          canRefund
+          management
+          onResolveDuplicate={onResolveDuplicate}
+          payments={[duplicateCharge]}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getAllByText('Trùng thanh toán cho cùng booking').length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(/giao dịch chính #90/).length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole('button', { name: 'Hoàn tiền giao dịch #91' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getAllByRole('button', { name: 'Xử lý giao dịch trùng #91' })
+        .length,
+    ).toBeGreaterThan(0)
+  })
+
+  it('REQUIRES_REVIEW without a distinct reason keeps the generic review copy but no refund button for duplicates', () => {
+    const orphanDuplicate: Payment = {
+      ...payment,
+      method: 'VNPAY',
+      status: 'REQUIRES_REVIEW',
+      reviewReason: 'ANOTHER_SUCCESSFUL_PAYMENT',
+      reviewCanonicalPaymentId: null,
+      gatewayReference: 'P91',
+      gatewayTransactionId: 'TXN91',
+    }
+
+    render(
+      <MemoryRouter>
+        <PaymentList canRefund management payments={[orphanDuplicate]} />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: 'Hoàn tiền giao dịch #91' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Xử lý giao dịch trùng #91' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('SUCCESS shows only the standard refund action', () => {
+    const successful: Payment = { ...payment, method: 'VNPAY' }
+
+    render(
+      <MemoryRouter>
+        <PaymentList
+          canRefund
+          management
+          onRefund={vi.fn()}
+          onResolveDuplicate={vi.fn()}
+          payments={[successful]}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getAllByRole('button', { name: 'Hoàn tiền giao dịch #91' })
+        .length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole('button', { name: 'Xử lý giao dịch trùng #91' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('REFUNDED exposes no money actions', () => {
+    const refunded: Payment = {
+      ...payment,
+      method: 'VNPAY',
+      status: 'REFUNDED',
+      refundedAt: '2026-07-29T01:05:00.000Z',
+      refundRequestId: 'R91',
+    }
+
+    render(
+      <MemoryRouter>
+        <PaymentList canRefund management payments={[refunded]} />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.queryByRole('button', { name: 'Hoàn tiền giao dịch #91' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Xử lý giao dịch trùng #91' }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Đối soát hoàn tiền giao dịch #91' }),
+    ).not.toBeInTheDocument()
+  })
+})

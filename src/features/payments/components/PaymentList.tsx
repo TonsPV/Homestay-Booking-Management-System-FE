@@ -1,10 +1,17 @@
 import { Link } from 'react-router-dom'
 
+import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { EmptyState } from '@/shared/components/Feedback'
 import { formatDateTime, formatMoney } from '@/shared/formatting/formatters'
 
+import {
+  getPaymentReviewExplanation,
+  getPaymentReviewReasonLabel,
+  isDuplicateChargeResolutionEligible,
+  isStandardRefundEligible,
+} from '../payment-review'
 import type { Payment } from '../types'
 import { getPaymentMethodLabel } from './paymentLabels'
 import { PaymentStatusBadge } from './PaymentStatusBadge'
@@ -15,8 +22,10 @@ interface PaymentListProps {
   management?: boolean
   onReconcile?: (payment: Payment) => void
   onRefund?: (payment: Payment) => void
+  onResolveDuplicate?: (payment: Payment) => void
   payments: Payment[]
   reconcilingPaymentId?: string
+  resolvingDuplicatePaymentId?: string
 }
 
 interface PaymentItemProps {
@@ -25,16 +34,10 @@ interface PaymentItemProps {
   management: boolean
   onReconcile?: (payment: Payment) => void
   onRefund?: (payment: Payment) => void
+  onResolveDuplicate?: (payment: Payment) => void
   payment: Payment
   reconcilingPaymentId?: string
-}
-
-function isRefundable(payment: Payment, canRefund: boolean) {
-  return (
-    canRefund &&
-    (payment.status === 'SUCCESS' ||
-      (payment.method === 'VNPAY' && payment.status === 'REQUIRES_REVIEW'))
-  )
+  resolvingDuplicatePaymentId?: string
 }
 
 function BookingReference({
@@ -219,10 +222,12 @@ function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   }
 
   if (payment.status === 'REQUIRES_REVIEW') {
+    const explanation = getPaymentReviewExplanation(payment)
+
     return (
       <p className="mt-3 rounded-card border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
-        VNPay báo thành công sau khi booking đã đóng. Cần đối soát thủ công;
-        không tự khôi phục booking.
+        {explanation ??
+          'Giao dịch cần đối soát thủ công; không tự khôi phục booking.'}
       </p>
     )
   }
@@ -271,7 +276,7 @@ function RefundButton({
   onRefund,
   payment,
 }: Omit<PaymentItemProps, 'management'>) {
-  if (!isRefundable(payment, canRefund) || !onRefund) {
+  if (!isStandardRefundEligible(payment) || !canRefund || !onRefund) {
     return null
   }
 
@@ -287,14 +292,58 @@ function RefundButton({
   )
 }
 
+function ResolveDuplicateButton({
+  canRefund,
+  onResolveDuplicate,
+  payment,
+  resolvingDuplicatePaymentId,
+}: Omit<PaymentItemProps, 'management' | 'onRefund' | 'onReconcile'>) {
+  if (
+    !canRefund ||
+    !isDuplicateChargeResolutionEligible(payment) ||
+    !onResolveDuplicate
+  ) {
+    return null
+  }
+
+  return (
+    <Button
+      aria-label={`Xử lý giao dịch trùng #${payment.id}`}
+      className="min-h-9 px-3 py-1.5"
+      loading={resolvingDuplicatePaymentId === payment.id}
+      onClick={() => onResolveDuplicate(payment)}
+      variant="outline"
+    >
+      Xử lý giao dịch trùng
+    </Button>
+  )
+}
+
+function ReviewReasonBadge({ payment }: { payment: Payment }) {
+  if (
+    payment.status !== 'REQUIRES_REVIEW' ||
+    !payment.reviewReason
+  ) {
+    return null
+  }
+
+  return (
+    <Badge tone="rose">
+      {getPaymentReviewReasonLabel(payment.reviewReason)}
+    </Badge>
+  )
+}
+
 function PaymentCards({
   bookingBasePath,
   canRefund,
   management,
   onReconcile,
   onRefund,
+  onResolveDuplicate,
   payments,
   reconcilingPaymentId,
+  resolvingDuplicatePaymentId,
 }: PaymentListProps & {
   canRefund: boolean
   management: boolean
@@ -311,6 +360,7 @@ function PaymentCards({
                     {getPaymentMethodLabel(payment.method)}
                   </p>
                   <PaymentStatusBadge status={payment.status} />
+                  <ReviewReasonBadge payment={payment} />
                 </div>
                 <p className="mt-1 text-sm text-muted">
                   Giao dịch #{payment.id} · Booking{' '}
@@ -330,6 +380,12 @@ function PaymentCards({
                   onReconcile={onReconcile}
                   payment={payment}
                   reconcilingPaymentId={reconcilingPaymentId}
+                />
+                <ResolveDuplicateButton
+                  canRefund={canRefund}
+                  onResolveDuplicate={onResolveDuplicate}
+                  payment={payment}
+                  resolvingDuplicatePaymentId={resolvingDuplicatePaymentId}
                 />
                 <RefundButton
                   canRefund={canRefund}
@@ -367,8 +423,10 @@ function ManagementPaymentTable({
   canRefund,
   onReconcile,
   onRefund,
+  onResolveDuplicate,
   payments,
   reconcilingPaymentId,
+  resolvingDuplicatePaymentId,
 }: Omit<PaymentListProps, 'management'> & { canRefund: boolean }) {
   return (
     <div className="hidden overflow-x-auto rounded-panel border border-line bg-surface shadow-card lg:block">
@@ -435,9 +493,11 @@ function ManagementPaymentTable({
               </td>
               <td className="px-4 py-3">
                 <PaymentStatusBadge status={payment.status} />
+                <ReviewReasonBadge payment={payment} />
                 {payment.status === 'REQUIRES_REVIEW' ? (
                   <p className="mt-2 max-w-44 text-xs leading-5 text-danger-strong">
-                    Cần đối soát thủ công, không tự khôi phục booking.
+                    {getPaymentReviewExplanation(payment) ??
+                      'Cần đối soát thủ công, không tự khôi phục booking.'}
                   </p>
                 ) : null}
               </td>
@@ -454,6 +514,12 @@ function ManagementPaymentTable({
                     onReconcile={onReconcile}
                     payment={payment}
                     reconcilingPaymentId={reconcilingPaymentId}
+                  />
+                  <ResolveDuplicateButton
+                    canRefund={canRefund}
+                    onResolveDuplicate={onResolveDuplicate}
+                    payment={payment}
+                    resolvingDuplicatePaymentId={resolvingDuplicatePaymentId}
                   />
                   <RefundButton
                     canRefund={canRefund}
@@ -476,8 +542,10 @@ export function PaymentList({
   management = false,
   onReconcile,
   onRefund,
+  onResolveDuplicate,
   payments,
   reconcilingPaymentId,
+  resolvingDuplicatePaymentId,
 }: PaymentListProps) {
   if (payments.length === 0) {
     return (
@@ -496,8 +564,10 @@ export function PaymentList({
         management={false}
         onReconcile={onReconcile}
         onRefund={onRefund}
+        onResolveDuplicate={onResolveDuplicate}
         payments={payments}
         reconcilingPaymentId={reconcilingPaymentId}
+        resolvingDuplicatePaymentId={resolvingDuplicatePaymentId}
       />
     )
   }
@@ -509,8 +579,10 @@ export function PaymentList({
         canRefund={canRefund}
         onReconcile={onReconcile}
         onRefund={onRefund}
+        onResolveDuplicate={onResolveDuplicate}
         payments={payments}
         reconcilingPaymentId={reconcilingPaymentId}
+        resolvingDuplicatePaymentId={resolvingDuplicatePaymentId}
       />
       <div className="lg:hidden">
         <PaymentCards
@@ -519,8 +591,10 @@ export function PaymentList({
           management
           onReconcile={onReconcile}
           onRefund={onRefund}
+          onResolveDuplicate={onResolveDuplicate}
           payments={payments}
           reconcilingPaymentId={reconcilingPaymentId}
+          resolvingDuplicatePaymentId={resolvingDuplicatePaymentId}
         />
       </div>
     </>

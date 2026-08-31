@@ -41,9 +41,10 @@ export const bookingApi = {
     return result.data;
   },
 
-  async createCustomer(input: CreateBookingInput) {
+  async createCustomer(input: CreateBookingInput, idempotencyKey: string) {
     const result = await apiRequest<Booking>("/bookings", {
       body: input,
+      headers: { "Idempotency-Key": idempotencyKey },
       method: "POST",
     });
     return result.data;
@@ -72,9 +73,13 @@ export const bookingApi = {
     return result.data;
   },
 
-  async createManagement(input: CreateManagementBookingInput) {
+  async createManagement(
+    input: CreateManagementBookingInput,
+    idempotencyKey: string,
+  ) {
     const result = await apiRequest<ManagementBooking>("/management/bookings", {
       body: input,
+      headers: { "Idempotency-Key": idempotencyKey },
       method: "POST",
     });
     return result.data;

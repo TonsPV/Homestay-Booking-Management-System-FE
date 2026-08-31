@@ -11,10 +11,16 @@ import type {
 export interface AuthContextValue {
   error: unknown
   isAuthenticated: boolean
+  login: (
+    input: CustomerLoginInput | UserLoginInput,
+    persistence?: AuthPersistence,
+  ) => Promise<AuthPrincipal>
+  /** @deprecated use `login` — kept for callers migrating off split flows. */
   loginCustomer: (
     input: CustomerLoginInput,
     persistence?: AuthPersistence,
   ) => Promise<AuthPrincipal>
+  /** @deprecated use `login` — kept for callers migrating off split flows. */
   loginUser: (
     input: UserLoginInput,
     persistence?: AuthPersistence,

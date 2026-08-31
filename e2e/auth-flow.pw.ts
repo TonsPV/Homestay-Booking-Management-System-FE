@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { dashboardSummary, fulfillJson, principalFor } from "./helpers";
+import { dashboardSummary, envelope, fulfillJson, principalFor } from "./helpers";
 
 test("anonymous customer route redirects to the customer login", async ({
   page,
@@ -9,7 +9,7 @@ test("anonymous customer route redirects to the customer login", async ({
 
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole("heading", { name: "Chào mừng bạn trở lại" }),
+    page.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
 });
 
@@ -65,6 +65,25 @@ for (const role of ["STAFF", "ADMIN"] as const) {
   }) => {
     const principal = principalFor({ actorType: "user", role });
 
+    /* The unified login flow tries the customer endpoint first and falls
+     * back to the user endpoint on 401; both must be mocked so no request
+     * reaches the real backend. */
+    await page.route("**/api/v1/auth/customers/login", async (route) => {
+      await route.fulfill({
+        body: JSON.stringify({
+          error: "Unauthorized",
+          errorCode: "COMMON_UNAUTHORIZED",
+          message: "Thong tin dang nhap khong hop le.",
+          path: "/api/v1/auth/customers/login",
+          requestId: "req-e2e-401",
+          statusCode: 401,
+          success: false,
+          timestamp: "2026-07-24T00:00:00.000Z",
+        }),
+        contentType: "application/json",
+        status: 401,
+      });
+    });
     await page.route("**/api/v1/auth/users/login", async (route) => {
       expect(route.request().method()).toBe("POST");
       await fulfillJson(
@@ -102,6 +121,22 @@ for (const role of ["STAFF", "ADMIN"] as const) {
         );
       },
     );
+    /* ADMIN lands on the bookings workflow (dashboard is dormant in
+     * Phase 0); the list endpoint must be mocked or the request reaches
+     * the real backend and the fake token gets the session revoked. */
+    await page.route("**/api/v1/management/bookings**", async (route) => {
+      const path = new URL(route.request().url()).pathname;
+      await route.fulfill({
+        body: JSON.stringify({
+          ...envelope([], path),
+          meta: {
+            pagination: { limit: 20, page: 1, total: 0, totalPages: 0 },
+          },
+        }),
+        contentType: "application/json",
+        status: 200,
+      });
+    });
 
     await page.goto("/management/login");
     await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
@@ -109,13 +144,13 @@ for (const role of ["STAFF", "ADMIN"] as const) {
     await page.getByRole("button", { name: "Đăng nhập" }).click();
 
     const expectedPath =
-      role === "STAFF" ? "/staff/counter" : "/management/dashboard";
+      role === "STAFF" ? "/staff/counter" : "/management/bookings";
     const expectedHeading =
-      role === "STAFF" ? "Tạo booking" : "Tổng quan vận hành";
+      role === "STAFF" ? "Tạo booking" : "Danh sách đặt phòng";
 
     await expect(page).toHaveURL(new RegExp(`${expectedPath}$`));
     await expect(
-      page.getByRole("heading", { name: expectedHeading }),
+      page.getByRole("heading", { name: expectedHeading }).first(),
     ).toBeVisible();
   });
 }

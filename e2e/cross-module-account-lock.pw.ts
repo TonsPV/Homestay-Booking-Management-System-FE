@@ -156,9 +156,9 @@ test("locking a staff account revokes its session on the next request", async ({
   await expect(page.getByText("Đã khóa tài khoản nhân viên.")).toBeVisible();
 
   await targetPage.reload();
-  await expect(targetPage).toHaveURL(/\/management\/login$/);
+  await expect(targetPage).toHaveURL(/\/login$/);
   await expect(
-    targetPage.getByRole("heading", { name: "Đăng nhập quản lý" }),
+    targetPage.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
   expect(locked).toBe(true);
 });
@@ -242,7 +242,7 @@ test("locking a customer account revokes its session on the next request", async
   await targetPage.reload();
   await expect(targetPage).toHaveURL(/\/login$/);
   await expect(
-    targetPage.getByRole("heading", { name: "Chào mừng bạn trở lại" }),
+    targetPage.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
   expect(locked).toBe(true);
 });

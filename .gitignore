@@ -68,3 +68,6 @@ CLAUDE.local.md
 # Codex Security output can contain source excerpts and vulnerability details.
 .codex-security/
 codex-security-results/
+
+# Local Hermes agent plans/state
+.hermes/

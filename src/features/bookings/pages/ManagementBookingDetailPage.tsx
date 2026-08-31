@@ -51,12 +51,27 @@ export function ManagementBookingDetailPage() {
   });
   const selectedStatus = watch("status");
   const booking = bookingQuery.data;
+  const transitionCapabilities = booking?.transitionCapabilities;
+  const cancelAllowed =
+    transitionCapabilities?.some(
+      (capability) =>
+        capability.targetStatus === "CANCELLED" && capability.allowed,
+    ) ?? false;
+  const updateBusy =
+    updateMutation.isPending || updateMutation.isReconciling;
+  const updateBlocked = updateBusy || updateMutation.isStateUnknown;
 
   useEffect(() => {
     if (booking) {
       reset({ status: booking.status, cancellationReason: "" });
     }
   }, [booking, reset]);
+
+  useEffect(() => {
+    if (booking && cancellationReason !== null && !cancelAllowed) {
+      setCancellationReason(null);
+    }
+  }, [booking, cancelAllowed, cancellationReason]);
 
   if (bookingQuery.isPending) {
     return <LoadingState label="Đang tải chi tiết booking…" />;
@@ -65,8 +80,19 @@ export function ManagementBookingDetailPage() {
   if (bookingQuery.isError || !booking) {
     return (
       <ErrorState
-        description={getBookingActionError(bookingQuery.error)}
-        onRetry={() => void bookingQuery.refetch()}
+        description={
+          updateMutation.isStateUnknown
+            ? "Không xác định được trạng thái booking hiện tại. Vui lòng làm mới/kiểm tra lại trước khi thao tác tiếp."
+            : getBookingActionError(bookingQuery.error)
+        }
+        onRetry={() => {
+          if (updateMutation.isStateUnknown && bookingId) {
+            void updateMutation.retryReconciliation(bookingId);
+            return;
+          }
+
+          void bookingQuery.refetch();
+        }}
       />
     );
   }
@@ -81,7 +107,6 @@ export function ManagementBookingDetailPage() {
     canSetInitialPassword: false,
     reasonCode: "COMMON_NOT_FOUND" as const,
   };
-  const transitionCapabilities = legacyBooking.transitionCapabilities;
   const transitionOptions =
     transitionCapabilities?.filter(
       (capability) =>
@@ -100,9 +125,14 @@ export function ManagementBookingDetailPage() {
         .filter((message): message is string => message !== undefined),
     ),
   );
+  const isTransitionAllowed = (status: UpdateBookingStatusFormValues["status"]) =>
+    transitionCapabilities?.some(
+      (capability) =>
+        capability.targetStatus === status && capability.allowed,
+    ) ?? false;
 
   const commitStatusUpdate = (values: UpdateBookingStatusFormValues) => {
-    if (!bookingId) {
+    if (!bookingId || updateBlocked || !isTransitionAllowed(values.status)) {
       return;
     }
 
@@ -129,6 +159,10 @@ export function ManagementBookingDetailPage() {
   };
 
   const submit = handleSubmit((values) => {
+    if (updateBlocked || !isTransitionAllowed(values.status)) {
+      return;
+    }
+
     setSuccessMessage(undefined);
 
     if (values.status === "CANCELLED") {
@@ -215,9 +249,38 @@ export function ManagementBookingDetailPage() {
             {successMessage}
           </Alert>
         ) : null}
-        {updateMutation.isError ? (
+        {updateMutation.isError && !updateMutation.isStateUnknown ? (
           <Alert className="mt-4" tone="error">
             {getBookingActionError(updateMutation.error)}
+          </Alert>
+        ) : null}
+        {updateMutation.isReconciling ? (
+          <Alert className="mt-4" tone="info">
+            Đang kiểm tra trạng thái booking mới nhất. Vui lòng chờ trước khi
+            thao tác lại.
+          </Alert>
+        ) : null}
+        {updateMutation.isStateUnknown ? (
+          <Alert
+            className="mt-4"
+            title="Chưa xác định được trạng thái booking"
+            tone="warning"
+          >
+            <p>
+              Không xác định được trạng thái booking hiện tại. Vui lòng làm
+              mới/kiểm tra lại trước khi thao tác tiếp.
+            </p>
+            <Button
+              className="mt-3"
+              onClick={() => {
+                if (bookingId) {
+                  void updateMutation.retryReconciliation(bookingId);
+                }
+              }}
+              variant="outline"
+            >
+              Thử tải lại trạng thái
+            </Button>
           </Alert>
         ) : null}
 
@@ -250,7 +313,7 @@ export function ManagementBookingDetailPage() {
               label="Trạng thái tiếp theo"
               error={errors.status?.message}
             >
-              <Select {...register("status")}>
+              <Select disabled={updateBlocked} {...register("status")}>
                 <option disabled value={booking.status}>
                   Chọn trạng thái tiếp theo
                 </option>
@@ -287,13 +350,11 @@ export function ManagementBookingDetailPage() {
             <div>
               <Button
                 disabled={
-                  updateMutation.isPending ||
+                  updateBlocked ||
                   selectedStatus === booking.status ||
-                  !transitionOptions.find(
-                    (capability) => capability.targetStatus === selectedStatus,
-                  )?.allowed
+                  !isTransitionAllowed(selectedStatus)
                 }
-                loading={updateMutation.isPending}
+                loading={updateBusy}
                 type="submit"
               >
                 Cập nhật trạng thái
@@ -304,11 +365,14 @@ export function ManagementBookingDetailPage() {
       </Card>
 
       <ConfirmationDialog
-        busy={updateMutation.isPending}
-        confirmDisabled={!bookingId}
+        busy={updateBusy}
+        confirmDisabled={!bookingId || !cancelAllowed || updateBlocked}
         confirmLabel="Xác nhận hủy booking"
         description="Hành động này thay đổi trạng thái booking và có thể giải phóng lịch phòng. Hãy kiểm tra đúng booking trước khi tiếp tục."
         onCancel={() => {
+          if (updateBusy) {
+            return;
+          }
           updateMutation.reset();
           setCancellationReason(null);
         }}
@@ -375,9 +439,38 @@ export function ManagementBookingDetailPage() {
           </div>
         ) : null}
 
-        {updateMutation.isError ? (
+        {updateMutation.isError && !updateMutation.isStateUnknown ? (
           <Alert className="mt-4" tone="error">
             {getBookingActionError(updateMutation.error)}
+          </Alert>
+        ) : null}
+        {updateMutation.isReconciling ? (
+          <Alert className="mt-4" tone="info">
+            Đang kiểm tra trạng thái booking mới nhất. Vui lòng chờ trước khi
+            thao tác lại.
+          </Alert>
+        ) : null}
+        {updateMutation.isStateUnknown ? (
+          <Alert
+            className="mt-4"
+            title="Chưa xác định được trạng thái booking"
+            tone="warning"
+          >
+            <p>
+              Không xác định được trạng thái booking hiện tại. Vui lòng làm
+              mới/kiểm tra lại trước khi thao tác tiếp.
+            </p>
+            <Button
+              className="mt-3"
+              onClick={() => {
+                if (bookingId) {
+                  void updateMutation.retryReconciliation(bookingId);
+                }
+              }}
+              variant="outline"
+            >
+              Thử tải lại trạng thái
+            </Button>
           </Alert>
         ) : null}
       </ConfirmationDialog>

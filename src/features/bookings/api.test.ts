@@ -35,16 +35,19 @@ describe('customer booking API contract', () => {
     vi.stubGlobal('fetch', fetchMock)
     configureAccessTokenProvider(() => 'customer-token')
 
-    await bookingApi.createCustomer({
-      roomId: '12',
-      checkInDate: '2026-08-10',
-      checkOutDate: '2026-08-12',
-      guestCount: 2,
-      contactName: 'Nguyễn Văn B',
-      contactPhone: '0901234567',
-      contactEmail: null,
-      customerNote: 'Phòng yên tĩnh',
-    })
+    await bookingApi.createCustomer(
+      {
+        roomId: '12',
+        checkInDate: '2026-09-10',
+        checkOutDate: '2026-09-12',
+        guestCount: 2,
+        contactName: 'Nguyễn Văn B',
+        contactPhone: '0901234567',
+        contactEmail: null,
+        customerNote: 'Phòng yên tĩnh',
+      },
+      'booking-customer-test-key',
+    )
 
     const [url, options] = fetchMock.mock.calls[0] as [
       URL,
@@ -58,16 +61,49 @@ describe('customer booking API contract', () => {
     expect(new Headers(options.headers).get('Authorization')).toBe(
       'Bearer customer-token',
     )
+    expect(new Headers(options.headers).get('Idempotency-Key')).toBe(
+      'booking-customer-test-key',
+    )
     expect(JSON.parse(String(options.body))).toEqual({
       roomId: '12',
-      checkInDate: '2026-08-10',
-      checkOutDate: '2026-08-12',
+      checkInDate: '2026-09-10',
+      checkOutDate: '2026-09-12',
       guestCount: 2,
       contactName: 'Nguyễn Văn B',
       contactPhone: '0901234567',
       contactEmail: null,
       customerNote: 'Phòng yên tĩnh',
     })
+  })
+
+  it('sends a request-intent key for management booking creation', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      successResponse({ id: '92', bookingCode: 'BK92' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'admin-token')
+
+    await bookingApi.createManagement(
+      {
+        roomId: '12',
+        checkInDate: '2026-09-10',
+        checkOutDate: '2026-09-12',
+        guestCount: 2,
+        contactName: 'Nguyễn Văn B',
+        contactPhone: '0901234567',
+      },
+      'booking-management-test-key',
+    )
+
+    const [url, options] = fetchMock.mock.calls[0] as [URL, RequestInit]
+
+    expect(url.toString()).toBe(
+      'http://localhost:3000/api/v1/management/bookings',
+    )
+    expect(options.method).toBe('POST')
+    expect(new Headers(options.headers).get('Idempotency-Key')).toBe(
+      'booking-management-test-key',
+    )
   })
 
   it('uses the supported customer list, detail, and cancel routes', async () => {

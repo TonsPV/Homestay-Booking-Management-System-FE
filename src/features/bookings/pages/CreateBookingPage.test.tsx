@@ -49,7 +49,7 @@ describe('CreateBookingPage', () => {
     render(
       <MemoryRouter
         initialEntries={[
-          '/bookings/new/12?checkIn=2026-08-10&checkOut=2026-08-12&guests=2',
+          '/bookings/new/12?checkIn=2099-08-10&checkOut=2099-08-12&guests=2',
         ]}
       >
         <Routes>
@@ -84,8 +84,8 @@ describe('CreateBookingPage', () => {
 
     expect(mutateMock.mock.calls[0]?.[0]).toEqual({
       roomId: '12',
-      checkInDate: '2026-08-10',
-      checkOutDate: '2026-08-12',
+      checkInDate: '2099-08-10',
+      checkOutDate: '2099-08-12',
       guestCount: 2,
       contactName: 'Nguyễn Văn B',
       contactPhone: '0901234567',

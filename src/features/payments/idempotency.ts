@@ -23,6 +23,12 @@ interface PersistedRefundAttempt {
   paymentId: string
 }
 
+interface PersistedDuplicateResolutionAttempt {
+  createdAt: number
+  idempotencyKey: string
+  paymentId: string
+}
+
 function readStorage<T>(key: string): T | null {
   if (typeof window === 'undefined') {
     return null
@@ -71,7 +77,7 @@ function fresh(createdAt: number) {
   )
 }
 
-function createKey(prefix: 'manual' | 'refund' | 'vnpay') {
+function createKey(prefix: 'duplicate' | 'manual' | 'refund' | 'vnpay') {
   const randomPart =
     typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? crypto.randomUUID()
@@ -240,4 +246,43 @@ export function getOrCreateRefundPaymentKey(paymentId: string) {
 
 export function clearRefundPaymentKey(paymentId: string) {
   removeStorage(refundStorageKey(paymentId))
+}
+
+function duplicateResolutionStorageKey(paymentId: string) {
+  return `${STORAGE_PREFIX}:duplicate-resolution:${paymentId}`
+}
+
+/**
+ * The key survives React re-renders and dialog retries: the same logical
+ * duplicate-resolution attempt must keep the same Idempotency-Key so the
+ * Backend replays (reconciles) instead of issuing a second outbound refund.
+ * It is stored separately from the generic refund key because the duplicate
+ * endpoint is its own money mutation with its own lifecycle.
+ */
+export function getOrCreateDuplicateResolutionKey(paymentId: string) {
+  const storageKey = duplicateResolutionStorageKey(paymentId)
+  const existing = readStorage<PersistedDuplicateResolutionAttempt>(
+    storageKey,
+  )
+
+  if (
+    existing?.paymentId === paymentId &&
+    typeof existing.idempotencyKey === 'string' &&
+    fresh(existing.createdAt)
+  ) {
+    return existing.idempotencyKey
+  }
+
+  const attempt: PersistedDuplicateResolutionAttempt = {
+    createdAt: Date.now(),
+    idempotencyKey: `${createKey('duplicate')}-${paymentId}`.slice(0, 100),
+    paymentId,
+  }
+
+  writeStorage(storageKey, attempt)
+  return attempt.idempotencyKey
+}
+
+export function clearDuplicateResolutionKey(paymentId: string) {
+  removeStorage(duplicateResolutionStorageKey(paymentId))
 }

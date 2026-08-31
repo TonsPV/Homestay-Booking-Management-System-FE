@@ -120,6 +120,8 @@
   --z-skip: 100;
 
   --container-app: 80rem;
+  --container-management: 110rem;
+  --tracking-eyebrow: 0.18em;
 }
 
 @layer base {

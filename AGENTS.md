@@ -21,6 +21,25 @@ the UI practical for a management tool and aligned with the Backend contract.
 - Use existing shared components before adding new visual primitives.
 - Keep buttons, tables, forms, dialogs, filters, and status badges consistent.
 - Make mobile layouts usable; text must not overflow buttons or cards.
+- Destructive and financial actions always use `variant="danger"` plus a
+  `ConfirmationDialog tone="danger"` (never `window.confirm`, never ghost
+  triggers).
+- Status colors follow the semantic policy in `DESIGN.md`: `warning` for
+  attention/SLA risk, `danger` only for failure/invalid/immediate
+  intervention (e.g. `REFUND_PENDING` stale past SLA is `warning`).
+- Management typography tops out at `font-bold`; `font-black` is reserved
+  for the brand wordmark.
+- Management reference implementations: `ManagementDashboardPage` (overview)
+  and `ManagementPaymentsPage` (dense operational list). Other management
+  screens must reuse their grammar instead of introducing new visual
+  patterns.
+- Mobile management lists use stacked, task-prioritized cards rather than
+  mirroring desktop table columns.
+- Rooms create/edit/images use dedicated routes
+  (`/management/rooms/new`, `/management/rooms/:id/edit`,
+  `/management/rooms/:id/images`); the list stays scan-first.
+- The payments list is scan-first with at most six columns; technical and
+  reconciliation metadata lives on `/management/payments/:id`.
 
 ## Frontend Module Checklist
 

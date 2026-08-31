@@ -133,6 +133,41 @@ describe('payment API contract', () => {
     expect(reconcileOptions.method).toBe('POST')
   })
 
+  it('resolves a duplicate charge on the dedicated endpoint with the idempotency key and no body', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      successResponse({ id: '95', status: 'REFUND_PENDING' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'admin-token')
+
+    await paymentApi.resolveDuplicateCharge('95', 'duplicate-key-1234')
+
+    const [url, options] = fetchMock.mock.calls[0] as [URL, RequestInit]
+    const headers = new Headers(options.headers)
+
+    expect(url.toString()).toBe(
+      'http://localhost:3000/api/v1/management/payments/95/resolve-duplicate-charge',
+    )
+    expect(options.method).toBe('POST')
+    expect(headers.get('Idempotency-Key')).toBe('duplicate-key-1234')
+    expect(headers.get('Authorization')).toBe('Bearer admin-token')
+    expect(options.body).toBeUndefined()
+  })
+
+  it('never sends the duplicate review to the generic refund endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      successResponse({ id: '95', status: 'REFUNDED' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'admin-token')
+
+    await paymentApi.resolveDuplicateCharge('95', 'duplicate-key-1234')
+
+    for (const [url] of fetchMock.mock.calls as Array<[URL, RequestInit]>) {
+      expect(url.pathname).not.toContain('/refund')
+    }
+  })
+
   it('forwards every VNPay return parameter to the public verifier', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       successResponse({

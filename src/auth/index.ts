@@ -1,7 +1,6 @@
 export { AuthProvider } from './AuthProvider'
 export { authQueryKeys } from './query-keys'
-export { CustomerLoginPage } from './pages/CustomerLoginPage'
-export { ManagementLoginPage } from './pages/ManagementLoginPage'
+export { LoginPage } from './pages/LoginPage'
 export { RegisterPage } from './pages/RegisterPage'
 export { useAuth } from './useAuth'
 export type {

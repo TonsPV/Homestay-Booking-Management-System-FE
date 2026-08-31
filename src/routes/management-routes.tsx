@@ -44,14 +44,19 @@ export const managementRoutes: RouteObject[] = [
       return { Component: ManagementIndexRoute };
     },
   },
-  {
-    path: "dashboard",
-    lazy: async () => {
-      const { ManagementDashboardPage } =
-        await import("@/features/dashboard/pages/ManagementDashboardPage");
-      return { Component: ManagementDashboardPage };
-    },
-  },
+  /* DORMANT (Phase 0): the Backend no longer exposes
+   * GET /management/dashboard/summary, so the dashboard page is unrouted.
+   * Source is preserved under src/features/dashboard for a possible
+   * capability return; do not re-add this route until the endpoint exists.
+   * {
+   *   path: "dashboard",
+   *   lazy: async () => {
+   *     const { ManagementDashboardPage } =
+   *       await import("@/features/dashboard/pages/ManagementDashboardPage");
+   *     return { Component: ManagementDashboardPage };
+   *   },
+   * },
+   */
   {
     path: "rooms",
     lazy: async () => {
@@ -99,7 +104,7 @@ export const managementRoutes: RouteObject[] = [
     element: (
       <RouteGuard
         actor="user"
-        loginPath="/management/login"
+        loginPath="/login"
         roles={ADMIN_ONLY_ROLES}
       />
     ),

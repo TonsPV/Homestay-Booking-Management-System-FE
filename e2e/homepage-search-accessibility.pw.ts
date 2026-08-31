@@ -53,13 +53,13 @@ test("homepage search remains accessible and navigates correctly", async ({
     "true",
   );
 
-  await page.getByLabel("Nhận phòng").fill("2026-08-10");
-  await page.getByLabel("Trả phòng").fill("2026-08-12");
+  await page.getByLabel("Nhận phòng").fill("2099-08-10");
+  await page.getByLabel("Trả phòng").fill("2099-08-12");
   await page.getByLabel("Số khách").fill("3");
   await page.getByRole("button", { name: "Tìm phòng" }).click();
 
   await expect(page).toHaveURL(
-    /\/rooms\/search\?checkIn=2026-08-10&checkOut=2026-08-12&guests=3$/,
+    /\/rooms\/search\?checkIn=2099-08-10&checkOut=2099-08-12&guests=3$/,
   );
 });
 

@@ -66,6 +66,7 @@ test('customer searches availability and books with profile contact', async ({
 }) => {
   await installSession(page, { actorType: 'customer' })
   let submittedBooking: Record<string, unknown> | undefined
+  let submittedBookingIntent: string | null = null
   let submittedCancellation: Record<string, unknown> | undefined
 
   await page.route('**/api/v1/room-types?**', async (route) => {
@@ -92,6 +93,8 @@ test('customer searches availability and books with profile contact', async ({
     }
 
     submittedBooking = route.request().postDataJSON()
+    submittedBookingIntent =
+      route.request().headers()['idempotency-key'] ?? null
     await fulfillJson(route, booking, '/api/v1/bookings', 201)
   })
   await page.route('**/api/v1/bookings/900', async (route) => {
@@ -135,6 +138,7 @@ test('customer searches availability and books with profile contact', async ({
     guestCount: 2,
     roomId: '10',
   })
+  expect(submittedBookingIntent).toMatch(/^booking-customer-/)
 
   await page.getByRole('button', { name: 'Hủy đặt phòng' }).click()
   await page.getByLabel('Lý do hủy').fill('Khách đổi kế hoạch')

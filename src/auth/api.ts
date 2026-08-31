@@ -5,6 +5,7 @@ import type {
   AuthMeCustomerResponseDto,
   AuthMeUserResponseDto,
 } from '@/api/generated'
+import { ApiError } from '@/api/errors'
 
 import type {
   CustomerLoginInput,
@@ -76,6 +77,24 @@ export async function loginUser(input: UserLoginInput) {
   }
 
   return normalizeLoginResponse(result.data, 'user')
+}
+
+/* Unified password login: try the customer identity endpoint first, fall
+ * back to the user endpoint only when the backend rejects the credential.
+ * Backend remains the authority on actor classification; the frontend never
+ * asks the user to declare an actor type. */
+export async function login(
+  input: CustomerLoginInput | UserLoginInput,
+): Promise<LoginResponse> {
+  try {
+    return await loginCustomer(input)
+  } catch (error) {
+    if (error instanceof ApiError && error.isStatus(401)) {
+      return loginUser(input)
+    }
+
+    throw error
+  }
 }
 
 export async function getMe(signal?: AbortSignal) {

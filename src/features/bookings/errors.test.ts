@@ -23,6 +23,14 @@ describe("getBookingActionError", () => {
     expect(
       getBookingActionError(httpError("BOOKING_CANCELLATION_NOT_ALLOWED")),
     ).toBe("Booking không thể hủy ở trạng thái hiện tại.");
+    expect(
+      getBookingActionError(httpError("BOOKING_REQUEST_INTENT_CONFLICT")),
+    ).toContain("kiểm tra danh sách booking");
+    expect(
+      getBookingActionError(
+        httpError("BOOKING_ROOM_MISSING_FOR_BOOKING"),
+      ),
+    ).toContain("không còn liên kết với phòng");
   });
 
   it("uses a safe fallback for an unknown booking conflict", () => {

@@ -18,6 +18,12 @@ import { useBlockRoomDates } from '@/features/rooms/hooks'
 import { roomKeys } from '@/features/rooms/query-keys'
 import { roomTypeKeys } from '@/features/room-types/query-keys'
 
+vi.mock('@/auth/useAuth', () => ({
+  useAuth: () => ({
+    principal: { actorType: 'user', id: 'staff-7' },
+  }),
+}))
+
 function createHarness() {
   const queryClient = new QueryClient({
     defaultOptions: {

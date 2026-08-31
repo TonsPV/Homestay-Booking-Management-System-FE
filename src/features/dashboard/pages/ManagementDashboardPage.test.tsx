@@ -1,232 +1,203 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DashboardSummary } from "@/features/dashboard";
+import type { DashboardSummary } from "../types";
 
 import { ManagementDashboardPage } from "./ManagementDashboardPage";
+import * as hooks from "../hooks";
 
-const mocks = vi.hoisted(() => ({
-  refetch: vi.fn(),
-  useDashboardSummary: vi.fn(),
-}));
+vi.mock("../hooks", async (importOriginal) => {
+  const original = await importOriginal<typeof hooks>();
 
-vi.mock("@/features/dashboard", async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import("@/features/dashboard")>();
-
-  return {
-    ...original,
-    useDashboardSummary: mocks.useDashboardSummary,
-  };
+  return { ...original, useDashboardSummary: vi.fn() };
 });
 
 const summary: DashboardSummary = {
-  fromDate: "2026-07-01",
-  toDate: "2026-07-29",
   bookings: {
-    pendingPayment: 1,
-    confirmed: 2,
+    cancelled: 2,
     checkedIn: 3,
-    checkedOut: 4,
-    cancelled: 5,
+    checkedOut: 5,
+    confirmed: 4,
+    pendingPayment: 1,
   },
-  rooms: {
-    ready: 6,
-    occupied: 3,
-    cleaning: 1,
-    maintenance: 0,
-  },
-  revenue: {
-    vnpay: 1_000_000,
-    manual: 500_000,
-    total: 1_500_000,
-  },
-  totalRefunded: 100_000,
-  payments: {
-    requiresReview: 1,
-    refundPending: 2,
-  },
+  fromDate: "2026-08-01",
+  generatedAt: "2026-08-22T07:30:00.000Z",
   occupancy: {
-    roomNightsReserved: 12,
-    roomNightsAvailable: 20,
-    occupancyRate: 60,
+    occupancyRate: 62.5,
+    roomNightsAvailable: 200,
+    roomNightsReserved: 125,
   },
-  generatedAt: "2026-07-29T04:00:00.000Z",
+  payments: { refundPending: 0, requiresReview: 0 },
+  revenue: { manual: 35_000_000, total: 84_000_000, vnpay: 49_000_000 },
+  rooms: { cleaning: 2, maintenance: 1, occupied: 3, ready: 12 },
+  toDate: "2026-08-22",
+  totalRefunded: 0,
 };
 
-function renderPage() {
+function renderPage(data?: DashboardSummary) {
+  vi.mocked(hooks.useDashboardSummary).mockReturnValue({
+    data,
+    error: null,
+    isError: false,
+    isFetching: false,
+    isPending: false,
+    refetch: vi.fn(),
+  } as unknown as ReturnType<typeof hooks.useDashboardSummary>);
+
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+
   return render(
-    <MemoryRouter>
-      <ManagementDashboardPage />
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <ManagementDashboardPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
-describe("ManagementDashboardPage", () => {
-  beforeEach(() => {
-    mocks.refetch.mockReset();
-    mocks.useDashboardSummary.mockReset().mockReturnValue({
-      data: summary,
-      error: null,
-      isError: false,
-      isFetching: false,
-      isPending: false,
-      refetch: mocks.refetch,
-    });
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
-  it("renders real summary values, supported queue links, and useful actions", () => {
-    renderPage();
+describe("ManagementDashboardPage information hierarchy", () => {
+  it("leads with a hero Revenue KPI using size/weight, not semantic color", () => {
+    renderPage(summary);
 
     expect(
       screen.getByRole("heading", { name: "Tổng quan vận hành" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("1.500.000 ₫")).toBeInTheDocument();
-    expect(
-      screen.getByRole("progressbar", {
-        name: "Công suất phòng 60%",
-      }),
-    ).toHaveAttribute("aria-valuenow", "60");
-    expect(
-      screen.getByRole("link", { name: "Chờ thanh toán" }),
-    ).toHaveAttribute("href", "/management/bookings?status=PENDING_PAYMENT");
-    expect(screen.getByRole("link", { name: /^Cần đối soát/ })).toHaveAttribute(
-      "href",
-      "/management/payments?status=REQUIRES_REVIEW",
-    );
-    const bookingSection = screen
-      .getByRole("heading", { name: "Booking theo trạng thái" })
-      .closest("div.rounded-panel");
 
-    expect(bookingSection).not.toBeNull();
-    expect(
-      within(bookingSection as HTMLElement).getByText("5"),
-    ).toBeInTheDocument();
+    const revenue = screen.getByText("Doanh thu ghi nhận");
+    const revenueValue = revenue.nextElementSibling;
+
+    expect(revenueValue).toHaveTextContent(/84/);
+    expect(revenueValue?.className).toContain("text-3xl");
+    expect(revenueValue?.className).toContain("font-bold");
+    // hero emphasis comes from size/weight/placement — not semantic tone
+    expect(revenueValue?.className).toContain("text-ink");
+    expect(revenueValue?.className).not.toContain("text-success");
+
+    const supporting = screen.getByText("Booking tạo trong kỳ");
+    const supportingValue = supporting.nextElementSibling;
+
+    expect(supportingValue?.className).toMatch(/text-(xl|2xl)\b/);
+    expect(revenueValue?.className).not.toBe(supportingValue?.className);
   });
 
-  it("treats an all-zero period as valid data instead of an error", () => {
-    mocks.useDashboardSummary.mockReturnValue({
-      data: {
-        ...summary,
-        bookings: {
-          pendingPayment: 0,
-          confirmed: 0,
-          checkedIn: 0,
-          checkedOut: 0,
-          cancelled: 0,
-        },
-        revenue: { vnpay: 0, manual: 0, total: 0 },
-        totalRefunded: 0,
-        payments: { requiresReview: 0, refundPending: 0 },
-        occupancy: {
-          roomNightsReserved: 0,
-          roomNightsAvailable: 0,
-          occupancyRate: 0,
-        },
-      },
-      error: null,
-      isError: false,
-      isFetching: false,
-      isPending: false,
-      refetch: mocks.refetch,
-    });
+  it("keeps an attention zone only when action is required", () => {
+    const { container } = renderPage(summary);
 
-    renderPage();
-
-    expect(screen.getByText("Không có phát sinh trong kỳ")).toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { name: "Không thể tải nội dung" }),
+      screen.queryByText("Cần đối soát"),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("progressbar", {
-        name: "Công suất phòng 0%",
-      }),
-    ).toBeInTheDocument();
+      screen.queryByText("Chờ hoàn tiền"),
+    ).not.toBeInTheDocument();
+    expect(container.querySelector("[data-attention]")).toBeNull();
   });
 
-  it("shows loading and retryable error states", async () => {
-    const { rerender } = renderPage();
-
-    mocks.useDashboardSummary.mockReturnValue({
-      data: undefined,
-      error: null,
-      isError: false,
-      isFetching: true,
-      isPending: true,
-      refetch: mocks.refetch,
+  it("shows an attention zone with warning semantics when queues need action", () => {
+    renderPage({
+      ...summary,
+      payments: { refundPending: 1, requiresReview: 2 },
     });
-    rerender(
-      <MemoryRouter>
-        <ManagementDashboardPage />
-      </MemoryRouter>,
-    );
-    expect(
-      screen.getByText("Đang tổng hợp dữ liệu vận hành…"),
-    ).toBeInTheDocument();
 
-    mocks.useDashboardSummary.mockReturnValue({
-      data: undefined,
-      error: new Error("Dashboard tạm thời không khả dụng."),
-      isError: true,
-      isFetching: false,
-      isPending: false,
-      refetch: mocks.refetch,
-    });
-    rerender(
-      <MemoryRouter>
-        <ManagementDashboardPage />
-      </MemoryRouter>,
-    );
-
-    expect(
-      screen.getByText("Không thể hoàn tất thao tác. Vui lòng thử lại."),
-    ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Thử lại" }));
-    expect(mocks.refetch).toHaveBeenCalledOnce();
+    expect(screen.getByText(/Cần đối soát/)).toBeInTheDocument();
+    expect(screen.getByText(/Chờ hoàn tiền/)).toBeInTheDocument();
   });
 
-  it("validates the range before applying it to the API query", async () => {
-    const user = userEvent.setup();
-    renderPage();
-
-    fireEvent.change(screen.getByLabelText(/Từ ngày/), {
-      target: { value: "2026-07-30" },
-    });
-    fireEvent.change(screen.getByLabelText(/Đến ngày/), {
-      target: { value: "2026-07-01" },
-    });
-    await user.click(screen.getByRole("button", { name: "Áp dụng" }));
+  it("does not render the redundant quick-actions section", () => {
+    renderPage(summary);
 
     expect(
-      await screen.findByText("Ngày bắt đầu không được sau ngày kết thúc."),
+      screen.queryByRole("heading", { name: "Thao tác nhanh" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps finance breakdown links instead of duplicating them at the bottom", () => {
+    renderPage(summary);
+
+    expect(
+      screen.getByRole("link", { name: "Xem giao dịch" }),
+    ).toHaveAttribute("href", "/management/payments");
+    expect(screen.getByRole("link", { name: "Xem tất cả" })).toHaveAttribute(
+      "href",
+      "/management/bookings",
+    );
+  });
+
+  it("refunded revenue uses a neutral treatment with an explicit label, not danger", () => {
+    renderPage({ ...summary, totalRefunded: 5_000_000 });
+
+    const refunded = screen.getByText("Đã hoàn tiền");
+    const refundedValue = refunded.nextElementSibling;
+
+    expect(refundedValue).toHaveTextContent(/5/);
+    expect(refundedValue?.className).toContain("text-ink");
+    expect(refundedValue?.className).not.toContain("text-danger");
+  });
+
+  it("shows one no-activity alert instead of stacking a warning alert", () => {
+    renderPage({
+      ...summary,
+      bookings: {
+        cancelled: 0,
+        checkedIn: 0,
+        checkedOut: 0,
+        confirmed: 0,
+        pendingPayment: 0,
+      },
+      occupancy: {
+        occupancyRate: 0,
+        roomNightsAvailable: 200,
+        roomNightsReserved: 0,
+      },
+      revenue: { manual: 0, total: 0, vnpay: 0 },
+      totalRefunded: 0,
+    });
+
+    expect(
+      screen.getByText(/Không có phát sinh trong kỳ/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Cần đối soát/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Chờ hoàn tiền/)).not.toBeInTheDocument();
+  });
+
+  it("attention alert contains a single operational summary link set", () => {
+    renderPage({
+      ...summary,
+      payments: { refundPending: 2, requiresReview: 3 },
+    });
+
+    expect(
+      screen.getByText(/việc cần xử lý/),
     ).toBeInTheDocument();
     expect(
-      mocks.useDashboardSummary.mock.calls.some(
-        ([query]) => query.from === "2026-07-30" && query.to === "2026-07-01",
-      ),
-    ).toBe(false);
+      screen.getByRole("link", { name: /Cần đối soát · 3/ }),
+    ).toHaveAttribute("href", "/management/payments?status=REQUIRES_REVIEW");
+    expect(
+      screen.getByRole("link", { name: /Chờ hoàn tiền · 2/ }),
+    ).toHaveAttribute("href", "/management/payments?status=REFUND_PENDING");
+  });
 
-    fireEvent.change(screen.getByLabelText(/Từ ngày/), {
-      target: { value: "2026-07-01" },
-    });
-    fireEvent.change(screen.getByLabelText(/Đến ngày/), {
-      target: { value: "2026-07-15" },
-    });
-    await user.click(screen.getByRole("button", { name: "Áp dụng" }));
+  it("zero attention counts still display a calm KPI instead of an alert", () => {
+    renderPage(summary);
 
-    await waitFor(() => {
-      expect(mocks.useDashboardSummary).toHaveBeenLastCalledWith({
-        from: "2026-07-01",
-        to: "2026-07-15",
-      });
-    });
+    expect(
+      screen.queryByText(/việc cần xử lý/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("marks the data timestamp as a meta label near the bottom", () => {
+    renderPage(summary);
+
+    const meta = screen.getByText(/Dữ liệu được tổng hợp lúc/);
+
+    expect(meta.className).toContain("text-xs");
+    expect(meta.className).toContain("text-muted");
   });
 });

@@ -4,8 +4,8 @@ export const authRoutes: RouteObject[] = [
   {
     path: 'login',
     lazy: async () => {
-      const { CustomerLoginRoute } = await import('./AuthRouteAdapters')
-      return { Component: CustomerLoginRoute }
+      const { LoginRoute } = await import('./AuthRouteAdapters')
+      return { Component: LoginRoute }
     },
   },
   {
@@ -18,8 +18,8 @@ export const authRoutes: RouteObject[] = [
   {
     path: 'management/login',
     lazy: async () => {
-      const { ManagementLoginRoute } = await import('./AuthRouteAdapters')
-      return { Component: ManagementLoginRoute }
+      const { LoginRoute } = await import('./AuthRouteAdapters')
+      return { Component: LoginRoute }
     },
   },
 ]

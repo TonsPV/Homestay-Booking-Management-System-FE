@@ -83,10 +83,10 @@ describe("RoomSearchPage", () => {
     ).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/Nhận phòng/), {
-      target: { value: "2026-08-10" },
+      target: { value: "2099-08-10" },
     });
     fireEvent.change(screen.getByLabelText(/Trả phòng/), {
-      target: { value: "2026-08-12" },
+      target: { value: "2099-08-12" },
     });
     fireEvent.click(screen.getByRole("button", { name: /Tìm phòng/i }));
 
@@ -94,8 +94,8 @@ describe("RoomSearchPage", () => {
     expect(await screen.findByText("Phòng hướng vườn")).toBeInTheDocument();
     expect(roomSearchMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        checkIn: "2026-08-10",
-        checkOut: "2026-08-12",
+        checkIn: "2099-08-10",
+        checkOut: "2099-08-12",
         guests: 1,
       }),
     );
@@ -106,7 +106,7 @@ describe("RoomSearchPage", () => {
     render(
       <MemoryRouter
         initialEntries={[
-          "/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=2",
+          "/rooms/search?checkIn=2099-08-10&checkOut=2099-08-12&guests=2",
         ]}
       >
         <LocationProbe />
@@ -133,7 +133,7 @@ describe("RoomSearchPage", () => {
     render(
       <MemoryRouter
         initialEntries={[
-          "/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=2",
+          "/rooms/search?checkIn=2099-08-10&checkOut=2099-08-12&guests=2",
         ]}
       >
         <RoomSearchPage onBookRoom={onBookRoom} />
@@ -145,8 +145,8 @@ describe("RoomSearchPage", () => {
     expect(onBookRoom).toHaveBeenCalledWith(
       expect.objectContaining({ id: "1" }),
       expect.objectContaining({
-        checkIn: "2026-08-10",
-        checkOut: "2026-08-12",
+        checkIn: "2099-08-10",
+        checkOut: "2099-08-12",
       }),
     );
   });

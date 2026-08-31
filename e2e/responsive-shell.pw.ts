@@ -40,9 +40,9 @@ test("public and auth shells remain usable on desktop and mobile", async ({
 
   await page.goto("/login");
   await expect(
-    page.getByRole("heading", { name: "Chào mừng bạn trở lại" }),
+    page.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
-  await expect(page).toHaveTitle("Đăng nhập khách hàng | Homestay Green");
+  await expect(page).toHaveTitle("Đăng nhập | Homestay Green");
   await expect(page.locator("main")).toHaveCount(1);
   await expectNoDocumentOverflow(page);
 });

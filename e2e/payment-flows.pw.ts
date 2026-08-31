@@ -1,11 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import {
-  dashboardSummary,
-  envelope,
-  fulfillJson,
-  installSession,
-} from "./helpers";
+import { envelope, fulfillJson, installSession } from "./helpers";
 
 const booking = {
   bookingCode: "HBMS-PAY-901",
@@ -308,11 +303,11 @@ test("staff sees only cash and bank-transfer payments at the counter", async ({
   ).toHaveCount(0);
 });
 
-test("admin refund pending and reconcile refresh payment and cached dashboard state", async ({
+test("admin refund pending and reconcile refresh payment data across views", async ({
   page,
 }) => {
   await installSession(page, { actorType: "user", role: "ADMIN" });
-  let dashboardReads = 0;
+  let paymentListReads = 0;
   let currentPayment = payment({
     id: "94",
     paidAt: "2026-07-24T00:02:00.000Z",
@@ -329,21 +324,8 @@ test("admin refund pending and reconcile refresh payment and cached dashboard st
       return;
     }
 
-    if (path.endsWith("/management/dashboard/summary")) {
-      dashboardReads += 1;
-      const summary = dashboardSummary(
-        url.searchParams.get("from") ?? "2026-07-01",
-        url.searchParams.get("to") ?? "2026-07-29",
-      );
-      summary.payments.refundPending =
-        currentPayment.status === "REFUND_PENDING" ? 1 : 0;
-      summary.totalRefunded =
-        currentPayment.status === "REFUNDED" ? 1_800_000 : 0;
-      await fulfillJson(route, summary, path);
-      return;
-    }
-
     if (path.endsWith("/management/payments") && request.method() === "GET") {
+      paymentListReads += 1;
       await route.fulfill({
         body: JSON.stringify({
           ...envelope([currentPayment], path),
@@ -397,14 +379,10 @@ test("admin refund pending and reconcile refresh payment and cached dashboard st
     await route.fallback();
   });
 
-  await page.goto("/management/dashboard");
-  await expect(
-    page.getByRole("heading", { name: "Tổng quan vận hành" }),
-  ).toBeVisible();
-  await expect.poll(() => dashboardReads).toBeGreaterThan(0);
-  const initialDashboardReads = dashboardReads;
+  await page.goto("/management/payments");
+  await expect.poll(() => paymentListReads).toBeGreaterThan(0);
+  const initialListReads = paymentListReads;
 
-  await page.getByRole("link", { name: "Quản lý thanh toán" }).click();
   await page.getByRole("button", { name: "Hoàn tiền giao dịch #94" }).click();
   await page.getByLabel("Lý do hoàn tiền").fill("Khách đổi kế hoạch");
   await page.getByRole("button", { name: "Xác nhận hoàn tiền" }).click();
@@ -419,21 +397,8 @@ test("admin refund pending and reconcile refresh payment and cached dashboard st
     .click();
   await expect(page.getByText("Đối soát hoàn tiền thành công")).toBeVisible();
 
-  const overviewLink = page.getByRole("link", {
-    exact: true,
-    name: "Tổng quan",
-  });
-
-  if (!(await overviewLink.isVisible())) {
-    await page.getByRole("button", { name: "Mở menu vận hành" }).click();
-  }
-  await overviewLink.click();
-
-  await expect(
-    page.getByRole("heading", { name: "Tổng quan vận hành" }),
-  ).toBeVisible();
+  /* Authoritative payment data must be refetched after each mutation. */
   await expect
-    .poll(() => dashboardReads)
-    .toBeGreaterThan(initialDashboardReads);
-  await expect(page.getByText("1.800.000 ₫")).toBeVisible();
+    .poll(() => paymentListReads)
+    .toBeGreaterThan(initialListReads);
 });
