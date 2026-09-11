@@ -65,10 +65,24 @@ export const managementRoutes: RouteObject[] = [
     },
   },
   {
+    path: "rooms/new",
+    lazy: async () => {
+      const { ManagementCreateRoomRoute } = await import("./RoomRouteAdapters");
+      return { Component: ManagementCreateRoomRoute };
+    },
+  },
+  {
     path: "rooms/:roomId",
     lazy: async () => {
       const { ManagementRoomDetailRoute } = await import("./RoomRouteAdapters");
       return { Component: ManagementRoomDetailRoute };
+    },
+  },
+  {
+    path: "rooms/:roomId/edit",
+    lazy: async () => {
+      const { ManagementEditRoomRoute } = await import("./RoomRouteAdapters");
+      return { Component: ManagementEditRoomRoute };
     },
   },
   {
@@ -98,6 +112,13 @@ export const managementRoutes: RouteObject[] = [
     lazy: async () => {
       const { ManagementPaymentsPage } = await import("@/features/payments");
       return { Component: ManagementPaymentsPage };
+    },
+  },
+  {
+    path: "payments/:paymentId",
+    lazy: async () => {
+      const { PaymentDetailPage } = await import("@/features/payments");
+      return { Component: PaymentDetailPage };
     },
   },
   {

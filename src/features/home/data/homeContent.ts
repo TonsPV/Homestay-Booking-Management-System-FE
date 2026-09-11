@@ -13,7 +13,7 @@ export const homeContent = {
     heading: "Một nơi để thật sự nghỉ ngơi.",
     description:
       "Chọn kỳ lưu trú, khám phá phòng còn trống và hoàn tất đặt phòng trong một hành trình rõ ràng.",
-    primaryCta: { label: "Tìm phòng trống", to: "/rooms/search" },
+    primaryCta: { label: "Tìm phòng trống", to: "/rooms" },
     secondaryCta: { label: "Khám phá không gian", to: "/rooms" },
   },
   trust: [
@@ -25,11 +25,11 @@ export const homeContent = {
     {
       icon: BadgeDollarSign,
       title: "Giá hiển thị rõ ràng",
-      description: "Mức giá phòng lấy trực tiếp từ hệ thống.",
+      description: "Mức giá theo đêm được hiển thị ngay trên từng phòng.",
     },
     {
       icon: ShieldCheck,
-      title: "Booking có thể theo dõi",
+      title: "Đặt phòng dễ theo dõi",
       description: "Đăng nhập để xem trạng thái đặt phòng và thanh toán.",
     },
   ] satisfies Array<{
@@ -57,7 +57,7 @@ export const homeContent = {
         icon: Headphones,
         name: "Hỗ trợ rõ ràng",
         description:
-          "Mỗi trạng thái booking đều có hướng dẫn cho bước tiếp theo.",
+          "Mỗi trạng thái đặt phòng đều có hướng dẫn cho bước tiếp theo.",
       },
       {
         icon: BadgeDollarSign,
@@ -84,7 +84,7 @@ export const homeContent = {
   finalCta: {
     heading: "Tìm kỳ nghỉ phù hợp với bạn hôm nay.",
     description: "Chọn ngày lưu trú và xem ngay những phòng thực sự còn trống.",
-    primaryCta: { label: "Bắt đầu tìm phòng", to: "/rooms/search" },
+    primaryCta: { label: "Bắt đầu tìm phòng", to: "/rooms" },
     secondaryCta: { label: "Khám phá tất cả phòng", to: "/rooms" },
   },
 } as const;

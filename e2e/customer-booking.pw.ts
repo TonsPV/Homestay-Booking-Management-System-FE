@@ -75,6 +75,9 @@ test('customer searches availability and books with profile contact', async ({
   await page.route('**/api/v1/amenities?**', async (route) => {
     await fulfillJson(route, [], '/api/v1/amenities')
   })
+  await page.route(/\/api\/v1\/rooms(?:\?.*)?$/, async (route) => {
+    await fulfillJson(route, [room], '/api/v1/rooms')
+  })
   await page.route('**/api/v1/rooms/search?**', async (route) => {
     const requestUrl = new URL(route.request().url())
 
@@ -112,18 +115,28 @@ test('customer searches availability and books with profile contact', async ({
     await fulfillJson(route, [], '/api/v1/bookings/900/payments')
   })
 
-  await page.goto('/rooms/search')
+  await page.goto('/rooms')
   await page.getByLabel('Nhận phòng').fill('2099-01-10')
   await page.getByLabel('Trả phòng').fill('2099-01-12')
   await page.getByText('1 khách', { exact: true }).click()
   await page.getByRole('button', { name: 'Tăng số khách' }).click()
   await page.getByRole('button', { name: 'Xong' }).click()
-  await page.getByRole('button', { name: 'Tìm phòng' }).click()
+  await page.getByRole('button', { name: 'Tìm phòng trống' }).click()
 
   await expect(page.getByText('Suite Vườn')).toBeVisible()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
   await expect(page.getByRole('heading', { name: 'Suite Vườn' })).toBeVisible()
-  await page.getByRole('button', { name: 'Chọn phòng này' }).click()
+  await page
+    .getByRole('button', { name: 'Tiếp tục đặt phòng' })
+    .first()
+    .click()
+  await expect(
+    page.getByRole('heading', { name: 'Xác nhận kỳ nghỉ' }),
+  ).toBeVisible()
+  await expect(page.getByText('900.000 ₫')).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Tóm tắt kỳ lưu trú' }),
+  ).toContainText('2 đêm')
   await page.getByRole('button', { name: 'Tạo đặt phòng' }).click()
 
   await expect(page.getByText('HBMS-000900').first()).toBeVisible()

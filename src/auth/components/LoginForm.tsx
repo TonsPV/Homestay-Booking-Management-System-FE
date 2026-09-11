@@ -9,7 +9,7 @@ import type { AuthPrincipal } from '../types'
 import { getAuthActionError } from '../errors'
 import { Alert } from '@/shared/components/Feedback'
 import { Button } from '@/shared/components/Button'
-import { Field, Input } from '@/shared/components/FormControls'
+import { Field, Input, PasswordInput } from '@/shared/components/FormControls'
 
 import { useAuth } from '../useAuth'
 import {
@@ -111,10 +111,9 @@ export function LoginForm({
         </Field>
 
         <Field error={errors.password?.message} label="Mật khẩu" required>
-          <Input
+          <PasswordInput
             autoComplete="current-password"
             placeholder="Nhập mật khẩu"
-            type="password"
             {...register('password')}
           />
         </Field>

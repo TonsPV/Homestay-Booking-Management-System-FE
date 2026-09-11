@@ -114,10 +114,14 @@
   --duration-slow: 400ms;
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --z-sticky: 30;
-  --z-overlay: 40;
-  --z-modal: 50;
-  --z-skip: 100;
+  --z-index-sticky: 30;
+  --z-index-overlay: 40;
+  --z-index-modal: 70;
+  --z-index-skip: 100;
+  --z-sticky: var(--z-index-sticky);
+  --z-overlay: var(--z-index-overlay);
+  --z-modal: var(--z-index-modal);
+  --z-skip: var(--z-index-skip);
 
   --container-app: 80rem;
   --container-management: 110rem;
@@ -147,6 +151,11 @@
 
   ::selection {
     background: color-mix(in srgb, var(--color-brand) 22%, transparent);
+  }
+
+  input[type='password']::-ms-clear,
+  input[type='password']::-ms-reveal {
+    display: none;
   }
 }
 

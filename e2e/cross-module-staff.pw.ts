@@ -328,7 +328,9 @@ test("staff login continues through counter booking, manual payment, check-in an
 
   await page.goto("/management/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-  await page.getByLabel("Mật khẩu").fill("StrongPassword123!");
+  await page
+    .getByRole("textbox", { name: "Mật khẩu", exact: true })
+    .fill("StrongPassword123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
 
   await expect(page).toHaveURL(/\/staff\/counter$/);

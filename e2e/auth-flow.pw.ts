@@ -13,7 +13,53 @@ test("anonymous customer route redirects to the customer login", async ({
   ).toBeVisible();
 });
 
-test("customer login uses the customer actor and opens bookings", async ({
+test("registration password controls remain aligned and can be toggled repeatedly", async ({
+  page,
+}) => {
+  await page.goto("/register");
+
+  const password = page.getByLabel(/^Mật khẩu/);
+  const confirmation = page.getByLabel(/^Xác nhận mật khẩu/);
+  const revealControls = page.getByRole("button", {
+    name: "Hiện mật khẩu",
+  });
+
+  await expect(revealControls).toHaveCount(2);
+  await expect(password).toHaveAttribute("type", "password");
+  await expect(confirmation).toHaveAttribute("type", "password");
+
+  const passwordBox = await password.boundingBox();
+  const revealBox = await revealControls.nth(0).boundingBox();
+  if (!passwordBox || !revealBox) {
+    throw new Error("Không tìm thấy ô mật khẩu hoặc nút hiển thị mật khẩu.");
+  }
+  expect(revealBox.x).toBeGreaterThan(passwordBox.x);
+  expect(revealBox.x + revealBox.width).toBeLessThanOrEqual(
+    passwordBox.x + passwordBox.width + 1,
+  );
+  expect(revealBox.y).toBeGreaterThanOrEqual(passwordBox.y);
+  expect(revealBox.y + revealBox.height).toBeLessThanOrEqual(
+    passwordBox.y + passwordBox.height + 1,
+  );
+
+  await revealControls.nth(0).click();
+  await expect(password).toHaveAttribute("type", "text");
+  await expect(
+    page.getByRole("button", { name: "Ẩn mật khẩu" }),
+  ).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Ẩn mật khẩu" }).click();
+  await expect(password).toHaveAttribute("type", "password");
+  await expect(revealControls).toHaveCount(2);
+
+  await revealControls.nth(1).click();
+  await expect(confirmation).toHaveAttribute("type", "text");
+  await page.getByRole("button", { name: "Ẩn mật khẩu" }).click();
+  await expect(confirmation).toHaveAttribute("type", "password");
+  await expect(revealControls).toHaveCount(2);
+});
+
+test("customer login uses the customer actor and opens the public home page", async ({
   page,
 }) => {
   const principal = principalFor({ actorType: "customer" });
@@ -44,19 +90,17 @@ test("customer login uses the customer actor and opens bookings", async ({
       "/api/v1/auth/customers/login",
     );
   });
-  await page.route("**/api/v1/bookings**", async (route) => {
-    await fulfillJson(route, [], "/api/v1/bookings");
+  await page.route("**/api/v1/rooms**", async (route) => {
+    await fulfillJson(route, [], "/api/v1/rooms");
   });
 
   await page.goto("/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-  await page.getByLabel("Mật khẩu").fill("StrongPassword123!");
+  await page.getByRole("textbox", { name: "Mật khẩu", exact: true }).fill("StrongPassword123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
 
-  await expect(page).toHaveURL(/\/bookings$/);
-  await expect(
-    page.getByRole("heading", { name: "Đặt phòng của tôi" }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
 
 for (const role of ["STAFF", "ADMIN"] as const) {
@@ -140,7 +184,7 @@ for (const role of ["STAFF", "ADMIN"] as const) {
 
     await page.goto("/management/login");
     await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-    await page.getByLabel("Mật khẩu").fill("StrongPassword123!");
+    await page.getByRole("textbox", { name: "Mật khẩu", exact: true }).fill("StrongPassword123!");
     await page.getByRole("button", { name: "Đăng nhập" }).click();
 
     const expectedPath =

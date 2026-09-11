@@ -11,6 +11,8 @@ export const paymentKeys = {
     [...paymentKeys.management(), 'list', query] as const,
   managementBooking: (bookingId: string, query: PaymentListQuery) =>
     [...paymentKeys.management(), 'booking', bookingId, query] as const,
+  managementDetail: (paymentId: string) =>
+    [...paymentKeys.management(), 'detail', paymentId] as const,
   vnPayReturn: (search: string) =>
     [...paymentKeys.all, 'vnpay-return', search] as const,
 }

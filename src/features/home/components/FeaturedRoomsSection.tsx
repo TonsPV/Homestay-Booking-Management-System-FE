@@ -129,7 +129,7 @@ function HospitalityRoomCard({
             Xem chi tiết{" "}
             <ArrowUpRight aria-hidden="true" className="ml-1 size-4" />
           </LinkButton>
-          <LinkButton to={`/rooms/search?roomTypeId=${room.roomTypeId}`}>
+          <LinkButton to={`/rooms?roomTypeId=${room.roomTypeId}`}>
             Kiểm tra phòng
           </LinkButton>
         </div>

@@ -1,0 +1,101 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Quality gates and Vercel deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v7
+
+      - name: Checkout Backend OpenAPI contract
+        uses: actions/checkout@v7
+        with:
+          repository: TonsPV/Homestay-Booking-Management-System
+          ref: main
+          path: backend-contract
+          sparse-checkout: |
+            openapi/openapi.json
+          sparse-checkout-cone-mode: false
+
+      - name: Use Node.js 22.13.0
+        uses: actions/setup-node@v7
+        with:
+          cache: npm
+          node-version: 22.13.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Architecture check
+        run: npm run architecture:check
+
+      - name: Contract check against Backend OpenAPI
+        env:
+          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/openapi/openapi.json
+        run: npm run contract:check
+
+      - name: Contract negative test
+        env:
+          HBMS_OPENAPI_SPEC_PATH: ${{ github.workspace }}/backend-contract/openapi/openapi.json
+        run: npm run contract:test
+
+      - name: Unit and component tests
+        run: npm test
+
+      - name: Production build with deployed Backend origin
+        env:
+          # Deployed Backend on Render; VITE_* values are public by design.
+          VITE_API_ORIGIN: https://homestay-booking-management-system.onrender.com
+        run: npm run build
+
+      - name: Pull Vercel environment information
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel build --prod --token "$VERCEL_TOKEN"
+
+      - name: Deploy to Vercel production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          url=$(npx vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN")
+          echo "Deployed to $url"
+
+      - name: Smoke test deployed site
+        run: |
+          sleep 10
+          status=$(curl -s -o /dev/null -w "%{http_code}" https://homestay-booking-management-system.vercel.app/)
+          if [ "$status" != "200" ]; then
+            echo "Smoke test failed: GET / returned $status"
+            exit 1
+          fi
+          echo "Smoke test passed: GET / returned 200"

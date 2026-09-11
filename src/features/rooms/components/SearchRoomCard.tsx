@@ -10,14 +10,23 @@ import type { PublicRoom } from "../types";
 import { RoomImage } from "./RoomImage";
 
 interface SearchRoomCardProps {
+  available?: boolean;
+  bookLabel?: string;
   onBook?: (room: PublicRoom) => void;
   onView?: (roomId: string) => void;
   room: PublicRoom;
 }
 
-export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
+export function SearchRoomCard({
+  available = false,
+  bookLabel = "Tiếp tục đặt phòng",
+  onBook,
+  onView,
+  room,
+}: SearchRoomCardProps) {
   const cover = room.images.find((image) => image.isCover) ?? room.images[0];
   const amenities = room.roomType.amenities.slice(0, 4);
+  const description = room.description ?? room.roomType.description;
 
   return (
     <article className="group grid min-w-0 overflow-hidden rounded-panel bg-surface shadow-elevation-2 transition duration-base ease-calm hover:-translate-y-0.5 hover:shadow-elevation-3 motion-reduce:transform-none motion-reduce:transition-none md:grid-cols-[minmax(15rem,38%)_minmax(0,1fr)]">
@@ -36,13 +45,15 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
             Chưa có ảnh
           </div>
         )}
-        <Badge
-          className="absolute left-3 top-3 shadow-elevation-1"
-          tone="emerald"
-        >
-          <Check aria-hidden="true" className="size-3.5" />
-          Còn phòng
-        </Badge>
+        {available ? (
+          <Badge
+            className="absolute left-3 top-3 shadow-elevation-1"
+            tone="emerald"
+          >
+            <Check aria-hidden="true" className="size-3.5" />
+            Còn phòng
+          </Badge>
+        ) : null}
       </div>
 
       <div className="flex min-w-0 flex-col p-5 sm:p-6">
@@ -59,7 +70,9 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
             <p className="text-xl font-black tracking-tight text-ink">
               {formatMoney(room.roomType.basePrice)}
             </p>
-            <p className="mt-1 text-xs font-semibold text-muted">mỗi đêm</p>
+            <p className="mt-1 text-xs font-semibold text-muted">
+              Giá cơ sở / đêm
+            </p>
           </div>
         </div>
 
@@ -73,6 +86,12 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
             <BedDouble aria-hidden="true" className="size-4" />
             {formatBedConfiguration(room.roomType.beds, room.roomType.bedType)}
           </div>
+        ) : null}
+
+        {description ? (
+          <p className="mt-3 line-clamp-2 text-sm leading-6 text-muted">
+            {description}
+          </p>
         ) : null}
 
         {amenities.length > 0 ? (
@@ -110,7 +129,7 @@ export function SearchRoomCard({ onBook, onView, room }: SearchRoomCardProps) {
             <span />
           )}
           {onBook ? (
-            <Button onClick={() => onBook(room)}>Đặt ngay</Button>
+            <Button onClick={() => onBook(room)}>{bookLabel}</Button>
           ) : null}
         </div>
       </div>

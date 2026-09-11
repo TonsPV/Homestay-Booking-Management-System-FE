@@ -23,6 +23,7 @@ import { LinkButton } from '@/shared/components/LinkButton'
 
 import { ManagementBookingList } from '../components/ManagementBookingList'
 import { getBookingStatusLabel } from '../components/bookingStatusLabels'
+import { BookingStatsSummary } from '../components/BookingStatsSummary'
 import { getBookingActionError } from '../errors'
 import { useManagementBookings } from '../hooks'
 import {
@@ -108,6 +109,8 @@ export function ManagementBookingsPage() {
     setSearchParams(new URLSearchParams())
   }
 
+  const pageBookings = bookingsQuery.data?.data ?? []
+
   return (
     <div className="grid gap-6">
       <PageHeader
@@ -119,6 +122,11 @@ export function ManagementBookingsPage() {
             Tạo booking tại quầy
           </LinkButton>
         }
+      />
+
+      <BookingStatsSummary
+        bookings={pageBookings}
+        loading={bookingsQuery.isPending}
       />
 
       <form

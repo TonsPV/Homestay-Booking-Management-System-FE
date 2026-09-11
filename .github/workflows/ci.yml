@@ -64,7 +64,8 @@ jobs:
 
       - name: Production build
         env:
-          VITE_API_ORIGIN: https://api.example.invalid
+          # Deployed Backend on Render; VITE_* values are public by design.
+          VITE_API_ORIGIN: https://homestay-booking-management-system.onrender.com
         run: npm run build
 
   e2e:

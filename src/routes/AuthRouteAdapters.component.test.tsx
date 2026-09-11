@@ -111,12 +111,12 @@ describe("LoginRoute (unified)", () => {
     ).toBeInTheDocument();
   });
 
-  it("redirects an authenticated customer to the customer surface", () => {
+  it("redirects an authenticated customer to the public home page", () => {
     useAuthMock.mockReturnValue({ principal: principalOf() });
 
     renderAdapter(<LoginRoute />, "/login");
 
-    expect(screen.getByText("location:/bookings")).toBeInTheDocument();
+    expect(screen.getByText("location:/")).toBeInTheDocument();
   });
 
   it.each(["STAFF", "ADMIN"] as const)(

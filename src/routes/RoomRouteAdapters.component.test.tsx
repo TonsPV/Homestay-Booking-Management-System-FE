@@ -30,35 +30,47 @@ const search: SearchRoomsQuery = {
 
 vi.mock("@/features/rooms/pages/PublicRoomsPage", () => ({
   PublicRoomsPage: ({
+    onBookRoom,
     onViewRoom,
   }: {
-    onViewRoom?: (roomId: string) => void;
+    onBookRoom?: (room: PublicRoom, criteria: SearchRoomsQuery) => void;
+    onViewRoom?: (roomId: string, criteria?: SearchRoomsQuery) => void;
   }) => (
-    <button onClick={() => onViewRoom?.(room.id)} type="button">
-      Mở từ danh sách
-    </button>
-  ),
-}));
-
-vi.mock("@/features/rooms/pages/RoomSearchPage", () => ({
-  RoomSearchPage: ({
-    onViewRoom,
-  }: {
-    onViewRoom?: (roomId: string, criteria: SearchRoomsQuery) => void;
-  }) => (
-    <button onClick={() => onViewRoom?.(room.id, search)} type="button">
-      Mở từ tìm kiếm
-    </button>
+    <div>
+      <button onClick={() => onViewRoom?.(room.id)} type="button">
+        Mở từ danh mục
+      </button>
+      <button onClick={() => onViewRoom?.(room.id, search)} type="button">
+        Mở từ kết quả
+      </button>
+      <button onClick={() => onBookRoom?.(room, search)} type="button">
+        Đặt từ kết quả
+      </button>
+    </div>
   ),
 }));
 
 vi.mock("@/features/rooms/pages/PublicRoomDetailPage", () => ({
   PublicRoomDetailPage: ({
     onBook,
+    initialStay,
   }: {
-    onBook?: (selectedRoom: PublicRoom) => void;
+    onBook?: (
+      selectedRoom: PublicRoom,
+      stay: { checkIn: string; checkOut: string; guests: number },
+    ) => void;
+    initialStay?: { checkIn: string; checkOut: string; guests: number };
   }) => (
-    <button onClick={() => onBook?.(room)} type="button">
+    <button
+      onClick={() =>
+        onBook?.(room, initialStay ?? {
+          checkIn: "",
+          checkOut: "",
+          guests: Number.NaN,
+        })
+      }
+      type="button"
+    >
       Chọn phòng này
     </button>
   ),
@@ -95,14 +107,18 @@ function BookingLocationProbe() {
   );
 }
 
-function renderFlow(
-  initialEntry:
-    | string
-    | {
-        pathname: string;
-        state?: { search: SearchRoomsQuery };
-      },
-) {
+function CurrentLocationProbe() {
+  const location = useLocation();
+
+  return (
+    <output>
+      current-path:{location.pathname}
+      current-query:{location.search}
+    </output>
+  );
+}
+
+function renderFlow(initialEntry: string) {
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
       <Routes>
@@ -114,15 +130,16 @@ function renderFlow(
           path="/bookings/new/:roomId"
         />
       </Routes>
+      <CurrentLocationProbe />
     </MemoryRouter>,
   );
 }
 
 describe("Public room booking navigation", () => {
-  it("opens a room from /rooms and reaches an empty booking form route", () => {
+  it("opens a room from the directory and reaches an empty booking form route", () => {
     renderFlow("/rooms");
 
-    fireEvent.click(screen.getByRole("button", { name: "Mở từ danh sách" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mở từ danh mục" }));
     fireEvent.click(screen.getByRole("button", { name: "Chọn phòng này" }));
 
     expect(screen.getByText("path:/bookings/new/42")).toBeInTheDocument();
@@ -131,10 +148,17 @@ describe("Public room booking navigation", () => {
     expect(screen.getByText("guests:none")).toBeInTheDocument();
   });
 
-  it("preserves search criteria from /rooms/search", () => {
-    renderFlow("/rooms/search");
+  it("preserves an applied stay when opening a detail page from /rooms", () => {
+    renderFlow("/rooms");
 
-    fireEvent.click(screen.getByRole("button", { name: "Mở từ tìm kiếm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mở từ kết quả" }));
+
+    expect(screen.getByText(/current-path:/)).toHaveTextContent(
+      "current-path:/rooms/42",
+    );
+    expect(screen.getByText(/current-query:/)).toHaveTextContent(
+      "current-query:?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Chọn phòng này" }));
 
     expect(screen.getByText("path:/bookings/new/42")).toBeInTheDocument();
@@ -146,6 +170,17 @@ describe("Public room booking navigation", () => {
     expect(screen.getByText("guests:3")).toBeInTheDocument();
   });
 
+  it("redirects the legacy search route to /rooms while preserving criteria", () => {
+    renderFlow("/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=3");
+
+    expect(screen.getByText(/current-path:/)).toHaveTextContent(
+      "current-path:/rooms",
+    );
+    expect(screen.getByText(/current-query:/)).toHaveTextContent(
+      "current-query:?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+    );
+  });
+
   it("opens a direct room URL and reaches an empty booking form route", () => {
     renderFlow("/rooms/42");
 
@@ -154,5 +189,18 @@ describe("Public room booking navigation", () => {
     expect(screen.getByText("path:/bookings/new/42")).toBeInTheDocument();
     expect(screen.getByText("query:")).toBeInTheDocument();
     expect(screen.getByText("room:42")).toBeInTheDocument();
+  });
+
+  it("keeps a valid shared stay from the room URL through booking", () => {
+    renderFlow("/rooms/42?checkIn=2026-08-10&checkOut=2026-08-12&guests=3");
+
+    fireEvent.click(screen.getByRole("button", { name: "Chọn phòng này" }));
+
+    expect(
+      screen.getByText(
+        "query:?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("guests:3")).toBeInTheDocument();
   });
 });

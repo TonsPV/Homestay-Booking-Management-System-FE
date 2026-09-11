@@ -45,26 +45,43 @@ const payment: Payment = {
 }
 
 describe('PaymentList management view', () => {
-  it('exposes a semantic table, reconciliation identifiers, and booking links', () => {
+  it('exposes a semantic six-column table, booking links, and a payment-detail link', () => {
     render(
       <MemoryRouter>
         <PaymentList management payments={[payment]} />
       </MemoryRouter>,
     )
 
-    expect(
-      screen.getByRole('table', {
-        name: 'Danh sách giao dịch thanh toán toàn hệ thống',
-      }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole('columnheader', { name: 'Đối soát' }),
-    ).toHaveAttribute('scope', 'col')
-    expect(screen.getAllByText('GW-REF-2026').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('BANK-TXN-91').length).toBeGreaterThan(0)
+    const table = screen.getByRole('table', {
+      name: 'Danh sách giao dịch thanh toán toàn hệ thống',
+    })
+    expect(table).toBeInTheDocument()
+    const columnHeaders = screen.getAllByRole('columnheader')
+    expect(columnHeaders.map((header) => header.textContent)).toEqual([
+      'Giao dịch',
+      'Booking',
+      'Phương thức',
+      'Số tiền',
+      'Trạng thái',
+      'Thời gian & Thao tác',
+    ])
+    for (const header of columnHeaders) {
+      expect(header).toHaveAttribute('scope', 'col')
+    }
+
+    // Technical gateway/reconciliation metadata must not appear in the list;
+    // it lives on /management/payments/:id now.
+    expect(screen.queryByText('GW-REF-2026')).not.toBeInTheDocument()
+    expect(screen.queryByText('BANK-TXN-91')).not.toBeInTheDocument()
 
     for (const link of screen.getAllByRole('link', { name: '#42' })) {
       expect(link).toHaveAttribute('href', '/management/bookings/42')
+    }
+
+    const detailLinks = screen.getAllByRole('link', { name: 'Xem chi tiết' })
+    expect(detailLinks.length).toBeGreaterThan(0)
+    for (const link of detailLinks) {
+      expect(link).toHaveAttribute('href', '/management/payments/91')
     }
   }, 15_000)
 
@@ -302,6 +319,18 @@ describe('PaymentList review-reason business-state matrix', () => {
     ).not.toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Đối soát hoàn tiền giao dịch #91' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('omits the payment-detail link for non-management (customer) lists', () => {
+    render(
+      <MemoryRouter>
+        <PaymentList payments={[payment]} />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.queryByRole('link', { name: 'Xem chi tiết' }),
     ).not.toBeInTheDocument()
   })
 })

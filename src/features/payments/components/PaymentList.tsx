@@ -64,153 +64,6 @@ function BookingReference({
   )
 }
 
-function GatewayDetails({ payment }: { payment: Payment }) {
-  const hasGatewayDetails = Boolean(
-    payment.gatewayName ||
-    payment.gatewayReference ||
-    payment.gatewayTransactionId ||
-    payment.gatewayResponseCode ||
-    payment.gatewayTransactionStatus ||
-    payment.refundRequestId ||
-    payment.refundResponseCode ||
-    payment.refundTransactionStatus,
-  )
-
-  if (!hasGatewayDetails) {
-    return <span className="text-muted">—</span>
-  }
-
-  return (
-    <dl className="grid gap-1 text-xs">
-      {payment.gatewayName ? (
-        <div>
-          <dt className="inline text-muted">Cổng: </dt>
-          <dd className="inline font-semibold text-ink">
-            {payment.gatewayName}
-          </dd>
-        </div>
-      ) : null}
-      {payment.gatewayReference ? (
-        <div className="break-all">
-          <dt className="inline text-muted">Tham chiếu: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.gatewayReference}
-          </dd>
-        </div>
-      ) : null}
-      {payment.gatewayTransactionId ? (
-        <div className="break-all">
-          <dt className="inline text-muted">Mã giao dịch: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.gatewayTransactionId}
-          </dd>
-        </div>
-      ) : null}
-      {payment.gatewayResponseCode ? (
-        <div>
-          <dt className="inline text-muted">Mã phản hồi: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.gatewayResponseCode}
-          </dd>
-        </div>
-      ) : null}
-      {payment.gatewayTransactionStatus ? (
-        <div>
-          <dt className="inline text-muted">Trạng thái cổng: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.gatewayTransactionStatus}
-          </dd>
-        </div>
-      ) : null}
-      {payment.refundRequestId ? (
-        <div className="break-all">
-          <dt className="inline text-muted">Mã yêu cầu hoàn: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.refundRequestId}
-          </dd>
-        </div>
-      ) : null}
-      {payment.refundResponseCode ? (
-        <div>
-          <dt className="inline text-muted">Mã phản hồi hoàn: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.refundResponseCode}
-          </dd>
-        </div>
-      ) : null}
-      {payment.refundTransactionStatus ? (
-        <div>
-          <dt className="inline text-muted">Trạng thái hoàn: </dt>
-          <dd className="inline font-mono text-ink">
-            {payment.refundTransactionStatus}
-          </dd>
-        </div>
-      ) : null}
-    </dl>
-  )
-}
-
-function PaymentTimeline({ payment }: { payment: Payment }) {
-  return (
-    <dl className="grid gap-1 text-xs">
-      <div>
-        <dt className="inline text-muted">Tạo: </dt>
-        <dd className="inline text-ink">{formatDateTime(payment.createdAt)}</dd>
-      </div>
-      {payment.paidAt ? (
-        <div>
-          <dt className="inline text-muted">Thanh toán: </dt>
-          <dd className="inline text-ink">{formatDateTime(payment.paidAt)}</dd>
-        </div>
-      ) : null}
-      {payment.refundedAt ? (
-        <div>
-          <dt className="inline text-muted">Hoàn tiền: </dt>
-          <dd className="inline text-ink">
-            {formatDateTime(payment.refundedAt)}
-          </dd>
-        </div>
-      ) : null}
-      {payment.refundRequestedAt ? (
-        <div>
-          <dt className="inline text-muted">Yêu cầu hoàn: </dt>
-          <dd className="inline text-ink">
-            {formatDateTime(payment.refundRequestedAt)}
-          </dd>
-        </div>
-      ) : null}
-      {payment.refundLastQueriedAt ? (
-        <div>
-          <dt className="inline text-muted">Đối soát gần nhất: </dt>
-          <dd className="inline text-ink">
-            {formatDateTime(payment.refundLastQueriedAt)}
-          </dd>
-        </div>
-      ) : null}
-      {payment.expiresAt ? (
-        <div>
-          <dt className="inline text-muted">Hết hạn: </dt>
-          <dd className="inline text-ink">
-            {formatDateTime(payment.expiresAt)}
-          </dd>
-        </div>
-      ) : null}
-      {payment.createdByUser ? (
-        <div>
-          <dt className="inline text-muted">Người ghi nhận: </dt>
-          <dd className="inline text-ink">{payment.createdByUser.fullName}</dd>
-        </div>
-      ) : null}
-      {payment.refundedByUser ? (
-        <div>
-          <dt className="inline text-muted">Người hoàn: </dt>
-          <dd className="inline text-ink">{payment.refundedByUser.fullName}</dd>
-        </div>
-      ) : null}
-    </dl>
-  )
-}
-
 function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   if (payment.status === 'REFUND_PENDING') {
     return (
@@ -392,21 +245,14 @@ function PaymentCards({
                   onRefund={onRefund}
                   payment={payment}
                 />
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 border-t border-line pt-4 sm:grid-cols-2">
-              <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted">
-                  Đối soát
-                </p>
-                <GatewayDetails payment={payment} />
-              </div>
-              <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-muted">
-                  Thời gian và người xử lý
-                </p>
-                <PaymentTimeline payment={payment} />
+                {management ? (
+                  <Link
+                    className="inline-flex min-h-9 items-center px-1 font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    to={`/management/payments/${payment.id}`}
+                  >
+                    Xem chi tiết
+                  </Link>
+                ) : null}
               </div>
             </div>
 
@@ -430,7 +276,7 @@ function ManagementPaymentTable({
 }: Omit<PaymentListProps, 'management'> & { canRefund: boolean }) {
   return (
     <div className="hidden overflow-x-auto rounded-panel border border-line bg-surface shadow-card lg:block">
-      <table className="min-w-[72rem] w-full border-collapse text-left text-sm">
+      <table className="min-w-[56rem] w-full border-collapse text-left text-sm">
         <caption className="sr-only">
           Danh sách giao dịch thanh toán toàn hệ thống
         </caption>
@@ -451,14 +297,8 @@ function ManagementPaymentTable({
             <th className="px-4 py-3" scope="col">
               Trạng thái
             </th>
-            <th className="px-4 py-3" scope="col">
-              Đối soát
-            </th>
-            <th className="px-4 py-3" scope="col">
-              Thời gian
-            </th>
             <th className="px-4 py-3 text-right" scope="col">
-              Thao tác
+              Thời gian & Thao tác
             </th>
           </tr>
         </thead>
@@ -501,14 +341,11 @@ function ManagementPaymentTable({
                   </p>
                 ) : null}
               </td>
-              <td className="max-w-64 px-4 py-3">
-                <GatewayDetails payment={payment} />
-              </td>
-              <td className="max-w-64 px-4 py-3">
-                <PaymentTimeline payment={payment} />
-              </td>
               <td className="px-4 py-3 text-right">
-                <div className="flex justify-end gap-2">
+                <p className="whitespace-nowrap text-ink">
+                  {formatDateTime(payment.createdAt)}
+                </p>
+                <div className="mt-2 flex flex-wrap justify-end gap-2">
                   <ReconcileButton
                     canRefund={canRefund}
                     onReconcile={onReconcile}
@@ -526,6 +363,12 @@ function ManagementPaymentTable({
                     onRefund={onRefund}
                     payment={payment}
                   />
+                  <Link
+                    className="inline-flex min-h-9 items-center px-1 font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                    to={`/management/payments/${payment.id}`}
+                  >
+                    Xem chi tiết
+                  </Link>
                 </div>
               </td>
             </tr>

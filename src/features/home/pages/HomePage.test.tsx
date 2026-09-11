@@ -71,7 +71,7 @@ function renderHomePage() {
       <MemoryRouter initialEntries={["/"]}>
         <Routes>
           <Route element={<HomePage />} path="/" />
-          <Route element={<LocationProbe />} path="/rooms/search" />
+          <Route element={<LocationProbe />} path="/rooms" />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -93,7 +93,7 @@ describe("HomePage route", () => {
 
     expect(
       screen.getByRole("link", { name: "Tìm phòng trống" }),
-    ).toHaveAttribute("href", "/rooms/search");
+    ).toHaveAttribute("href", "/rooms");
     expect(
       screen.getByRole("link", { name: "Khám phá không gian" }),
     ).toHaveAttribute("href", "/rooms");
@@ -161,7 +161,7 @@ describe("HomePage route", () => {
     fireEvent.click(screen.getByRole("button", { name: "Tìm phòng" }));
 
     expect(screen.getByTestId("location")).toHaveTextContent(
-      "/rooms/search?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
+      "/rooms?checkIn=2026-08-10&checkOut=2026-08-12&guests=3",
     );
   });
 
@@ -214,6 +214,6 @@ describe("HomePage route", () => {
 
     expect(
       screen.getByRole("link", { name: "Bắt đầu tìm phòng" }),
-    ).toHaveAttribute("href", "/rooms/search");
+    ).toHaveAttribute("href", "/rooms");
   });
 });

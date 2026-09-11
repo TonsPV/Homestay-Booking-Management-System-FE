@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { getErrorMessage } from "@/api/errors";
 import { useRoomTypeOptions } from "@/features/room-types";
@@ -21,33 +15,21 @@ import { PageHeader } from "@/shared/components/PageHeader";
 import { PaginationControls } from "@/shared/components/PaginationControls";
 import { formatMoney, formatNumber } from "@/shared/formatting/formatters";
 
-import { RoomForm } from "../components/RoomForm";
-import { PendingRoomImagePicker } from "../components/PendingRoomImagePicker";
 import { RoomAvailabilitySummary } from "../components/RoomAvailabilitySummary";
 import { RoomImage } from "../components/RoomImage";
 import { RoomStatusBadge } from "../components/RoomStatusBadge";
 import {
-  useCreateRoomWithImages,
   useDeleteRoom,
   useManagementRooms,
-  useUploadRoomImages,
-  useUpdateRoom,
   useUpdateRoomStatus,
 } from "../hooks";
-import { usePendingRoomImages } from "../pending-room-images";
-import type { PendingRoomImageStatusUpdate } from "../pending-room-images";
 import { resolveRoomImageUrl } from "../image-url";
 import { getRoomStatusLabel } from "../status";
 import {
   ROOM_STATUSES,
-  type CreateRoomInput,
   type ManagementRole,
-  type Room,
   type RoomStatus,
-  type UpdateRoomInput,
 } from "../types";
-
-type EditorState = { mode: "create" } | { mode: "edit"; room: Room } | null;
 
 interface StatusDraft {
   roomId: string;
@@ -55,6 +37,8 @@ interface StatusDraft {
 }
 
 interface ManagementRoomsPageProps {
+  onCreateRoom?: () => void;
+  onEditRoom?: (roomId: string) => void;
   onManageImages?: (roomId: string) => void;
   onViewRoom?: (roomId: string) => void;
   role: ManagementRole;
@@ -67,6 +51,8 @@ function statusOptionsFor(role: ManagementRole) {
 }
 
 export function ManagementRoomsPage({
+  onCreateRoom,
+  onEditRoom,
   onManageImages,
   onViewRoom,
   role,
@@ -80,15 +66,8 @@ export function ManagementRoomsPage({
     search: "",
     status: "",
   });
-  const [editor, setEditor] = useState<EditorState>(null);
   const [statusDraft, setStatusDraft] = useState<StatusDraft>();
   const [successMessage, setSuccessMessage] = useState<string>();
-  const [createdRoomId, setCreatedRoomId] = useState<string>();
-  const [partialUploadMessage, setPartialUploadMessage] = useState<string>();
-  const navigationTimeoutRef = useRef<number | undefined>(undefined);
-  const mountedRef = useRef(true);
-  const pendingImages = usePendingRoomImages();
-  const updateImageStatus = pendingImages.updateImageStatus;
   const roomTypesQuery = useRoomTypeOptions();
   const roomsQuery = useManagementRooms({
     page,
@@ -97,43 +76,9 @@ export function ManagementRoomsPage({
     status: (filters.status || undefined) as RoomStatus | undefined,
   });
   const totalPages = roomsQuery.data?.pagination?.totalPages;
-  const createWithImagesMutation = useCreateRoomWithImages();
-  const uploadImagesMutation = useUploadRoomImages();
-  const updateMutation = useUpdateRoom();
   const deleteMutation = useDeleteRoom();
   const statusMutation = useUpdateRoomStatus();
-  const editorMutation =
-    editor?.mode === "edit" ? updateMutation : createWithImagesMutation;
-  const editorLoading =
-    editor?.mode === "edit"
-      ? updateMutation.isPending
-      : createWithImagesMutation.isPending || uploadImagesMutation.isPending;
-  const actionError =
-    editorMutation.error ??
-    uploadImagesMutation.error ??
-    deleteMutation.error ??
-    statusMutation.error;
-
-  useEffect(() => {
-    mountedRef.current = true;
-
-    return () => {
-      mountedRef.current = false;
-
-      if (navigationTimeoutRef.current !== undefined) {
-        window.clearTimeout(navigationTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleImageStatus = useCallback(
-    (update: PendingRoomImageStatusUpdate) => {
-      if (mountedRef.current) {
-        updateImageStatus(update);
-      }
-    },
-    [updateImageStatus],
-  );
+  const actionError = deleteMutation.error ?? statusMutation.error;
 
   useEffect(() => {
     if (totalPages === undefined) {
@@ -163,173 +108,6 @@ export function ManagementRoomsPage({
     setStatusFilterDraft("");
     setFilters({ roomTypeId: "", search: "", status: "" });
     setPage(1);
-  }
-
-  function clearNavigationTimeout() {
-    if (navigationTimeoutRef.current !== undefined) {
-      window.clearTimeout(navigationTimeoutRef.current);
-      navigationTimeoutRef.current = undefined;
-    }
-  }
-
-  function resetCreateState() {
-    clearNavigationTimeout();
-    pendingImages.reset();
-    createWithImagesMutation.reset();
-    uploadImagesMutation.reset();
-    setCreatedRoomId(undefined);
-    setPartialUploadMessage(undefined);
-  }
-
-  function openCreateEditor() {
-    resetCreateState();
-    setSuccessMessage(undefined);
-    setEditor({ mode: "create" });
-  }
-
-  function openEditEditor(room: Room) {
-    resetCreateState();
-    setSuccessMessage(undefined);
-    setEditor({ mode: "edit", room });
-  }
-
-  function finishCreatedRoom(roomId: string, uploadedCount: number, total: number) {
-    if (!mountedRef.current) {
-      return;
-    }
-
-    pendingImages.reset();
-    setEditor(null);
-    setCreatedRoomId(undefined);
-    setPartialUploadMessage(undefined);
-    setSuccessMessage(
-      total === 0
-        ? "Đã tạo phòng."
-        : `Đã tạo phòng và tải lên ${uploadedCount} ảnh.`,
-    );
-
-    if (onViewRoom) {
-      clearNavigationTimeout();
-      navigationTimeoutRef.current = window.setTimeout(() => {
-        navigationTimeoutRef.current = undefined;
-        onViewRoom(roomId);
-      }, 700);
-    }
-  }
-
-  function closeEditor() {
-    const wasCreated = createdRoomId !== undefined;
-    resetCreateState();
-    setEditor(null);
-
-    if (wasCreated) {
-      setSuccessMessage(
-        "Phòng đã được tạo. Các ảnh chưa tải có thể được bổ sung trong quản lý ảnh.",
-      );
-    }
-  }
-
-  async function retryImages(images: typeof pendingImages.images) {
-    if (!createdRoomId || images.length === 0) {
-      return;
-    }
-
-    setSuccessMessage(undefined);
-    setPartialUploadMessage(undefined);
-
-    try {
-      const result = await uploadImagesMutation.mutateAsync({
-        images,
-        onImageStatus: handleImageStatus,
-        roomId: createdRoomId,
-      });
-
-      if (!mountedRef.current) {
-        return;
-      }
-
-      if (result.failedImages.length > 0) {
-        setPartialUploadMessage(
-          `Phòng đã được tạo, nhưng ${result.failedImages.length} trong ${pendingImages.images.length} ảnh chưa tải lên.`,
-        );
-        return;
-      }
-
-      finishCreatedRoom(
-        createdRoomId,
-        pendingImages.images.length,
-        pendingImages.images.length,
-      );
-    } catch {
-      // Mutation state renders unexpected errors while keeping the retry state.
-    }
-  }
-
-  async function submitEditor(input: CreateRoomInput | UpdateRoomInput) {
-    setSuccessMessage(undefined);
-    setPartialUploadMessage(undefined);
-
-    try {
-      if (editor?.mode === "edit") {
-        const updateInput: UpdateRoomInput = {
-          description: input.description,
-          name: input.name,
-          roomNumber: input.roomNumber,
-          roomTypeId: input.roomTypeId,
-        };
-
-        await updateMutation.mutateAsync({
-          id: editor.room.id,
-          input: updateInput,
-        });
-        setSuccessMessage("Đã cập nhật phòng.");
-        setEditor(null);
-      } else {
-        if (createdRoomId) {
-          return;
-        }
-
-        const result = await createWithImagesMutation.mutateAsync({
-          images: pendingImages.images,
-          input: input as CreateRoomInput,
-          onImageStatus: handleImageStatus,
-        });
-
-        if (!mountedRef.current) {
-          return;
-        }
-
-        setCreatedRoomId(result.room.id);
-
-        if (result.failedImages.length > 0) {
-          setPartialUploadMessage(
-            `Phòng đã được tạo, nhưng ${result.failedImages.length} trong ${pendingImages.images.length} ảnh chưa tải lên.`,
-          );
-          return;
-        }
-
-        finishCreatedRoom(
-          result.room.id,
-          result.uploadedCount,
-          pendingImages.images.length,
-        );
-      }
-    } catch {
-      // Mutation state keeps the editor open and renders the API error.
-    }
-  }
-
-  function removeRoom(room: Room) {
-    if (
-      window.confirm(
-        `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
-      )
-    ) {
-      setSuccessMessage(undefined);
-      deleteMutation.mutate(room.id, {
-        onSuccess: () => setSuccessMessage("Đã xóa phòng."),
-      });
-    }
   }
 
   function saveStatus() {
@@ -363,7 +141,7 @@ export function ManagementRoomsPage({
                 roomTypesQuery.isError ||
                 (roomTypesQuery.data?.length ?? 0) === 0
               }
-              onClick={openCreateEditor}
+              onClick={() => onCreateRoom?.()}
             >
               Thêm phòng
             </Button>
@@ -407,95 +185,7 @@ export function ManagementRoomsPage({
 
       {successMessage ? <Alert tone="success">{successMessage}</Alert> : null}
 
-      {editor ? (
-        <Card>
-          <div className="mb-5">
-            <h2 className="text-lg font-black text-slate-950">
-              {editor.mode === "edit"
-                ? `Chỉnh sửa phòng ${editor.room.roomNumber}`
-                : "Tạo phòng mới"}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Thông tin giá và sức chứa được lấy từ loại phòng.
-            </p>
-          </div>
-          {editorMutation.error && !createdRoomId ? (
-            <Alert className="mb-5" tone="error">
-              {getErrorMessage(editorMutation.error)}
-            </Alert>
-          ) : null}
-          {uploadImagesMutation.error ? (
-            <Alert className="mb-5" tone="error">
-              {getErrorMessage(uploadImagesMutation.error)}
-            </Alert>
-          ) : null}
-          {partialUploadMessage && createdRoomId ? (
-            <Alert className="mb-5" tone="warning">
-              <div className="grid gap-3">
-                <p>{partialUploadMessage}</p>
-                <div className="flex flex-wrap gap-2">
-                  {onManageImages ? (
-                    <Button
-                      onClick={() => onManageImages(createdRoomId)}
-                      variant="outline"
-                    >
-                      Đến quản lý ảnh
-                    </Button>
-                  ) : null}
-                  {onViewRoom ? (
-                    <Button
-                      onClick={() => onViewRoom(createdRoomId)}
-                      variant="outline"
-                    >
-                      Xem phòng
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-            </Alert>
-          ) : null}
-          <RoomForm
-            imagePicker={
-              <PendingRoomImagePicker
-                disabled={editorLoading}
-                images={pendingImages.images}
-                inputError={pendingImages.inputError}
-                locked={createdRoomId !== undefined}
-                onAddFiles={pendingImages.addFiles}
-                onMoveImage={pendingImages.moveImage}
-                onRemoveImage={pendingImages.removeImage}
-                onRetryFailed={() =>
-                  void retryImages(
-                    pendingImages.images.filter(
-                      (image) => image.status === "failed",
-                    ),
-                  )
-                }
-                onRetryImage={(clientId) => {
-                  const image = pendingImages.images.find(
-                    (candidate) => candidate.clientId === clientId,
-                  );
-
-                  if (image) {
-                    void retryImages([image]);
-                  }
-                }}
-                onSetCover={pendingImages.setCover}
-              />
-            }
-            initialValue={editor.mode === "edit" ? editor.room : undefined}
-            loading={editorLoading}
-            onCancel={closeEditor}
-            onSubmit={submitEditor}
-            roomTypes={roomTypesQuery.data ?? []}
-            roomFieldsDisabled={createdRoomId !== undefined}
-            submitDisabled={createdRoomId !== undefined}
-            submitLabel={createdRoomId ? "Đã tạo phòng" : undefined}
-          />
-        </Card>
-      ) : null}
-
-      {!editor && actionError ? (
+      {!successMessage && actionError ? (
         <Alert tone="error">{getErrorMessage(actionError)}</Alert>
       ) : null}
 
@@ -700,6 +390,14 @@ export function ManagementRoomsPage({
                       ) : null}
                       {role === "ADMIN" ? (
                         <>
+                          {onEditRoom ? (
+                            <Button
+                              onClick={() => onEditRoom(room.id)}
+                              variant="outline"
+                            >
+                              Chỉnh sửa
+                            </Button>
+                          ) : null}
                           {onManageImages ? (
                             <Button
                               onClick={() => onManageImages(room.id)}
@@ -709,24 +407,23 @@ export function ManagementRoomsPage({
                             </Button>
                           ) : null}
                           <Button
-                            disabled={
-                              roomTypesQuery.isPending ||
-                              roomTypesQuery.isError ||
-                              (roomTypesQuery.data?.length ?? 0) === 0
-                            }
-                            onClick={() => {
-                              openEditEditor(room);
-                            }}
-                            variant="outline"
-                          >
-                            Chỉnh sửa
-                          </Button>
-                          <Button
                             loading={
                               deleteMutation.isPending &&
                               deleteMutation.variables === room.id
                             }
-                            onClick={() => removeRoom(room)}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
+                                )
+                              ) {
+                                setSuccessMessage(undefined);
+                                deleteMutation.mutate(room.id, {
+                                  onSuccess: () =>
+                                    setSuccessMessage("Đã xóa phòng."),
+                                });
+                              }
+                            }}
                             variant="danger"
                           >
                             Xóa

@@ -59,7 +59,7 @@ test("homepage search remains accessible and navigates correctly", async ({
   await page.getByRole("button", { name: "Tìm phòng" }).click();
 
   await expect(page).toHaveURL(
-    /\/rooms\/search\?checkIn=2099-08-10&checkOut=2099-08-12&guests=3$/,
+    /\/rooms\?checkIn=2099-08-10&checkOut=2099-08-12&guests=3$/,
   );
 });
 

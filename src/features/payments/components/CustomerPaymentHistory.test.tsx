@@ -19,6 +19,12 @@ const pendingPayment: CustomerPayment = {
   updatedAt: '2026-07-24T08:25:00.000Z',
 }
 
+const reviewPayment: CustomerPayment = {
+  ...pendingPayment,
+  id: '92',
+  status: 'REQUIRES_REVIEW',
+}
+
 describe('CustomerPaymentHistory', () => {
   it('shows a useful status without exposing internal identifiers', () => {
     render(<CustomerPaymentHistory payments={[pendingPayment]} />)
@@ -33,5 +39,12 @@ describe('CustomerPaymentHistory', () => {
       screen.queryByText('SAFE-MERCHANT-REFERENCE'),
     ).not.toBeInTheDocument()
     expect(screen.queryByText(/đối soát|response|idempotency/i)).not.toBeInTheDocument()
+  })
+
+  it('uses a customer-facing label while a payment is being checked', () => {
+    render(<CustomerPaymentHistory payments={[reviewPayment]} />)
+
+    expect(screen.getByText('Đang kiểm tra')).toBeInTheDocument()
+    expect(screen.queryByText('Cần đối soát')).not.toBeInTheDocument()
   })
 })

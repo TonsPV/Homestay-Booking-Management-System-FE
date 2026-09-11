@@ -51,3 +51,52 @@ export function BookingPaymentStatusBadge({
     </Badge>
   )
 }
+
+export function BookingHoldExpiryBadge({
+  now = Date.now(),
+  paymentExpiresAt,
+  status,
+}: {
+  now?: number
+  paymentExpiresAt?: string | null
+  status: BookingStatus
+}) {
+  if (status !== 'PENDING_PAYMENT' || !paymentExpiresAt) {
+    return null
+  }
+
+  const expiresAt = Date.parse(paymentExpiresAt)
+  if (!Number.isFinite(expiresAt)) {
+    return null
+  }
+
+  const remaining = expiresAt - now
+
+  if (remaining <= 0) {
+    return <Badge tone="rose">Hết hạn giữ chỗ</Badge>
+  }
+
+  const totalMinutes = Math.ceil(remaining / 60_000)
+
+  if (totalMinutes <= 15) {
+    return (
+      <Badge tone="rose">
+        Giữ chỗ: còn {totalMinutes} phút
+      </Badge>
+    )
+  }
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  const timeText =
+    hours > 0
+      ? `${hours} giờ ${minutes > 0 ? `${minutes} phút` : ''}`.trim()
+      : `${minutes} phút`
+
+  return (
+    <Badge tone="amber">
+      Giữ chỗ: còn {timeText}
+    </Badge>
+  )
+}

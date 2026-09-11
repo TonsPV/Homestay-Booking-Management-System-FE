@@ -1,142 +1,100 @@
-# Homestay Green Design System
+# Hệ thống thiết kế Homestay Green
 
-## Visual thesis
+## Định hướng chung
 
-Homestay Green presents a stay as a calm arrival sequence rather than a catalog.
-Public surfaces pair real room photography with precise booking controls and
-quiet, editorial pacing. Operational surfaces remain denser and inherit only
-the shared semantic tokens and control behavior.
+Trang dành cho khách gợi cảm giác đến nơi nghỉ: ảnh phòng thật, điều khiển đặt phòng
+chính xác và nhịp đọc thư thái. Trang vận hành dày thông tin hơn, dùng chung màu ngữ
+nghĩa và hành vi điều khiển nhưng có quy tắc bố cục riêng.
 
-## Palette and material
+## Trang dành cho khách
 
-- Canvas is a soft mineral neutral; cards are clean white surfaces.
-- Deep slate carries immersive hero and closing regions.
-- Blue is reserved for primary navigation and booking actions.
-- Green communicates real availability only; amber warning and red error.
-- Depth comes from soft offset shadows and image layering, not decorative
-  borders or glass effects.
+- Nền trung tính dịu, thẻ trắng; vùng đầu/cuối trang có thể dùng màu đá phiến đậm.
+- Xanh dương cho điều hướng chính và đặt phòng; xanh lá biểu thị phòng thực sự sẵn
+  sàng; vàng cảnh báo, đỏ lỗi. Chiều sâu bằng bóng mềm và lớp ảnh, tránh hiệu ứng kính.
+- Tiêu đề dùng bộ chữ hệ thống giàu tính người, khoảng chữ gọn và dòng ngắn; nội dung
+  dùng bộ chữ không chân hiện có. Cỡ tiêu đề máy tính 64/48/36/28, di động 44/36/28/24;
+  nội dung 16–18 px, giãn dòng dễ đọc.
+- Trang chủ đi từ cảm hứng → tìm phòng → thông tin tạo tin cậy đã xác minh → chọn
+  phòng → trải nghiệm → bằng chứng hình ảnh → hành động cuối.
+- Ảnh có vùng hiển thị lớn liền mạch; điều khiển gần ảnh hoặc quyết định liên quan.
+  Thẻ bo góc 12–16 px; thay đổi nhịp giữa vùng ảnh, nội dung và vùng lựa chọn.
+- Nút chính xanh dương, cao tối thiểu 44 px, nhãn nêu bước tiếp theo.
+  Tìm phòng ưu tiên ngày và số khách; bộ lọc bổ sung đặt ở trang kết quả.
+- Khung chờ khớp bố cục; trạng thái lỗi/rỗng giữ hành động hữu ích tiếp theo.
+- Điểm tập trung bàn phím luôn rõ; kết quả động thông báo nhẹ qua vùng thông báo hỗ trợ.
+- Ưu tiên ảnh cơ sở được duyệt từ Backend. Ảnh tiếp thị thay thế phải ghi rõ minh họa;
+  không bịa khách, giải thưởng, đánh giá, lượng đặt phòng, diện tích hoặc phòng trống.
+- Chuyển động chậm, tiết chế ở ảnh đầu và khi phần nội dung xuất hiện. Phóng ảnh/bóng
+  khi rê chuột nhẹ; tắt chuyển động khi người dùng yêu cầu giảm chuyển động.
+- Ảnh dưới màn hình đầu tải trì hoãn; có mô tả thay thế có nghĩa hoặc rỗng nếu trang trí.
 
-## Typography
+## Quy tắc trang quản lý — phiên bản 3
 
-- Display copy uses a humanist system display stack with compact tracking,
-  strong weight, and short line lengths.
-- Interface and body copy use the workhorse sans stack already defined by the
-  application.
-- Public headings use a clear 64/48/36/28 scale on desktop and 44/36/28/24 on
-  mobile; body copy remains 16–18px with generous leading.
+Ưu tiên mật độ, phân cấp và khả năng quét. `ManagementDashboardPage` là mẫu tổng quan,
+`ManagementPaymentsPage` là mẫu danh sách. Dashboard hiện tạm ngưng tuyến/API nhưng
+vẫn được giữ làm tham chiếu thiết kế; xem [hiện trạng](docs/architecture/system-overview.md).
 
-## Composition
+### Bố cục và chữ
 
-- The homepage is an arrival path: inspiration, immediate search, verified
-  confidence, room choice, experience, visual proof, and decisive close.
-- Photography owns large uninterrupted fields. Controls attach to the image or
-  decision they affect instead of floating between unrelated sections.
-- Public card radii stay between 12–16px. Sections alternate immersive,
-  editorial, and decision-dense passages to pace the scroll.
+- Vùng quản lý dùng `max-w-management` (110rem), căn giữa và lề chuẩn; trang khách
+  dùng `max-w-app` (80rem).
+- Nhịp trang `page-stack` (`gap-6`), nhịp phần `section-stack` (`gap-4`). Rà soát màn
+  được sửa; chữ trình bày cỡ lớn mang phong cách biên tập chỉ dành cho trang công khai.
 
-## Controls and state
+| Vai trò | Đặc tả | Nơi dùng |
+| --- | --- | --- |
+| `page-title` | `text-2xl sm:text-3xl font-bold tracking-tight text-ink` | `PageHeader.title`, một lần mỗi trang |
+| `section-title` | `text-lg font-bold text-ink` | Tiêu đề thẻ/phần |
+| `kpi` | `text-3xl font-bold tracking-tight tabular-nums` | Chỉ số chính; chỉ dùng màu trạng thái khi có ý nghĩa nghiệp vụ |
+| `kpi-label` | `text-sm font-semibold text-muted` | Nhãn chỉ số và ghi chú |
+| `body` | `text-sm text-ink leading-6` | Nội dung mặc định |
+| `label` | `text-sm font-semibold text-ink` | Nhãn biểu mẫu, tiêu đề cột |
+| `meta` | `text-xs text-muted` | Thời gian, mã, hướng dẫn phụ |
+| `eyebrow` | `text-xs font-bold uppercase tracking-eyebrow text-brand` | Nhãn nhóm trong `PageHeader` |
+| `link-inline` | `text-sm font-semibold text-brand-strong hover:underline` | Liên kết trong nội dung |
 
-- Primary controls are blue, 44px minimum height, and name the next action.
-- Booking search exposes dates and guests first; optional refinement belongs on
-  the search-results surface.
-- Loading uses layout-matched skeletons. Error and empty states preserve the
-  next useful action.
-- Focus is always visible, dynamic result text uses polite announcements, and
-  reduced-motion users receive static imagery and transitions.
+`font-black` chỉ dành cho chữ thương hiệu. Nội dung quản lý đậm tối đa `font-bold`,
+nhãn và nút dùng `font-semibold`; không dùng `font-medium` thay cho phân cấp.
+Doanh thu và số tiền đã hoàn dùng màu trung tính; không tô xanh/đỏ chỉ để nhấn mạnh.
 
-## Imagery and motion
+### Bề mặt và độ nổi
 
-- Use approved property room images from the Backend wherever possible. If the
-  current media is unsuitable, a curated marketing image may be used only with
-  a visible illustrative label; never fabricate guest, award, rating, booking,
-  room-size, or availability evidence.
-- One slow hero image reveal and restrained section entrances form the motion
-  signature. Hover zoom and elevation are subtle and disabled for reduced
-  motion.
-- Images below the first viewport are lazy-loaded and always have meaningful
-  alt text or empty alt text when decorative.
+- Ưu tiên đường viền trước bóng. `Card`: `rounded-panel border-line bg-surface shadow-card` (mức 2).
+- Thanh lọc là thẻ có `p-4`. Bảng nằm trong `Card` với `p-0 overflow-hidden` và vùng
+  cuộn ngang `overflow-x-auto` riêng.
+- Ngăn trượt/lớp phủ mức 3, hộp thoại mức 4, thanh đầu cố định mức 1.
+- `shadow-sm/md/lg` còn là tên tương đương; màn mới dùng `shadow-elevation-*`.
 
----
+### Màu trạng thái
 
-## Management grammar (v3 — frozen for operational UI)
+| Tông | Ý nghĩa |
+| --- | --- |
+| `neutral` | Thông tin tĩnh/trung tính |
+| `info` | Đang hoạt động/xử lý |
+| `success` | Hoàn tất/bình thường |
+| `warning` | Cần chú ý hoặc nguy cơ quá thời hạn xử lý |
+| `danger` | Thất bại, không hợp lệ, phá hủy hoặc cần can thiệp ngay |
 
-Management surfaces favor density, hierarchy, and scanability over editorial
-pacing. These rules are the reference for every management screen; two
-reference implementations (Dashboard 4A, Payments 4B) demonstrate them.
+`REFUND_PENDING` quá thời hạn dùng `warning`. Nhãn trạng thái theo cùng bảng;
+`violet` không phải tông quản lý. Nội dung và vị trí thông báo theo
+[chuẩn phản hồi](docs/CLIENT_FEEDBACK_STANDARD.md); `Alert` dùng tên `error` cho lỗi.
 
-### Layout
+### Hành động, bảng và di động
 
-- Workspace container: `max-w-management` (110rem) centered with the standard
-  page gutters. Public surfaces keep `max-w-app` (80rem).
-- Page rhythm: `page-stack` (`gap-6`), `section-stack` (`gap-4`).
-- Audit on touch; editorial display text remains public-only.
+- Tối đa một hành động chính trên mỗi vùng/hàng; phụ dùng viền, thứ yếu dùng chữ hoặc `ghost`.
+- Mọi thao tác phá hủy hoặc tài chính dùng `variant="danger"` cùng
+  `ConfirmationDialog tone="danger"`; không dùng nút `ghost` cho thao tác phá hủy.
+- Phòng có tuyến tạo/sửa/ảnh riêng. Thanh toán tối đa sáu cột; thông tin kỹ thuật
+  nằm ở `/management/payments/:id`.
+- Đầu bảng: `bg-surface-muted text-xs uppercase tracking-wide text-muted`;
+  ô: `px-4 py-3`; hàng: `hover:bg-surface-muted align-top`.
+- Mỗi trang 10–12 hàng; tiền và mã dùng chữ đơn cách hoặc `tabular-nums`.
+- Dưới `lg`: thẻ xếp dọc ưu tiên tác vụ. Từ `lg`: bảng. `TableCards` giữ trong tính
+  năng đến khi hai tính năng thực sự dùng chung cấu trúc thẻ.
+- Thanh lọc xếp dọc trên di động, từ `sm` dùng `flex items-end gap-3`.
 
-### Typography roles
+### Trạng thái và khả năng tiếp cận
 
-| Role | Spec | Usage |
-|---|---|---|
-| `page-title` | `text-2xl sm:text-3xl font-bold tracking-tight text-ink` | `PageHeader.title` — once per page |
-| `section-title` | `text-lg font-bold text-ink` | Card and section headings |
-| `kpi` | `text-3xl font-bold tracking-tight tabular-nums` with semantic color | Hero dashboard metrics |
-| `kpi-label` | `text-sm font-semibold text-muted` | KPI labels and sub-notes |
-| `body` | `text-sm text-ink leading-6` | Default copy |
-| `label` | `text-sm font-semibold text-ink` | Form labels, table header cells |
-| `meta` | `text-xs text-muted` | Timestamps, ids, helper lines |
-| `eyebrow` | `text-xs font-bold uppercase tracking-eyebrow text-brand` | Category tags in `PageHeader` |
-| `link-inline` | `text-sm font-semibold text-brand-strong hover:underline` | Inline links |
-
-Weight policy: `font-black` is reserved for the brand wordmark. Management
-copy tops out at `font-bold`; `font-semibold` for labels and CTA text; do not
-use `font-medium` as a substitute for hierarchy.
-
-### Surfaces and elevation
-
-- Border first, elevation second. `Card` = `rounded-panel border-line bg-surface
-  shadow-card` (elev-2).
-- Filter bars are surface cards with `p-4`, not bare forms.
-- Table wrapper = `Card` with `p-0 overflow-hidden` and its own
-  `overflow-x-auto` scroller.
-- Drawer/overlay = elev-3; dialogs = elev-4; sticky header stays elev-1.
-- Shadow aliases (`shadow-sm/md/lg`) remain synonyms of elevation levels but
-  new screens use `shadow-elevation-*` names.
-
-### Status and feedback colors
-
-- `neutral`: informational/static; `info`: active/in-progress;
-  `success`: completed/healthy; `warning`: needs attention/SLA risk;
-  `danger`: failure, invalid state, destructive, or immediate intervention.
-- `REFUND_PENDING` stale past SLA is `warning`, not `danger`.
-- Badge tones follow the same mapping; `violet` is not a management tone.
-
-### Action hierarchy
-
-- Maximum one primary action per surface or row; secondary actions are
-  outline; tertiary actions are text/ghost.
-- Every destructive or financial action uses `variant="danger"` and a
-  `ConfirmationDialog tone="danger"`. Never ghost destructive actions.
-- Decisions:
-  - Rooms uses dedicated routes for create/edit/images.
-  - Payments list is scan-first (six columns); technical metadata lives at
-    `/management/payments/:id`.
-
-### Tables and density
-
-- Header `bg-surface-muted text-xs uppercase tracking-wide text-muted`,
-  cells `px-4 py-3`, rows `hover:bg-surface-muted align-top`, wrapper
-  `overflow-x-auto` inside a `Card`.
-- Ten to twelve rows per page; monospaced/tabular-nums for amounts and ids.
-
-### Responsive management rules
-
-- Mobile (<lg) renders stacked task-prioritized cards; do not mirror desktop
-  columns 1:1.
-- Desktop (≥lg) renders tables. `TableCards` remain feature-local until two
-  features share one card grammar.
-- Filter bars stack on mobile and become `flex items-end gap-3` from `sm`.
-
-### State and accessibility
-
-- Every interactive primitive covers default/hover/active/focus-visible/
-  selected/disabled/loading states.
-- Skeletons are layout-matched and `aria-hidden`; live regions remain polite
-  for async results.
+Thành phần tương tác có đủ mặc định, rê chuột, nhấn, tập trung bàn phím, được chọn,
+bị khóa và đang xử lý. Khung chờ khớp bố cục, có `aria-hidden`; kết quả bất đồng bộ
+thông báo nhẹ, tránh gián đoạn người dùng.

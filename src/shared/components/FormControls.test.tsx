@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Field, Input } from './FormControls'
+import { Field, Input, PasswordInput } from './FormControls'
 
 describe('Field', () => {
   it('exposes required semantics and preserves an existing description', () => {
@@ -44,5 +44,28 @@ describe('Field', () => {
       'aria-invalid',
       'true',
     )
+  })
+
+  it('keeps the password visibility control available after repeated toggles', () => {
+    render(
+      <Field label="Mật khẩu">
+        <PasswordInput defaultValue="mat-khau-an-toan" />
+      </Field>,
+    )
+
+    const input = screen.getByLabelText('Mật khẩu')
+    expect(input).toHaveAttribute('type', 'password')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hiện mật khẩu' }))
+    expect(input).toHaveAttribute('type', 'text')
+    expect(
+      screen.getByRole('button', { name: 'Ẩn mật khẩu' }),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ẩn mật khẩu' }))
+    expect(input).toHaveAttribute('type', 'password')
+    expect(
+      screen.getByRole('button', { name: 'Hiện mật khẩu' }),
+    ).toBeInTheDocument()
   })
 })

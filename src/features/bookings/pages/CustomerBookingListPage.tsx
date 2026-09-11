@@ -14,7 +14,7 @@ import { LinkButton } from '@/shared/components/LinkButton'
 
 import { BookingCard } from '../components/BookingCard'
 import { getBookingStatusLabel } from '../components/bookingStatusLabels'
-import { getBookingActionError } from '../errors'
+import { getCustomerBookingActionError } from '../errors'
 import { useCustomerBookings } from '../hooks'
 import {
   BOOKING_STATUSES,
@@ -98,7 +98,7 @@ export function CustomerBookingListPage() {
         <LoadingState label="Đang tải danh sách đặt phòng…" />
       ) : bookingsQuery.isError ? (
         <ErrorState
-          description={getBookingActionError(bookingsQuery.error)}
+          description={getCustomerBookingActionError(bookingsQuery.error)}
           onRetry={() => void bookingsQuery.refetch()}
         />
       ) : bookingsQuery.data.data.length === 0 ? (

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { BedDouble, CalendarDays, CheckCircle2, ShieldCheck, Users } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import {
@@ -21,8 +22,21 @@ import {
   Textarea,
 } from '@/shared/components/FormControls'
 import { PageHeader } from '@/shared/components/PageHeader'
+import { LinkButton } from '@/shared/components/LinkButton'
+import { RoomImage } from '@/features/rooms/components/RoomImage'
+import { countStayNights } from '@/features/rooms/components/room-stay'
+import { resolveRoomImageUrl } from '@/features/rooms/image-url'
+import {
+  formatDateOnly,
+  formatMoney,
+  formatNumber,
+} from '@/shared/formatting/formatters'
 
-import { getBookingActionError } from '../errors'
+import {
+  buildRoomSearchUrl,
+  getCustomerBookingActionError,
+  isBookingRoomConflictError,
+} from '../errors'
 import { useCreateCustomerBooking } from '../hooks'
 import {
   createBookingFormSchema,
@@ -32,7 +46,12 @@ import {
 interface BookingLocationState {
   bookingDetailPath?: string
   room?: {
+    amenities?: string[]
+    basePrice?: string
+    coverImageUrl?: string
+    description?: string
     id: string
+    maxGuests?: number
     name: string
     roomNumber?: string
     roomTypeName?: string
@@ -61,6 +80,10 @@ function getVietnamToday() {
 function optionalValue(value: string) {
   const trimmed = value.trim()
   return trimmed === '' ? undefined : trimmed
+}
+
+function formatStayDate(value: string) {
+  return value ? formatDateOnly(value) : 'Chọn ngày'
 }
 
 export function CreateBookingPage() {
@@ -115,18 +138,39 @@ export function CreateBookingPage() {
     ] as const
   ).find((field) => getApiFieldErrorCode(createMutation.error, field))
   const bookingForSomeoneElse = watch('bookingForSomeoneElse')
+  const isConflict = isBookingRoomConflictError(createMutation.error)
+  const checkInDate = watch('checkInDate')
+  const checkOutDate = watch('checkOutDate')
+  const guestCount = watch('guestCount')
+  const otherRoomsUrl = buildRoomSearchUrl({
+    checkIn: checkInDate,
+    checkOut: checkOutDate,
+    guests: guestCount,
+  })
+  const stayNights = countStayNights({
+    checkIn: checkInDate,
+    checkOut: checkOutDate,
+    guests: guestCount,
+  })
+  const displayedGuestCount =
+    Number.isInteger(guestCount) && guestCount > 0 ? guestCount : null
+  const selectedRoom = state?.room
+  const roomName = selectedRoom?.name ?? `Phòng ${roomId}`
 
   useEffect(() => {
-    if (!serverField) {
+    if (!serverField || isConflict) {
       return
     }
 
     setError(
       serverField,
-      { type: 'server', message: getBookingActionError(createMutation.error) },
+      {
+        type: 'server',
+        message: getCustomerBookingActionError(createMutation.error),
+      },
       { shouldFocus: true },
     )
-  }, [createMutation.error, serverField, setError])
+  }, [createMutation.error, isConflict, serverField, setError])
 
   if (!roomId || !/^[1-9][0-9]*$/.test(roomId)) {
     return (
@@ -176,31 +220,64 @@ export function CreateBookingPage() {
   })
 
   return (
-    <div className="grid min-w-0 gap-7">
+    <div className="mx-auto grid min-w-0 max-w-6xl gap-8 lg:gap-10">
       <PageHeader
+        breadcrumbs={[
+          { label: 'Khám phá phòng', to: '/rooms' },
+          { label: 'Xác nhận đặt phòng' },
+        ]}
         eyebrow="Đặt phòng"
         title="Xác nhận kỳ nghỉ"
-        description="Chúng tôi sẽ kiểm tra lại giá và tình trạng phòng khi bạn xác nhận."
+        description="Rà soát kỳ lưu trú và thông tin người ở trước khi gửi yêu cầu. Giá và tình trạng phòng sẽ được Backend kiểm tra lại."
       />
 
-      {createMutation.isError && !serverField ? (
-        <Alert tone="error">{getBookingActionError(createMutation.error)}</Alert>
+      {createMutation.isError && (!serverField || isConflict) ? (
+        <Alert tone="error">
+          <p>{getCustomerBookingActionError(createMutation.error)}</p>
+          {isConflict ? (
+            <div className="mt-3">
+              <LinkButton to={otherRoomsUrl} variant="outline">
+                Tìm phòng khác
+              </LinkButton>
+            </div>
+          ) : null}
+        </Alert>
       ) : null}
 
-      <div className="grid min-w-0 items-start gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.42fr)]">
-        <Card className="border-line p-0 shadow-card">
-          <form className="grid gap-7 p-5 sm:p-7" onSubmit={submit}>
+      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)] xl:gap-8">
+        <Card className="border-line p-0 shadow-elevation-2">
+          <form className="grid gap-8 p-5 sm:p-7 lg:p-8" onSubmit={submit}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight text-ink">
+                  Hoàn thiện thông tin lưu trú
+                </h2>
+                <p className="mt-1 max-w-xl text-sm leading-6 text-muted">
+                  Bạn có thể chỉnh ngày hoặc số khách trước khi tạo đặt phòng.
+                </p>
+              </div>
+              <span className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-soft px-3 py-1.5 text-xs font-bold text-brand-strong">
+                <CheckCircle2 aria-hidden="true" className="size-4" />
+                Đã chọn phòng
+              </span>
+            </div>
+
             <section
               aria-labelledby="booking-stay-details"
-              className="grid gap-5"
+              className="grid gap-5 rounded-card bg-surface-muted p-4 sm:p-5"
             >
-              <div>
-                <h3
-                  className="font-black text-ink"
-                  id="booking-stay-details"
-                >
-                  Thời gian và số khách
-                </h3>
+              <div className="flex gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-brand text-white">
+                  <CalendarDays aria-hidden="true" className="size-5" />
+                </span>
+                <div>
+                  <h3 className="font-bold text-ink" id="booking-stay-details">
+                    Thời gian lưu trú
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-muted">
+                    Ngày trả phòng cần sau ngày nhận phòng.
+                  </p>
+                </div>
               </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <Field
@@ -235,17 +312,34 @@ export function CreateBookingPage() {
                   type="number"
                 />
               </Field>
+
+              <p
+                aria-live="polite"
+                className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-control bg-surface px-3.5 py-3 text-sm text-muted shadow-elevation-1"
+                role="status"
+              >
+                <CalendarDays aria-hidden="true" className="size-4 text-brand" />
+                {stayNights !== null ? (
+                  <>
+                    <span>
+                      Kỳ lưu trú <strong className="font-bold text-ink">{formatNumber(stayNights)} đêm</strong>
+                    </span>
+                    {displayedGuestCount !== null ? (
+                      <span>· {formatNumber(displayedGuestCount)} khách</span>
+                    ) : null}
+                  </>
+                ) : (
+                  <span>Chọn đủ ngày để xem số đêm lưu trú.</span>
+                )}
+              </p>
             </section>
 
             <section
               aria-labelledby="booking-contact-details"
-              className="grid gap-5 border-t border-line pt-7"
+              className="grid gap-5"
             >
               <div>
-                <h3
-                  className="font-black text-ink"
-                  id="booking-contact-details"
-                >
+                <h3 className="font-bold text-ink" id="booking-contact-details">
                   Thông tin người lưu trú
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-muted">
@@ -264,7 +358,7 @@ export function CreateBookingPage() {
                     Đặt phòng cho người khác
                   </span>
                   <span className="mt-1 block text-sm leading-6 text-muted">
-                    Mặc định hệ thống dùng thông tin trong hồ sơ của bạn. Chỉ
+                    Thông tin trong hồ sơ của bạn sẽ được dùng mặc định. Chỉ
                     bật tùy chọn này khi người lưu trú là người khác.
                   </span>
                 </span>
@@ -307,11 +401,16 @@ export function CreateBookingPage() {
 
             <section
               aria-labelledby="booking-note"
-              className="grid gap-5 border-t border-line pt-7"
+              className="grid gap-5"
             >
-              <h3 className="font-black text-ink" id="booking-note">
-                Yêu cầu thêm
-              </h3>
+              <div>
+                <h3 className="font-bold text-ink" id="booking-note">
+                  Yêu cầu thêm
+                </h3>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Ghi chú sẽ được gửi cùng yêu cầu đặt phòng để nơi lưu trú tham khảo.
+                </p>
+              </div>
               <Field
                 label="Ghi chú"
                 error={errors.customerNote?.message}
@@ -321,49 +420,147 @@ export function CreateBookingPage() {
               </Field>
             </section>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-line pt-7 sm:flex-row">
-              <Button
-                className="min-h-11 sm:min-w-28"
-                onClick={() => navigate(-1)}
-                variant="outline"
-              >
-                Quay lại
-              </Button>
-              <Button
-                className="min-h-11 flex-1 sm:flex-none sm:px-7"
-                loading={createMutation.isPending}
-                type="submit"
-              >
-                Tạo đặt phòng
-              </Button>
+            <div className="flex flex-col gap-4 rounded-card bg-brand-soft p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p className="font-bold text-ink">Sẵn sàng xác nhận?</p>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  Sau khi tạo, bạn sẽ xem được trạng thái và bước tiếp theo trong chi tiết đặt phòng.
+                </p>
+              </div>
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                <Button
+                  className="min-h-11 shrink-0 whitespace-nowrap sm:min-w-28"
+                  onClick={() => navigate(-1)}
+                  variant="outline"
+                >
+                  Quay lại
+                </Button>
+                <Button
+                  className="min-h-11 shrink-0 whitespace-nowrap sm:px-7"
+                  loading={createMutation.isPending}
+                  type="submit"
+                >
+                  Tạo đặt phòng
+                </Button>
+              </div>
             </div>
           </form>
         </Card>
 
         <aside className="min-w-0 lg:sticky lg:top-24">
-          <Card className="overflow-hidden border-line bg-brand-soft p-0 shadow-card">
-            <div className="border-b border-line p-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-brand">
+          <Card className="overflow-hidden border-line p-0 shadow-elevation-2">
+            <div className="relative aspect-[16/9] bg-surface-muted">
+              {selectedRoom?.coverImageUrl ? (
+                <RoomImage
+                  alt={`Ảnh ${roomName}`}
+                  className="size-full object-cover"
+                  fallbackLabel="Không thể tải ảnh phòng"
+                  src={resolveRoomImageUrl(selectedRoom.coverImageUrl)}
+                />
+              ) : (
+                <div className="flex size-full flex-col items-center justify-center gap-2 bg-brand-soft text-center text-brand-strong">
+                  <BedDouble aria-hidden="true" className="size-8" />
+                  <span className="text-sm font-semibold">Phòng bạn đã chọn</span>
+                </div>
+              )}
+            </div>
+            <div className="p-5 sm:p-6">
+              <p className="text-xs font-bold uppercase tracking-eyebrow text-brand">
                 Phòng đã chọn
               </p>
-              <h2 className="mt-2 text-xl font-black text-ink">
-                {state?.room?.name ?? `Phòng ${roomId}`}
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-ink">
+                {roomName}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                {state?.room?.roomNumber
-                  ? `Phòng ${state.room.roomNumber}`
+              <p className="mt-1 text-sm leading-6 text-muted">
+                {selectedRoom?.roomNumber
+                  ? `Phòng ${selectedRoom.roomNumber}`
                   : `Mã phòng ${roomId}`}
-                {state?.room?.roomTypeName
-                  ? ` · ${state.room.roomTypeName}`
+                {selectedRoom?.roomTypeName
+                  ? ` · ${selectedRoom.roomTypeName}`
                   : ''}
               </p>
-            </div>
-            <div className="p-6">
-              <p className="text-sm leading-6 text-muted">
-                Giá và tình trạng phòng được xác nhận lại khi yêu cầu được gửi.
-              </p>
+
+              {selectedRoom?.description ? (
+                <p className="mt-4 line-clamp-3 text-sm leading-6 text-muted">
+                  {selectedRoom.description}
+                </p>
+              ) : null}
+
+              {selectedRoom?.amenities?.length ? (
+                <ul className="mt-4 flex flex-wrap gap-2" aria-label="Tiện nghi nổi bật">
+                  {selectedRoom.amenities.map((amenity) => (
+                    <li
+                      className="rounded-full bg-surface-muted px-3 py-1.5 text-xs font-semibold text-ink"
+                      key={amenity}
+                    >
+                      {amenity}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <section aria-label="Tóm tắt kỳ lưu trú" className="mt-5">
+                <dl aria-live="polite" className="grid grid-cols-2 gap-2.5">
+                  <div className="rounded-control bg-surface-muted px-3 py-3">
+                    <dt className="text-xs font-semibold text-muted">Nhận phòng</dt>
+                    <dd className="mt-1 text-sm font-bold text-ink">
+                      {formatStayDate(checkInDate)}
+                    </dd>
+                  </div>
+                  <div className="rounded-control bg-surface-muted px-3 py-3">
+                    <dt className="text-xs font-semibold text-muted">Trả phòng</dt>
+                    <dd className="mt-1 text-sm font-bold text-ink">
+                      {formatStayDate(checkOutDate)}
+                    </dd>
+                  </div>
+                  <div className="rounded-control bg-surface-muted px-3 py-3">
+                    <dt className="text-xs font-semibold text-muted">Số đêm</dt>
+                    <dd className="mt-1 text-sm font-bold text-ink">
+                      {stayNights !== null ? `${formatNumber(stayNights)} đêm` : '—'}
+                    </dd>
+                  </div>
+                  <div className="rounded-control bg-surface-muted px-3 py-3">
+                    <dt className="text-xs font-semibold text-muted">Số khách</dt>
+                    <dd className="mt-1 flex items-center gap-1.5 text-sm font-bold text-ink">
+                      <Users aria-hidden="true" className="size-4 text-brand" />
+                      {displayedGuestCount !== null
+                        ? `${formatNumber(displayedGuestCount)} khách`
+                        : '—'}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              {selectedRoom?.maxGuests ? (
+                <p className="mt-3 flex items-center gap-2 text-sm text-muted">
+                  <Users aria-hidden="true" className="size-4" />
+                  Tối đa {formatNumber(selectedRoom.maxGuests)} khách
+                </p>
+              ) : null}
+
+              {selectedRoom?.basePrice ? (
+                <div className="mt-5 rounded-card bg-brand-soft p-4">
+                  <p className="text-sm font-semibold text-ink">Giá cơ sở</p>
+                  <p className="mt-1 text-2xl font-bold tracking-tight text-ink">
+                    {formatMoney(selectedRoom.basePrice)}
+                    <span className="ml-1 text-sm font-semibold text-muted">/ đêm</span>
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-muted">
+                    Tổng tiền được Backend xác nhận khi bạn gửi yêu cầu.
+                  </p>
+                </div>
+              ) : null}
             </div>
           </Card>
+          <section className="mt-4 flex gap-3 rounded-card border border-brand/20 bg-brand-soft p-4" aria-label="Lưu ý xác nhận đặt phòng">
+            <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
+            <div>
+              <h2 className="font-bold text-ink">Thông tin được kiểm tra lại</h2>
+              <p className="mt-1 text-sm leading-6 text-muted">
+                Phòng trống, giá và điều kiện đặt phòng chỉ được xác nhận sau khi hệ thống nhận yêu cầu.
+              </p>
+            </div>
+          </section>
         </aside>
       </div>
     </div>

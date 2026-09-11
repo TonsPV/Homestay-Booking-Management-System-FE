@@ -1,81 +1,71 @@
-# HBMS Frontend Agent Instructions
+# Hướng dẫn tác nhân cho HBMS Frontend
 
-This React/Vite frontend follows an ECC-inspired, project-local workflow. Keep
-the UI practical for a management tool and aligned with the Backend contract.
+Frontend React/Vite theo quy trình cục bộ lấy cảm hứng từ ECC. Giao diện quản lý
+phải thực dụng và phù hợp hợp đồng Backend.
 
-## Architecture Rules
+## Kiến trúc
 
-- Feature code lives under `src/features/<domain>`.
-- Shared primitives live under `src/shared`.
-- API client behavior belongs in `src/api` and feature `api.ts` files.
-- Prefer generated OpenAPI types when available.
-- Do not duplicate Backend business rules in the UI except for helpful form
-  validation and disabled states.
-- Treat the Backend as the source of truth for auth, pricing, booking status,
-  payment status, and room availability.
+- Mã tính năng nằm trong `src/features/<domain>`; thành phần dùng chung ở `src/shared`.
+- Hành vi HTTP thuộc `src/api` và tệp `api.ts` của từng tính năng.
+- Ưu tiên kiểu sinh từ OpenAPI; không nhân đôi quy tắc nghiệp vụ Backend, ngoại trừ
+  kiểm tra biểu mẫu và vô hiệu hóa thao tác để hỗ trợ người dùng.
+- Backend là nguồn quyết định cho xác thực, giá, trạng thái đặt phòng/thanh toán và phòng trống.
 
-## UI Direction
+## Định hướng giao diện
 
-- Management screens should be dense, calm, and scan-friendly.
-- Avoid landing-page style layouts for operational pages.
-- Use existing shared components before adding new visual primitives.
-- Keep buttons, tables, forms, dialogs, filters, and status badges consistent.
-- Make mobile layouts usable; text must not overflow buttons or cards.
-- Destructive and financial actions always use `variant="danger"` plus a
-  `ConfirmationDialog tone="danger"` (never `window.confirm`, never ghost
-  triggers).
-- Status colors follow the semantic policy in `DESIGN.md`: `warning` for
-  attention/SLA risk, `danger` only for failure/invalid/immediate
-  intervention (e.g. `REFUND_PENDING` stale past SLA is `warning`).
-- Management typography tops out at `font-bold`; `font-black` is reserved
-  for the brand wordmark.
-- Management reference implementations: `ManagementDashboardPage` (overview)
-  and `ManagementPaymentsPage` (dense operational list). Other management
-  screens must reuse their grammar instead of introducing new visual
-  patterns.
-- Mobile management lists use stacked, task-prioritized cards rather than
-  mirroring desktop table columns.
-- Rooms create/edit/images use dedicated routes
-  (`/management/rooms/new`, `/management/rooms/:id/edit`,
-  `/management/rooms/:id/images`); the list stays scan-first.
-- The payments list is scan-first with at most six columns; technical and
-  reconciliation metadata lives on `/management/payments/:id`.
+- Trang quản lý cần gọn, bình tĩnh, dễ quét; không dùng bố cục trang quảng bá.
+- Dùng thành phần chung sẵn có trước khi tạo thành phần mới; giữ nhất quán nút,
+  bảng, biểu mẫu, hộp thoại, bộ lọc và nhãn trạng thái.
+- Di động phải dùng được; chữ không tràn nút hoặc thẻ.
+- Mọi thao tác phá hủy hoặc tài chính dùng `variant="danger"` cùng
+  `ConfirmationDialog tone="danger"`; không dùng `window.confirm` hoặc nút dạng `ghost`.
+- Màu trạng thái theo [DESIGN.md](DESIGN.md): `warning` khi cần chú ý hoặc có nguy cơ
+  quá thời hạn; `danger` chỉ cho thất bại, không hợp lệ hoặc cần can thiệp ngay.
+  `REFUND_PENDING` quá thời hạn dùng `warning`.
+- Chữ quản lý đậm tối đa `font-bold`; `font-black` chỉ dành cho chữ thương hiệu.
+- Mẫu tham chiếu: `ManagementDashboardPage` cho tổng quan và
+  `ManagementPaymentsPage` cho danh sách nghiệp vụ. Tái sử dụng quy tắc của hai mẫu.
+  Dashboard hiện tạm ngưng tuyến/API; giữ vai trò mẫu, không tự mở lại tuyến.
+- Danh sách quản lý trên di động dùng thẻ xếp dọc ưu tiên tác vụ, không sao nguyên cột máy tính.
+- Tạo/sửa/ảnh phòng có tuyến riêng: `/management/rooms/new`,
+  `/management/rooms/:id/edit`, `/management/rooms/:id/images`; danh sách ưu tiên tra cứu.
+- Danh sách thanh toán tối đa sáu cột; thông tin kỹ thuật và đối soát nằm tại
+  `/management/payments/:id`.
 
-## Frontend Module Checklist
+## Danh sách kiểm tra tính năng
 
-For each new or changed feature:
+1. Xác nhận tuyến Backend, loại tài khoản, nội dung yêu cầu và phản hồi.
+2. Cập nhật hoặc sinh kiểu API.
+3. Thêm lược đồ kiểm tra biểu mẫu.
+4. Thêm hook React Query khi tải hoặc thay đổi dữ liệu.
+5. Chỉ cập nhật giao diện trước phản hồi khi đã rõ cách hoàn tác.
+6. Có trạng thái đang tải, rỗng, lỗi và thành công.
+7. Thêm kiểm thử đơn vị/thành phần cho kiểm tra dữ liệu, hiển thị và thao tác quan trọng.
+8. Thêm Playwright E2E cho hành trình quan trọng.
 
-1. Confirm the Backend route, actor, request body, and response body.
-2. Update or generate API types.
-3. Add schema validation for forms.
-4. Add React Query hooks where data is loaded or mutated.
-5. Add optimistic UI only when rollback behavior is clear.
-6. Show loading, empty, error, and success states.
-7. Add unit/component tests for validation, rendering, and important actions.
-8. Add Playwright E2E for critical user journeys.
+## Đặt phòng và thanh toán
 
-## Payment And Booking UI Rules
+- Tham số trên trang quay về VNPay là đầu vào không đáng tin.
+- Thành công thanh toán phải được Backend xác nhận, không chỉ dựa vào trình duyệt quay về.
+- `REFUND_PENDING` bình thường khi VNPay còn chờ xử lý/xem xét.
+- Làm mới phòng trống sau tạo, hủy, hết hạn, thanh toán hoặc hoàn tiền có thể ảnh hưởng
+  quyết định của người dùng.
 
-- VNPay return pages should treat query params as untrusted display input.
-- Payment success must be confirmed by Backend state, not only browser return.
-- Refund state `REFUND_PENDING` is normal while VNPay shows pending/review.
-- Booking availability must be refreshed after create, cancel, expire, pay, or
-  refund actions that can affect user decisions.
+## Lệnh kiểm tra
 
-## Commands
+- Kiến trúc: `npm run architecture:check`.
+- Kiểu dữ liệu: `npm run typecheck`.
+- Quy tắc mã: `npm run lint`.
+- Đơn vị/thành phần: `npm run test`.
+- Trình duyệt: `npm run test:e2e`.
+- Sinh hợp đồng: `npm run contract:generate`.
+- Bản dựng: `npm run build`.
 
-- Architecture hygiene: `npm run architecture:check`
-- Typecheck: `npm run typecheck`
-- Lint: `npm run lint`
-- Unit/component tests: `npm run test`
-- E2E: `npm run test:e2e`
-- Contract generation: `npm run contract:generate`
-- Build: `npm run build`
+## Chính sách hợp đồng và tài liệu
 
-## Contract Policy
-
-- When Backend OpenAPI changes, run Backend `npm run openapi:generate`, then FE
-  `npm run contract:generate`.
-- Prefer removing hand-written response types over adding more duplicates once
-  the generated contract covers that API.
-- Do not hand-edit generated files under `src/api/generated`.
+- Khi OpenAPI Backend đổi, chạy `npm run openapi:generate` ở Backend rồi
+  `npm run contract:generate` ở Frontend.
+- Khi kiểu sinh tự động đã bao phủ API, ưu tiên xóa kiểu phản hồi viết tay trùng lặp.
+- Không sửa tay tệp trong `src/api/generated`.
+- Tài liệu viết bằng tiếng Việt; giữ nguyên định danh kỹ thuật và lệnh.
+  Tra cứu chủ đề tại [mục lục](docs/README.md); cập nhật tài liệu chủ thay vì tạo bản lặp.

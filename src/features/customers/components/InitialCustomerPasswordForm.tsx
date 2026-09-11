@@ -6,7 +6,7 @@ import type { Customer } from "@/auth/types";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
 import { Alert } from "@/shared/components/Feedback";
-import { Field, Input } from "@/shared/components/FormControls";
+import { Field, PasswordInput } from "@/shared/components/FormControls";
 
 import { useSetInitialCustomerPasswordMutation } from "../queries";
 import { getCustomerCredentialActionError } from "../errors";
@@ -59,7 +59,7 @@ export function InitialCustomerPasswordForm({
       </div>
 
       <form
-        className="mt-5 grid gap-4 lg:grid-cols-2"
+        className="mt-5 grid items-start gap-4 lg:grid-cols-2"
         noValidate
         onSubmit={handleSubmit((values) => {
           mutation.mutate(
@@ -87,20 +87,19 @@ export function InitialCustomerPasswordForm({
           label="Mật khẩu ban đầu"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register("password")}
           />
         </Field>
         <Field
           error={errors.confirmPassword?.message}
+          hint="Nhập lại mật khẩu để xác nhận."
           label="Xác nhận mật khẩu"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register("confirmPassword")}
           />
         </Field>

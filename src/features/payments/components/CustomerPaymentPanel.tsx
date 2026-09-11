@@ -19,7 +19,7 @@ import {
   Select,
 } from '@/shared/components/FormControls'
 
-import { getPaymentActionError } from '../errors'
+import { getCustomerPaymentActionError } from '../errors'
 import {
   useCreateVnPayPayment,
   useCustomerPayments,
@@ -201,7 +201,7 @@ export function CustomerPaymentPanel({
           >
             {attemptDecision.reason === 'pending-without-key'
               ? 'Một giao dịch VNPay đang chờ kết quả. Để tránh thanh toán trùng, bạn chưa thể tạo giao dịch mới.'
-              : 'Thông tin thanh toán trên thiết bị này chưa đồng bộ với lịch sử. Vui lòng tải lại trang hoặc liên hệ Homestay Green nếu tình trạng vẫn tiếp diễn.'}
+              : 'Chưa thể xác nhận giao dịch đang mở. Vui lòng tải lại trang hoặc liên hệ Homestay Green nếu tình trạng vẫn tiếp diễn.'}
           </Alert>
         ) : (
           <form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={submit}>
@@ -222,7 +222,7 @@ export function CustomerPaymentPanel({
 
             {createMutation.isError ? (
               <Alert className="sm:col-span-2" tone="error">
-                {getPaymentActionError(createMutation.error)}
+                {getCustomerPaymentActionError(createMutation.error)}
               </Alert>
             ) : null}
 
@@ -234,8 +234,8 @@ export function CustomerPaymentPanel({
 
             {pendingPayment ? (
               <Alert className="sm:col-span-2" tone="warning">
-                Một giao dịch VNPay đang chờ kết quả. Nếu tiếp tục, hệ thống sẽ
-                mở lại đúng giao dịch đó để tránh thanh toán trùng.
+                Một giao dịch VNPay đang chờ kết quả. Bạn có thể tiếp tục giao
+                dịch này mà không tạo thêm khoản thanh toán mới.
               </Alert>
             ) : null}
 
@@ -263,7 +263,7 @@ export function CustomerPaymentPanel({
         <LoadingState label="Đang kiểm tra lịch sử thanh toán…" />
       ) : paymentsQuery.isError ? (
         <ErrorState
-          description={getPaymentActionError(paymentsQuery.error)}
+          description={getCustomerPaymentActionError(paymentsQuery.error)}
           onRetry={() => void paymentsQuery.refetch()}
         />
       ) : (

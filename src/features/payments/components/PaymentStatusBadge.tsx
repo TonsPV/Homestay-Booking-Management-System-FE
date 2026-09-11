@@ -3,7 +3,10 @@ import { Badge } from '@/shared/components/Badge'
 import type {
   PaymentStatus,
 } from '../types'
-import { getPaymentStatusLabel } from './paymentLabels'
+import {
+  getCustomerPaymentStatusLabel,
+  getPaymentStatusLabel,
+} from './paymentLabels'
 
 const statusTones: Record<
   PaymentStatus,
@@ -17,10 +20,18 @@ const statusTones: Record<
   REFUNDED: 'violet',
 }
 
-export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
+export function PaymentStatusBadge({
+  audience = 'management',
+  status,
+}: {
+  audience?: 'customer' | 'management'
+  status: PaymentStatus
+}) {
   return (
     <Badge tone={statusTones[status]}>
-      {getPaymentStatusLabel(status)}
+      {audience === 'customer'
+        ? getCustomerPaymentStatusLabel(status)
+        : getPaymentStatusLabel(status)}
     </Badge>
   )
 }

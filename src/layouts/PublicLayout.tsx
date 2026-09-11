@@ -12,7 +12,6 @@ import { SkipLink } from "@/shared/components/SkipLink";
 const publicNavigation = [
   { end: true, label: "Trang chủ", to: "/" },
   { label: "Khám phá phòng", to: "/rooms" },
-  { label: "Kiểm tra phòng trống", to: "/rooms/search" },
 ];
 
 function navLinkClass({ isActive }: { isActive: boolean }, inverse = false) {
@@ -373,13 +372,7 @@ export function PublicLayout() {
               className="inline-flex min-h-11 items-center text-muted hover:text-brand-strong"
               to="/rooms"
             >
-              Danh sách phòng
-            </NavLink>
-            <NavLink
-              className="inline-flex min-h-11 items-center text-muted hover:text-brand-strong"
-              to="/rooms/search"
-            >
-              Tìm phòng trống
+              Khám phá phòng
             </NavLink>
           </nav>
           <nav

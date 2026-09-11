@@ -165,6 +165,11 @@ test('customer register, login, search, booking and VNPay return use authoritati
       return
     }
 
+    if (path.endsWith('/rooms') && request.method() === 'GET') {
+      await fulfillJson(route, [room], path)
+      return
+    }
+
     if (path.endsWith('/rooms/10')) {
       await fulfillJson(route, room, path)
       return
@@ -229,19 +234,25 @@ test('customer register, login, search, booking and VNPay return use authoritati
   await page.getByRole('link', { name: 'Đăng nhập ngay' }).click()
 
   await page.getByLabel('Email hoặc số điện thoại').fill(customer.email)
-  await page.getByLabel('Mật khẩu').fill('StrongPassword123!')
+  await page
+    .getByRole('textbox', { name: 'Mật khẩu', exact: true })
+    .fill('StrongPassword123!')
   await page.getByRole('button', { name: 'Đăng nhập' }).click()
-  await expect(page).toHaveURL(/\/bookings$/)
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
-  await page.goto('/rooms/search')
+  await page.goto('/rooms')
   await page.getByLabel('Nhận phòng').fill('2099-04-10')
   await page.getByLabel('Trả phòng').fill('2099-04-12')
   await page.getByText('1 khách', { exact: true }).click()
   await page.getByRole('button', { name: 'Tăng số khách' }).click()
   await page.getByRole('button', { name: 'Xong' }).click()
-  await page.getByRole('button', { name: 'Tìm phòng' }).click()
+  await page.getByRole('button', { name: 'Tìm phòng trống' }).click()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
-  await page.getByRole('button', { name: 'Chọn phòng này' }).click()
+  await page
+    .getByRole('button', { name: 'Tiếp tục đặt phòng' })
+    .first()
+    .click()
   await page.getByRole('button', { name: 'Tạo đặt phòng' }).click()
 
   await expect(page).toHaveURL(/\/bookings\/903$/)

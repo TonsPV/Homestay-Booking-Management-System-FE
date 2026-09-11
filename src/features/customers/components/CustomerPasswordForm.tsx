@@ -9,7 +9,7 @@ import { getApiFieldErrorCode } from '@/api/errors'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Alert } from '@/shared/components/Feedback'
-import { Field, Input } from '@/shared/components/FormControls'
+import { Field, PasswordInput } from '@/shared/components/FormControls'
 
 import { useChangeCustomerPasswordMutation } from '../queries'
 import { getCustomerPasswordActionError } from '../errors'
@@ -118,9 +118,8 @@ export function CustomerPasswordForm() {
           label="Mật khẩu hiện tại"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="current-password"
-            type="password"
             {...register('currentPassword')}
           />
         </Field>
@@ -129,9 +128,8 @@ export function CustomerPasswordForm() {
           label="Mật khẩu mới"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register('newPassword')}
           />
         </Field>
@@ -140,9 +138,8 @@ export function CustomerPasswordForm() {
           label="Xác nhận mật khẩu mới"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register('confirmPassword')}
           />
         </Field>

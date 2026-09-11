@@ -55,7 +55,9 @@ test("login 429 preserves the form and exposes the Retry-After cooldown", async 
 
   await page.goto("/login");
   await page.getByLabel("Email hoặc số điện thoại").fill("guest@example.com");
-  await page.getByLabel("Mật khẩu").fill("StrongPassword123!");
+  await page
+    .getByRole("textbox", { name: "Mật khẩu", exact: true })
+    .fill("StrongPassword123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
 
   await expect(page.getByText(/Bạn đã thao tác quá nhiều lần/)).toBeVisible();

@@ -10,7 +10,7 @@ export function getUserWorkspaceHome(role: UserRole) {
 
 export function getPrincipalHome(principal: AuthPrincipal) {
   return principal.actorType === "customer"
-    ? "/bookings"
+    ? "/"
     : getUserWorkspaceHome(principal.role);
 }
 

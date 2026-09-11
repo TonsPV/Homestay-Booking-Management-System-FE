@@ -31,7 +31,18 @@ const room = vi.hoisted(
 
 vi.mock("@/features/room-types", () => ({
   useRoomTypeOptions: vi.fn(() => ({
-    data: [],
+    data: [
+      {
+        amenities: [],
+        id: "2",
+        name: "Phòng đôi",
+        description: null,
+        maxGuests: 2,
+        basePrice: "900000.00",
+        bedType: null,
+        beds: [],
+      },
+    ],
     error: null,
     isError: false,
     isFetching: false,
@@ -127,5 +138,41 @@ describe("ManagementRoomDetailPage permissions", () => {
         name: `${room.roomNumber} · ${room.name}`,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("navigates to the dedicated edit route instead of an inline editor", () => {
+    const onEditRoom = vi.fn();
+
+    render(
+      <ManagementRoomDetailPage
+        onEditRoom={onEditRoom}
+        role="ADMIN"
+        roomId={room.id}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Chỉnh sửa" }));
+
+    expect(onEditRoom).toHaveBeenCalledOnce();
+    // The inline RoomForm must not render on the detail page anymore.
+    expect(
+      screen.queryByRole("button", { name: "Lưu thay đổi" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText(/Số phòng/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: `${room.roomNumber} · ${room.name}`,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("hides the edit navigation from staff", () => {
+    render(<ManagementRoomDetailPage role="STAFF" roomId={room.id} />);
+
+    expect(
+      screen.queryByRole("button", { name: "Chỉnh sửa" }),
+    ).not.toBeInTheDocument();
   });
 });

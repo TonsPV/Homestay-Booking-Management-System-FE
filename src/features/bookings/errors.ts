@@ -51,12 +51,164 @@ const bookingCodeMessages: Record<string, string> = {
     "Booking không thể hủy ở trạng thái hiện tại.",
 };
 
-export function getBookingActionError(error: unknown) {
-  if (error instanceof ApiError && error.errorCode) {
-    return bookingCodeMessages[error.errorCode] ?? getErrorMessage(error);
+const customerBookingCodeMessages: Record<string, string> = {
+  BOOKING_GUEST_CAPACITY_EXCEEDED:
+    "Số khách vượt quá sức chứa của phòng. Vui lòng giảm số khách hoặc chọn phòng khác.",
+  BOOKING_ACTIVE_UNPAID_LIMIT_REACHED:
+    "Bạn đang có quá nhiều đặt phòng chờ thanh toán. Hãy xử lý các đặt phòng đó trước khi tạo mới.",
+  BOOKING_HELD_NIGHTS_LIMIT_REACHED:
+    "Bạn đã giữ chỗ quá nhiều đêm. Hãy xử lý các đặt phòng hiện có trước khi thử lại.",
+  BOOKING_ROOM_NOT_BOOKABLE:
+    "Phòng này hiện chưa thể đặt. Vui lòng chọn phòng khác.",
+  BOOKING_CHECKIN_IN_PAST: "Ngày nhận phòng không được nằm trong quá khứ.",
+  BOOKING_CHECKIN_TOO_FAR:
+    "Ngày nhận phòng vượt quá khoảng thời gian được phép đặt trước.",
+  BOOKING_DATE_RANGE_INVALID: "Ngày trả phòng phải sau ngày nhận phòng.",
+  BOOKING_STAY_TOO_LONG:
+    "Thời gian lưu trú vượt quá giới hạn cho một lần đặt phòng.",
+  BOOKING_TOTAL_LIMIT_EXCEEDED:
+    "Tổng tiền vượt mức cho phép. Vui lòng rút ngắn kỳ lưu trú hoặc chọn phòng khác.",
+  BOOKING_ROOM_UNAVAILABLE:
+    "Phòng này không còn trống trong kỳ bạn đã chọn. Hãy chọn ngày hoặc phòng khác.",
+  BOOKING_CREATE_CONFLICT:
+    "Thông tin phòng vừa thay đổi. Hãy kiểm tra lại kỳ lưu trú rồi thử đặt lại.",
+  BOOKING_REQUEST_INTENT_CONFLICT:
+    "Thông tin đặt phòng vừa thay đổi. Hãy kiểm tra lại và thử đặt lại.",
+  CUSTOMER_EMAIL_IN_USE: "Email này đã được sử dụng. Vui lòng dùng email khác.",
+  CUSTOMER_PHONE_IN_USE:
+    "Số điện thoại này đã được sử dụng. Vui lòng dùng số khác.",
+  BOOKING_CANCELLATION_REASON_REQUIRED: "Vui lòng nhập lý do hủy đặt phòng.",
+  BOOKING_REFUND_PENDING:
+    "Yêu cầu hoàn tiền đang được xử lý. Chúng tôi sẽ cập nhật khi có kết quả.",
+  BOOKING_CANCELLATION_NOT_ALLOWED:
+    "Đặt phòng này chưa thể hủy ở thời điểm hiện tại.",
+};
+
+const knownClientErrorCodes = new Set([
+  "COMMON_VALIDATION_FAILED",
+  "COMMON_UNAUTHORIZED",
+  "COMMON_FORBIDDEN",
+  "COMMON_NOT_FOUND",
+  "COMMON_RATE_LIMITED",
+  "COMMON_PAYLOAD_TOO_LARGE",
+  "COMMON_UNSUPPORTED_MEDIA_TYPE",
+]);
+
+function isSystemOrUnknownError(error: ApiError): boolean {
+  if (
+    (error.status && error.status >= 500) ||
+    error.kind === "network" ||
+    error.kind === "parse" ||
+    error.errorCode === "COMMON_INTERNAL_ERROR" ||
+    error.errorCode === "COMMON_SERVICE_UNAVAILABLE"
+  ) {
+    return true;
+  }
+
+  if (!error.errorCode) {
+    return true;
+  }
+
+  return (
+    bookingCodeMessages[error.errorCode] === undefined &&
+    !knownClientErrorCodes.has(error.errorCode)
+  );
+}
+
+export function getBookingActionError(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.errorCode && bookingCodeMessages[error.errorCode]) {
+      return bookingCodeMessages[error.errorCode];
+    }
+
+    const message = getErrorMessage(error);
+    if (isSystemOrUnknownError(error) && error.requestId) {
+      return `${message} (Mã tham chiếu: ${error.requestId})`;
+    }
+    return message;
   }
 
   return getErrorMessage(error);
+}
+
+/**
+ * Nội dung dành cho khách lưu trú: chỉ giải thích điều khách có thể làm tiếp,
+ * không đưa mã tham chiếu hay trạng thái nội bộ ra giao diện công khai.
+ */
+export function getCustomerBookingActionError(error: unknown): string {
+  if (error instanceof ApiError) {
+    const errorCodes = [
+      error.errorCode,
+      ...Object.values(error.fieldErrors ?? {}).flatMap((fieldErrors) =>
+        fieldErrors.map((fieldError) => fieldError.errorCode),
+      ),
+    ];
+    const customerMessage = errorCodes
+      .filter((errorCode): errorCode is string => typeof errorCode === "string")
+      .map((errorCode) => customerBookingCodeMessages[errorCode])
+      .find(Boolean);
+
+    if (customerMessage) {
+      return customerMessage;
+    }
+  }
+
+  return getErrorMessage(error);
+}
+
+export function isBookingRoomConflictError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) {
+    return false;
+  }
+
+  if (error.errorCode === "BOOKING_REQUEST_INTENT_CONFLICT") {
+    return false;
+  }
+
+  if (
+    error.errorCode === "BOOKING_ROOM_UNAVAILABLE" ||
+    error.errorCode === "BOOKING_ROOM_NOT_BOOKABLE" ||
+    error.errorCode === "BOOKING_CREATE_CONFLICT"
+  ) {
+    return true;
+  }
+
+  const checkInErr = error.fieldErrors?.checkInDate?.[0]?.errorCode;
+  const checkOutErr = error.fieldErrors?.checkOutDate?.[0]?.errorCode;
+  const roomErr = error.fieldErrors?.roomId?.[0]?.errorCode;
+
+  if (
+    checkInErr === "BOOKING_ROOM_UNAVAILABLE" ||
+    checkInErr === "BOOKING_ROOM_NOT_BOOKABLE" ||
+    checkOutErr === "BOOKING_ROOM_UNAVAILABLE" ||
+    checkOutErr === "BOOKING_ROOM_NOT_BOOKABLE" ||
+    roomErr === "BOOKING_ROOM_UNAVAILABLE" ||
+    roomErr === "BOOKING_ROOM_NOT_BOOKABLE"
+  ) {
+    return true;
+  }
+
+  return error.status === 409;
+}
+
+export function buildRoomSearchUrl(params: {
+  checkIn?: string;
+  checkOut?: string;
+  guests?: number | string;
+}): string {
+  const searchParams = new URLSearchParams();
+  if (params.checkIn) {
+    searchParams.set("checkIn", params.checkIn);
+  }
+  if (params.checkOut) {
+    searchParams.set("checkOut", params.checkOut);
+  }
+  if (params.guests && Number(params.guests) > 0) {
+    searchParams.set("guests", String(params.guests));
+  }
+
+  const query = searchParams.toString();
+  return `/rooms${query ? `?${query}` : ""}`;
 }
 
 export function getBookingTransitionReason(reasonCode: string | null) {

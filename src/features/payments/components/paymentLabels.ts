@@ -12,6 +12,12 @@ const statusLabels: Record<PaymentStatus, string> = {
   REFUNDED: 'Đã hoàn tiền',
 }
 
+const customerStatusLabels: Record<PaymentStatus, string> = {
+  ...statusLabels,
+  FAILED: 'Chưa thành công',
+  REQUIRES_REVIEW: 'Đang kiểm tra',
+}
+
 const methodLabels: Record<PaymentMethod, string> = {
   CASH: 'Tiền mặt',
   BANK_TRANSFER: 'Chuyển khoản',
@@ -20,6 +26,10 @@ const methodLabels: Record<PaymentMethod, string> = {
 
 export function getPaymentStatusLabel(status: PaymentStatus) {
   return statusLabels[status]
+}
+
+export function getCustomerPaymentStatusLabel(status: PaymentStatus) {
+  return customerStatusLabels[status]
 }
 
 export function getPaymentMethodLabel(method: PaymentMethod) {

@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 
 import { Alert } from '@/shared/components/Feedback'
 import { Button } from '@/shared/components/Button'
-import { Field, Input } from '@/shared/components/FormControls'
+import { Field, Input, PasswordInput } from '@/shared/components/FormControls'
 
 import { registerCustomer } from '../api'
 import { getAuthActionError } from '../errors'
@@ -138,28 +138,27 @@ export function RegisterPage({
           />
         </Field>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid items-start gap-5 sm:grid-cols-2">
           <Field
             error={errors.password?.message}
             hint="Từ 8 đến 72 ký tự."
             label="Mật khẩu"
             required
           >
-            <Input
+            <PasswordInput
               autoComplete="new-password"
-              type="password"
               {...register('password')}
             />
           </Field>
 
           <Field
             error={errors.confirmPassword?.message}
+            hint="Nhập lại mật khẩu để xác nhận."
             label="Xác nhận mật khẩu"
             required
           >
-            <Input
+            <PasswordInput
               autoComplete="new-password"
-              type="password"
               {...register('confirmPassword')}
             />
           </Field>

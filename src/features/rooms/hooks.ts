@@ -49,8 +49,9 @@ import type {
 
 export { roomKeys } from './query-keys'
 
-export function useRooms(query: ListRoomsQuery = {}) {
+export function useRooms(query: ListRoomsQuery = {}, enabled = true) {
   return useQuery({
+    enabled,
     queryFn: ({ signal }) => listRooms(query, signal),
     queryKey: roomKeys.list(query),
   })

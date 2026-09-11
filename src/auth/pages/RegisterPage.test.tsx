@@ -90,4 +90,31 @@ describe('RegisterPage', () => {
       passwordError.id,
     )
   })
+
+  it('lets a guest show and hide either password field repeatedly', () => {
+    renderRegisterPage()
+
+    const password = screen.getByLabelText(/^Mật khẩu/)
+    const confirmation = screen.getByLabelText(/^Xác nhận mật khẩu/)
+    const toggles = screen.getAllByRole('button', { name: 'Hiện mật khẩu' })
+
+    fireEvent.click(toggles[0]!)
+    expect(password).toHaveAttribute('type', 'text')
+    expect(confirmation).toHaveAttribute('type', 'password')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ẩn mật khẩu' }))
+    expect(password).toHaveAttribute('type', 'password')
+    expect(
+      screen.getAllByRole('button', { name: 'Hiện mật khẩu' }),
+    ).toHaveLength(2)
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Hiện mật khẩu' })[1]!)
+    expect(confirmation).toHaveAttribute('type', 'text')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ẩn mật khẩu' }))
+    expect(confirmation).toHaveAttribute('type', 'password')
+    expect(
+      screen.getAllByRole('button', { name: 'Hiện mật khẩu' }),
+    ).toHaveLength(2)
+  })
 })

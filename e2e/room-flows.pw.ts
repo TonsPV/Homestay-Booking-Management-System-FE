@@ -36,6 +36,30 @@ const baseRoom = {
   updatedAt: '2026-07-24T00:00:00.000Z',
 }
 
+const galleryRoom = {
+  ...baseRoom,
+  images: [
+    {
+      id: '71',
+      imageUrl: '/images/home/hero.webp',
+      isCover: true,
+      sortOrder: 0,
+    },
+    {
+      id: '72',
+      imageUrl: '/images/home/experience.webp',
+      isCover: false,
+      sortOrder: 1,
+    },
+    {
+      id: '73',
+      imageUrl: '/images/home/closing.webp',
+      isCover: false,
+      sortOrder: 2,
+    },
+  ],
+}
+
 test('public search sends exact filters, handles a broken image and opens detail', async ({
   page,
 }) => {
@@ -56,6 +80,11 @@ test('public search sends exact filters, handles a broken image and opens detail
       return
     }
 
+    if (url.pathname.endsWith('/rooms') && request.method() === 'GET') {
+      await fulfillJson(route, [baseRoom], url.pathname)
+      return
+    }
+
     if (url.pathname.endsWith('/rooms/search')) {
       expect(url.searchParams.get('checkIn')).toBe('2099-01-10')
       expect(url.searchParams.get('checkOut')).toBe('2099-01-12')
@@ -73,25 +102,71 @@ test('public search sends exact filters, handles a broken image and opens detail
     await route.fallback()
   })
 
-  await page.goto('/rooms/search')
+  await page.goto('/rooms')
+  const filterToggle = page.getByRole('button', { name: /Bộ lọc/ })
+  if (await page.evaluate(() => window.matchMedia('(max-width: 1023px)').matches)) {
+    await filterToggle.click()
+    await expect(filterToggle).toHaveAttribute('aria-expanded', 'true')
+  }
+  await expect(page.getByText('Tiện ích mong muốn')).toBeVisible()
+  await page.getByLabel('Wi-Fi').check()
   await page.getByLabel('Nhận phòng').fill('2099-01-10')
   await page.getByLabel('Trả phòng').fill('2099-01-12')
   await page.getByText('1 khách', { exact: true }).click()
   await page.getByRole('button', { name: 'Tăng số khách' }).click()
   await page.getByRole('button', { name: 'Xong' }).click()
-  await page.getByRole('button', { name: 'Tìm phòng' }).click()
-  const filterToggle = page.getByRole('button', { name: /Bộ lọc/ })
-  if (await filterToggle.isVisible()) await filterToggle.click()
-  await page.getByLabel('Wi-Fi').check()
+  await page.getByRole('button', { name: 'Tìm phòng trống' }).click()
   await page.getByLabel('Hồ bơi').check()
+  await page.getByRole('button', { name: 'Áp dụng bộ lọc' }).click()
 
   await expect.poll(() => capturedAmenityIds).toEqual(['3', '9'])
   await expect(page.getByText('Không thể tải ảnh phòng')).toBeVisible()
   await page.getByRole('button', { name: 'Xem chi tiết' }).click()
 
-  await expect(page).toHaveURL(/\/rooms\/10$/)
+  await expect(page).toHaveURL(
+    /\/rooms\/10\?checkIn=2099-01-10&checkOut=2099-01-12&guests=2$/,
+  )
   await expect(page.getByRole('heading', { name: 'Suite Vườn' })).toBeVisible()
   await expect(page.getByText('Không thể tải ảnh phòng')).toBeVisible()
+})
+
+test('public room detail presents a multi-image gallery and booking context', async ({
+  page,
+}) => {
+  await page.route('**/api/v1/**', async (route) => {
+    const url = new URL(route.request().url())
+
+    if (url.pathname.endsWith('/rooms/10')) {
+      await fulfillJson(route, galleryRoom, url.pathname)
+      return
+    }
+
+    await route.fallback()
+  })
+
+  await page.goto('/rooms/10?checkIn=2099-01-10&checkOut=2099-01-12&guests=2')
+
+  await expect(page.getByRole('heading', { name: 'Suite Vườn' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Hình ảnh' })).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: 'Mở bộ xem ảnh Suite Vườn' }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('group', { name: 'Chọn ảnh phòng' }).getByRole('button'),
+  ).toHaveCount(3)
+  await expect(page.getByText(/Kỳ lưu trú 2 đêm/)).toBeVisible()
+
+  const secondImage = page.getByRole('button', {
+    name: 'Chọn ảnh 2 của Suite Vườn',
+  })
+  await secondImage.click()
+  await expect(secondImage).toHaveAttribute('aria-pressed', 'true')
+
+  await page
+    .getByRole('button', { name: 'Mở bộ xem ảnh Suite Vườn' })
+    .click()
+  await expect(page.getByRole('dialog')).toContainText('2 / 3')
+  await page.getByRole('button', { name: 'Đóng' }).click()
 })
 
 test('admin handles room status, calendar conflict and image operations', async ({

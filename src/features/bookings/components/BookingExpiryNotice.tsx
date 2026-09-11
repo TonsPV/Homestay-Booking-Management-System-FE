@@ -10,6 +10,7 @@ import { formatDateTime } from '@/shared/formatting/formatters'
 import type { Booking } from '../types'
 
 const MAX_BROWSER_TIMEOUT = 2_147_483_647
+const FIFTEEN_MINUTES_MS = 15 * 60_000
 
 interface BookingExpiryNoticeProps {
   booking: Booking
@@ -20,7 +21,16 @@ function getRemainingLabel(expiresAt: string, now: number) {
   const remainingMilliseconds = Date.parse(expiresAt) - now
 
   if (remainingMilliseconds <= 0) {
-    return 'Thời hạn thanh toán đã kết thúc. Trạng thái sẽ được hệ thống cập nhật.'
+    return 'Thời hạn thanh toán đã kết thúc. Chúng tôi đang cập nhật trạng thái đặt phòng...'
+  }
+
+  if (remainingMilliseconds <= FIFTEEN_MINUTES_MS) {
+    const totalSeconds = Math.max(0, Math.floor(remainingMilliseconds / 1000))
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    const mm = String(minutes).padStart(2, '0')
+    const ss = String(seconds).padStart(2, '0')
+    return `Còn ${mm}:${ss} để thanh toán.`
   }
 
   const totalMinutes = Math.ceil(remainingMilliseconds / 60_000)
@@ -42,9 +52,45 @@ export function BookingExpiryNotice({
   const reportedExpiry = useRef<string | null>(null)
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 30_000)
-    return () => window.clearInterval(interval)
-  }, [])
+    const paymentExpiresAt = booking.paymentExpiresAt
+    if (!paymentExpiresAt) {
+      return
+    }
+
+    const expiresAt = Date.parse(paymentExpiresAt)
+    if (!Number.isFinite(expiresAt)) {
+      return
+    }
+
+    const getTickInterval = () => {
+      const remaining = expiresAt - Date.now()
+      if (remaining <= 0) {
+        return null
+      }
+      return remaining <= FIFTEEN_MINUTES_MS ? 1_000 : 10_000
+    }
+
+    let timer: number | undefined
+
+    const tick = () => {
+      setNow(Date.now())
+      const interval = getTickInterval()
+      if (interval !== null) {
+        timer = window.setTimeout(tick, interval)
+      }
+    }
+
+    const initialInterval = getTickInterval()
+    if (initialInterval !== null) {
+      timer = window.setTimeout(tick, initialInterval)
+    }
+
+    return () => {
+      if (timer !== undefined) {
+        window.clearTimeout(timer)
+      }
+    }
+  }, [booking.paymentExpiresAt])
 
   useEffect(() => {
     const paymentExpiresAt = booking.paymentExpiresAt

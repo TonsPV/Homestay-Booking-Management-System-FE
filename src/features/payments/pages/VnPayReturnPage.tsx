@@ -16,7 +16,7 @@ import {
 import { LinkButton } from '@/shared/components/LinkButton'
 import { PageHeader } from '@/shared/components/PageHeader'
 
-import { getPaymentActionError } from '../errors'
+import { getCustomerPaymentActionError } from '../errors'
 import {
   useCustomerPayments,
   useVnPayReturn,
@@ -144,7 +144,7 @@ export function VnPayReturnPage() {
   } else if (hasGatewayParameters && returnQuery.isError) {
     content = (
       <ErrorState
-        description={getPaymentActionError(returnQuery.error)}
+        description={getCustomerPaymentActionError(returnQuery.error)}
         onRetry={() => void returnQuery.refetch()}
       />
     )
@@ -164,8 +164,8 @@ export function VnPayReturnPage() {
   } else if (!returnResult.paymentId || !returnResult.paymentStatus) {
     content = (
       <Alert tone="warning" title="Chưa xác định được giao dịch">
-        Hệ thống chưa tìm thấy khoản thanh toán tương ứng. Vui lòng kiểm tra
-        lịch sử trong chi tiết đặt phòng.
+        Chưa tìm thấy khoản thanh toán tương ứng. Vui lòng kiểm tra lịch sử
+        trong chi tiết đặt phòng.
       </Alert>
     )
   } else if (attempt && !returnMatchesAttempt) {
@@ -195,7 +195,7 @@ export function VnPayReturnPage() {
   ) {
     content = (
       <ErrorState
-        description={getPaymentActionError(paymentsQuery.error)}
+        description={getCustomerPaymentActionError(paymentsQuery.error)}
         onRetry={retryAuthoritativeState}
       />
     )
@@ -205,8 +205,8 @@ export function VnPayReturnPage() {
   ) {
     content = (
       <Alert tone="warning" title="Đang cập nhật kết quả">
-        Hệ thống chưa ghi nhận giao dịch trong lịch sử đặt phòng. Trang sẽ tiếp
-        tục kiểm tra trong ít phút{polling ? '…' : '.'}
+        Chưa thấy giao dịch trong lịch sử đặt phòng. Trang sẽ tiếp tục cập nhật
+        trong ít phút{polling ? '…' : '.'}
       </Alert>
     )
   } else if (paymentStatus === 'SUCCESS') {
@@ -221,13 +221,13 @@ export function VnPayReturnPage() {
       >
         {authoritativePayment
           ? 'Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được cập nhật.'
-          : 'VNPay đã gửi kết quả về, nhưng hệ thống chưa xác nhận khoản thanh toán trong lịch sử. Vui lòng đăng nhập và kiểm tra chi tiết đặt phòng.'}
+          : 'VNPay đã gửi kết quả, nhưng khoản thanh toán chưa xuất hiện trong lịch sử. Vui lòng đăng nhập và kiểm tra chi tiết đặt phòng.'}
       </Alert>
     )
   } else if (paymentStatus === 'PENDING') {
     content = canReadCustomerHistory ? (
       <Alert tone="info" title="Giao dịch đang được xử lý">
-        Hệ thống đang kiểm tra kết quả với VNPay. Bạn chưa cần thanh toán lại
+        Chúng tôi đang cập nhật kết quả từ VNPay. Bạn chưa cần thanh toán lại
         {polling ? '…' : '.'}
         {!polling
           ? ' Quá trình kiểm tra tự động đã tạm dừng; bạn có thể kiểm tra lại ngay.'
@@ -266,7 +266,7 @@ export function VnPayReturnPage() {
       <PageHeader
         eyebrow="Thanh toán VNPay"
         title="Kết quả thanh toán"
-        description="Kết quả chỉ được xác nhận sau khi hệ thống đối chiếu với lịch sử thanh toán của đặt phòng."
+        description="Kết quả thanh toán sẽ được cập nhật trong chi tiết đặt phòng."
       />
       <Card>
         {content}

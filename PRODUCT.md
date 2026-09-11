@@ -1,88 +1,72 @@
-# Product
+# Sản phẩm Homestay Green
 
 <!-- impeccable:product-schema 1 -->
 
-## Platform
+## Nền tảng
 
-web
+Ứng dụng web.
 
-## Users
+## Người dùng
 
-- Khách hàng đang tìm chỗ lưu trú, kiểm tra phòng còn phù hợp, tạo booking,
-  thanh toán và theo dõi hành trình đặt phòng.
-- Nhân viên vận hành (`STAFF`) quản lý phòng, booking và thanh toán tại quầy.
-- Quản trị viên (`ADMIN`) quản lý toàn bộ vận hành, danh mục, nhân viên và khách
-  hàng.
+- Khách hàng tìm chỗ lưu trú, kiểm tra phòng trống, đặt phòng, thanh toán và theo dõi kỳ nghỉ.
+- Nhân viên (`STAFF`) vận hành phòng, đặt phòng và thanh toán tại quầy.
+- Quản trị viên (`ADMIN`) quản lý vận hành, danh mục, nhân viên và khách hàng.
 
-## Product Purpose
+## Mục đích sản phẩm
 
-Homestay Green kết nối hành trình tìm phòng và đặt phòng của khách với hệ thống
-vận hành nội bộ. Thành công nghĩa là khách có thể tìm đúng phòng đang sẵn sàng,
-đặt và thanh toán rõ ràng; nhân viên có thể xử lý booking, phòng và giao dịch
-trong cùng một hệ thống nhất quán với Backend.
+Kết nối hành trình đặt phòng của khách với vận hành nội bộ. Khách tìm đúng phòng,
+đặt và thanh toán rõ ràng; nhân viên xử lý phòng, đặt phòng và giao dịch trong cùng
+hệ thống nhất quán với Backend.
 
-## Positioning
+## Định vị
 
-Sản phẩm kết hợp giao diện booking dành cho khách với công cụ vận hành
-homestay dành cho STAFF/ADMIN trên cùng nguồn dữ liệu và quy trình nghiệp vụ.
-Điểm khác biệt sản phẩm ngoài cơ chế tích hợp này hiện chưa được xác nhận.
+Giao diện đặt phòng và công cụ vận hành homestay dùng chung dữ liệu và quy trình.
+Điểm khác biệt sản phẩm ngoài sự tích hợp này chưa được xác nhận.
 
-## Operating Context
+## Bối cảnh sử dụng
 
-- Khách sử dụng public catalog, tìm phòng theo kỳ nghỉ, xem chi tiết, đăng nhập,
-  tạo booking, thanh toán VNPay và theo dõi booking.
-- STAFF/ADMIN sử dụng management workspace để quản lý Room, RoomType, Amenity,
-  Booking, Payment, Customer và User theo quyền.
-- Backend là nguồn sự thật cho quyền truy cập, giá, availability, booking state,
-  payment state và refund state.
-- Giao diện và nội dung chính sử dụng tiếng Việt.
+Khách xem danh sách phòng, tìm theo kỳ nghỉ, xem chi tiết, đăng nhập, đặt phòng,
+thanh toán VNPay và theo dõi đặt phòng. Nhân viên và quản trị viên có không gian
+riêng theo quyền để xử lý phòng, loại phòng, tiện nghi, đặt phòng, thanh toán và tài khoản.
+Giao diện và nội dung chính dùng tiếng Việt.
 
-## Capabilities and Constraints
+## Khả năng và giới hạn
 
-- React/Vite frontend tích hợp NestJS Backend qua versioned REST API.
-- Backend OpenAPI và response runtime là contract nguồn.
-- Không thay UI library hoặc state management nếu không có quyết định sản phẩm
-  mới.
-- RoomType tiếp tục là Backend entity phục vụ CRUD và phân loại, nhưng trên
-  public frontend chủ yếu xuất hiện như filter hoặc context cho Room.
-- Payment success chỉ được xác nhận bằng trạng thái Backend, không dựa riêng vào
-  query trả về từ VNPay.
-- Mọi module cần loading, empty, error, success, validation và browser evidence
-  phù hợp trước khi được đánh dấu `PASS`.
+- Frontend React/Vite tích hợp Backend NestJS qua REST API có phiên bản.
+- OpenAPI và phản hồi thực tế của Backend là hợp đồng nguồn; Backend quyết định
+  quyền, giá, phòng trống, trạng thái đặt phòng, thanh toán và hoàn tiền.
+- Không thay thư viện giao diện hoặc quản lý trạng thái khi chưa có quyết định sản phẩm mới.
+- Loại phòng vẫn là thực thể quản trị, nhưng phía khách chủ yếu là bộ lọc và thông tin của phòng.
+- Thành công thanh toán phải được Backend xác nhận; tham số VNPay không đủ làm bằng chứng.
+- Tính năng cần trạng thái tải/rỗng/lỗi/thành công, kiểm tra biểu mẫu và bằng chứng
+  trình duyệt phù hợp trước khi ghi nhận đạt.
 
-## Brand Commitments
+## Cam kết thương hiệu
 
-- Tên thương hiệu được xác nhận: **Homestay Green**.
-- Không tiếp tục dùng “Homestay Booking” làm tên thương hiệu hiển thị trong các
-  thay đổi UI mới.
-- Chưa có logo, tagline hoặc tuyên bố tiếp thị chính thức được xác nhận.
-- Public marketing surfaces follow a premium boutique-hospitality standard:
-  immersive real property imagery, a clear booking action, restrained neutral
-  surfaces, and familiar patterns comparable in craft to Airbnb, Booking.com,
-  Apple, Stripe, Linear, Notion, and Vercel.
+- Tên xác nhận: **Homestay Green**; không dùng “Homestay Booking” làm tên hiển thị mới.
+- Chưa xác nhận logo, khẩu hiệu hay tuyên bố tiếp thị chính thức.
+- Trang giới thiệu hướng đến chất lượng lưu trú boutique: ảnh cơ sở thật, hành động
+  đặt phòng rõ ràng, nền trung tính tiết chế và tương tác quen thuộc. Mức hoàn thiện
+  tham khảo Airbnb, Booking.com, Apple, Stripe, Linear, Notion và Vercel.
 
-## Evidence on Hand
+## Bằng chứng sẵn có
 
-- Source code và test hiện có trong repository.
-- Backend OpenAPI tại
-  `../homestay-booking-management-system-api/openapi/openapi.json`.
-- Execution plan tại `docs/FRONTEND_MODULE_BY_MODULE_EXECUTION_PLAN.md`.
-- Chưa có testimonial, giải thưởng, đối tác, số liệu kinh doanh hoặc nội dung
-  marketing được xác nhận; các bằng chứng này không được tự tạo.
+- Mã nguồn, kiểm thử và OpenAPI tại repo Backend liền kề.
+- [Kiến trúc hiện tại](docs/architecture/system-overview.md) và
+  [kế hoạch kiểm chứng](docs/plans/implementation-plan.md).
+- Chưa có lời chứng thực, giải thưởng, đối tác, số liệu kinh doanh hoặc nội dung
+  tiếp thị được xác nhận; không tự tạo các bằng chứng đó.
 
-## Product Principles
+## Nguyên tắc sản phẩm
 
-1. Availability và trạng thái Backend phải đáng tin hơn suy đoán phía client.
-2. Khách cần đi từ tìm phòng đến booking với ít bước và ít mơ hồ.
-3. Giao diện vận hành phải scan nhanh, nhất quán và tôn trọng quyền actor/role.
-4. Trạng thái thanh toán, refund và booking phải giải thích được và truy vết
-   được.
-5. Thay đổi được thực hiện theo module, có contract và test bảo vệ.
+1. Tin phòng trống và trạng thái Backend hơn suy đoán của trình duyệt.
+2. Giảm bước và sự mơ hồ từ tìm phòng đến đặt phòng.
+3. Giao diện vận hành dễ quét, nhất quán và tôn trọng quyền.
+4. Trạng thái giao dịch phải giải thích và truy vết được.
+5. Thay đổi theo tính năng, có hợp đồng và kiểm thử bảo vệ.
 
-## Accessibility & Inclusion
+## Khả năng tiếp cận
 
-- Public và management flows phải dùng được trên desktop và mobile.
-- Form cần label, error liên kết đúng; trạng thái động cần thông báo phù hợp cho
-  assistive technology.
-- Keyboard, focus, dialog, text overflow và reduced motion phải được kiểm tra
-  trong các lượt UI liên quan.
+Dùng được trên máy tính và di động. Biểu mẫu có nhãn, lỗi liên kết đúng trường;
+trạng thái động thông báo cho công nghệ hỗ trợ. Kiểm tra bàn phím, điểm tập trung,
+hộp thoại, chữ tràn và chế độ giảm chuyển động trong mỗi đợt thay đổi liên quan.

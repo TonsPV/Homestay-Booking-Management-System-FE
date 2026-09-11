@@ -153,7 +153,7 @@ describe("LoginForm", () => {
     expect(login).toHaveBeenCalledTimes(1);
   });
 
-  it("redirects a customer principal to the customer surface", async () => {
+  it("redirects a customer principal to the public home page", async () => {
     useAuthMock.mockReturnValue({
       login: vi.fn(() =>
         Promise.resolve({
@@ -173,7 +173,7 @@ describe("LoginForm", () => {
     fillCredentials("guest@example.com", "password123");
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
-    expect(await screen.findByText("location:/bookings")).toBeInTheDocument();
+    expect(await screen.findByText("location:/")).toBeInTheDocument();
   });
 
   it("redirects a staff principal to the staff surface", async () => {

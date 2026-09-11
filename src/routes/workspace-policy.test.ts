@@ -49,9 +49,9 @@ function customerPrincipal(): AuthPrincipal {
 }
 
 describe("post-login routing policy (regression)", () => {
-  it("routes a customer to bookings", () => {
-    expect(resolvePostLoginRoute(customerPrincipal())).toBe("/bookings");
-    expect(getPrincipalHome(customerPrincipal())).toBe("/bookings");
+  it("routes a customer to the public home page", () => {
+    expect(resolvePostLoginRoute(customerPrincipal())).toBe("/");
+    expect(getPrincipalHome(customerPrincipal())).toBe("/");
   });
 
   it("routes a staff user to the staff counter", () => {

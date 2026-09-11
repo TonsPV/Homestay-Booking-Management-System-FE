@@ -8,6 +8,7 @@ import {
 
 import type { Booking } from '../types'
 import {
+  BookingHoldExpiryBadge,
   BookingPaymentStatusBadge,
   BookingStatusBadge,
 } from './BookingStatusBadges'
@@ -35,6 +36,10 @@ export function BookingCard({ booking, to }: BookingCardProps) {
         <div className="flex flex-wrap gap-2">
           <BookingStatusBadge status={booking.status} />
           <BookingPaymentStatusBadge status={booking.paymentStatus} />
+          <BookingHoldExpiryBadge
+            paymentExpiresAt={booking.paymentExpiresAt}
+            status={booking.status}
+          />
         </div>
       </div>
 

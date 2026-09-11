@@ -98,7 +98,7 @@ export function CustomerPaymentHistory({
                     {formatMoney(payment.amount)}
                   </p>
                 </div>
-                <PaymentStatusBadge status={payment.status} />
+                <PaymentStatusBadge audience="customer" status={payment.status} />
               </div>
 
               <CustomerPaymentTimeline payment={payment} />

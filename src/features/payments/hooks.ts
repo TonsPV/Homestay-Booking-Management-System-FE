@@ -12,7 +12,7 @@ import { roomKeys } from '@/features/rooms/query-keys'
 import { paymentApi } from './api'
 import { paymentKeys } from './query-keys'
 import { getBoundedPaymentPollingInterval } from './safety'
-import type { PaymentListQuery } from './types'
+import type { Payment, PaymentListQuery } from './types'
 
 export { paymentKeys } from './query-keys'
 
@@ -90,6 +90,54 @@ export function useManagementPayments(
   return useQuery({
     queryKey: paymentKeys.managementList(query),
     queryFn: ({ signal }) => paymentApi.listManagement(query, signal),
+  })
+}
+
+export function useManagementPayment(paymentId: string | undefined) {
+  const queryClient = useQueryClient()
+
+  return useQuery({
+    queryKey: paymentKeys.managementDetail(paymentId ?? 'missing'),
+    queryFn: async ({ signal }) => {
+      if (!paymentId) {
+        throw new Error('Payment ID is required')
+      }
+
+      const cached = queryClient
+        .getQueriesData<{ data: Payment[] }>({ queryKey: paymentKeys.all })
+        .flatMap(([, data]) => data?.data ?? [])
+        .find((item) => item.id === paymentId)
+
+      if (cached) {
+        return cached
+      }
+
+      const response = await paymentApi.listManagement(
+        { limit: 50, page: 1 },
+        signal,
+      )
+      const found = response.data.find((item) => item.id === paymentId)
+
+      if (found) {
+        return found
+      }
+
+      throw new ApiError('Không tìm thấy giao dịch thanh toán.', {
+        kind: 'http',
+        status: 404,
+      })
+    },
+    enabled: Boolean(paymentId),
+    initialData: () => {
+      if (!paymentId) {
+        return undefined
+      }
+
+      return queryClient
+        .getQueriesData<{ data: Payment[] }>({ queryKey: paymentKeys.all })
+        .flatMap(([, data]) => data?.data ?? [])
+        .find((item) => item.id === paymentId)
+    },
   })
 }
 

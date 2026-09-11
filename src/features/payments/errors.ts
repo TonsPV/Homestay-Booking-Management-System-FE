@@ -1,5 +1,16 @@
 import { ApiError, getErrorMessage } from "@/api/errors";
 
+const customerPaymentCodeMessages: Record<string, string> = {
+  PAYMENT_IDEMPOTENCY_KEY_CONFLICT:
+    "Thông tin thanh toán vừa thay đổi. Vui lòng tải lại trang trước khi thử lại.",
+  PAYMENT_REFUND_REJECTED:
+    "Yêu cầu hoàn tiền chưa thể hoàn tất. Vui lòng liên hệ Homestay Green nếu cần hỗ trợ.",
+  PAYMENT_REFUND_NOT_ALLOWED:
+    "Khoản thanh toán này chưa thể hoàn tiền ở thời điểm hiện tại.",
+  PAYMENT_REFUND_OUTCOME_UNKNOWN:
+    "Kết quả hoàn tiền đang được cập nhật. Vui lòng kiểm tra lại sau.",
+};
+
 export function getPaymentActionError(error: unknown) {
   if (error instanceof ApiError) {
     if (error.errorCode === "PAYMENT_REFUND_REJECTED") {
@@ -25,6 +36,23 @@ export function getPaymentActionError(error: unknown) {
       (!error.errorCode && error.isStatus(409)))
   ) {
     return "Thanh toán chưa thể hoàn tất vì dữ liệu vừa thay đổi. Vui lòng tải lại lịch sử trước khi thử lại.";
+  }
+
+  return getErrorMessage(error);
+}
+
+export function getCustomerPaymentActionError(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.errorCode && customerPaymentCodeMessages[error.errorCode]) {
+      return customerPaymentCodeMessages[error.errorCode];
+    }
+
+    if (
+      error.errorCode === "COMMON_CONFLICT" ||
+      (!error.errorCode && error.isStatus(409))
+    ) {
+      return "Thông tin thanh toán vừa thay đổi. Vui lòng tải lại trang trước khi thử lại.";
+    }
   }
 
   return getErrorMessage(error);

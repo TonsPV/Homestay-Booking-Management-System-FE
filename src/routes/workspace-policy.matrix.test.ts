@@ -33,8 +33,8 @@ function user(role: "ADMIN" | "STAFF"): AuthPrincipal {
 
 describe("workspace landing policy (Step 4 matrix)", () => {
   describe("CUSTOMER", () => {
-    it("defaults to /bookings without returnTo", () => {
-      expect(resolvePostLoginRoute(customer())).toBe("/bookings");
+    it("defaults to the public home page without returnTo", () => {
+      expect(resolvePostLoginRoute(customer())).toBe("/");
     });
 
     it("honors a customer-surface returnTo", () => {
@@ -49,10 +49,10 @@ describe("workspace landing policy (Step 4 matrix)", () => {
       "/management/bookings",
       "/management/payments",
       "/management/users",
-    ])("rejects cross-workspace %s and falls back to /bookings", (path) => {
+    ])("rejects cross-workspace %s and falls back to the public home page", (path) => {
       const result = resolvePostLoginRoute(customer(), { returnTo: path });
 
-      expect(result).toBe("/bookings");
+      expect(result).toBe("/");
     });
   });
 

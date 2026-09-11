@@ -1,5 +1,6 @@
 export { VnPayReturnPage } from './pages/VnPayReturnPage'
 export { ManagementPaymentsPage } from './pages/ManagementPaymentsPage'
+export { PaymentDetailPage } from './pages/PaymentDetailPage'
 export { StaffPaymentsPage } from './pages/StaffPaymentsPage'
 
 export { CustomerPaymentPanel } from './components/CustomerPaymentPanel'

@@ -61,7 +61,7 @@ export function HomeSearchPanel() {
     if (Object.keys(nextErrors).length > 0) return;
 
     const params = new URLSearchParams({ checkIn, checkOut, guests });
-    navigate(`/rooms/search?${params.toString()}`);
+    navigate(`/rooms?${params.toString()}`);
   }
 
   return (

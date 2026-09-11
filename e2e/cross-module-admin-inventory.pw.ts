@@ -265,7 +265,9 @@ test("admin login continues through amenity, room type, room, image cover and ca
 
   await page.goto("/management/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-  await page.getByLabel("Mật khẩu").fill("StrongPassword123!");
+  await page
+    .getByRole("textbox", { name: "Mật khẩu", exact: true })
+    .fill("StrongPassword123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
   await expect(page).toHaveURL(/\/management\/bookings$/);
   await expect(
@@ -301,9 +303,10 @@ test("admin login continues through amenity, room type, room, image cover and ca
   await page.locator('select[name="roomTypeId"]').selectOption("21");
   await page.getByLabel("Mô tả").fill("Không gian yên tĩnh nhìn ra vườn.");
   await page.getByRole("button", { name: "Tạo phòng" }).click();
-  await expect(page.getByText("Đã tạo phòng.")).toBeVisible();
-  await expect(page.getByText("Trống hôm nay")).toBeVisible();
-  await page.getByRole("button", { name: "Xem chi tiết" }).click();
+  await expect(page).toHaveURL(/\/management\/rooms\/31$/);
+  await expect(
+    page.getByRole("heading", { name: "G101 · Suite Vườn Xanh" }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Quản lý ảnh" }).click();
   await expect(page).toHaveURL(/\/management\/rooms\/31\/images$/);

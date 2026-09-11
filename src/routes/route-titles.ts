@@ -7,8 +7,9 @@ export function getPageTitle(pathname: string) {
   }
   if (pathname === "/register") return "Đăng ký tài khoản";
   if (pathname === "/account") return "Hồ sơ của tôi";
-  if (pathname === "/rooms/search") return "Tìm phòng";
-  if (pathname === "/rooms") return "Danh sách phòng";
+  if (pathname === "/rooms/search" || pathname === "/rooms") {
+    return "Khám phá phòng";
+  }
   if (/^\/rooms\/[^/]+$/.test(pathname)) return "Chi tiết phòng";
   if (pathname === "/room-types") return "Loại phòng";
   if (/^\/room-types\/[^/]+$/.test(pathname)) return "Chi tiết loại phòng";
@@ -37,6 +38,12 @@ export function getPageTitle(pathname: string) {
       : "Chi tiết booking";
   }
   if (pathname.startsWith("/staff/payments")) return "Thanh toán tại quầy";
+  if (/^\/management\/rooms\/new$/.test(pathname)) {
+    return "Tạo phòng mới";
+  }
+  if (/^\/management\/rooms\/[^/]+\/edit$/.test(pathname)) {
+    return "Chỉnh sửa phòng";
+  }
   if (pathname.startsWith("/management/rooms")) {
     if (/^\/management\/rooms\/[^/]+\/images$/.test(pathname)) {
       return "Quản lý ảnh phòng";
@@ -57,6 +64,9 @@ export function getPageTitle(pathname: string) {
       : "Chi tiết booking";
   }
   if (pathname.startsWith("/management/payments")) {
+    if (/^\/management\/payments\/[^/]+$/.test(pathname)) {
+      return "Chi tiết thanh toán";
+    }
     return "Quản lý thanh toán";
   }
   if (pathname.startsWith("/management/users")) {

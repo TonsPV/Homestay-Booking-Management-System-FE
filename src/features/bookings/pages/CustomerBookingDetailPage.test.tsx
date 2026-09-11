@@ -124,7 +124,7 @@ describe('CustomerBookingDetailPage reconciliation safety', () => {
     expect(confirm).toBeDisabled()
     await user.click(confirm)
     expect(mocks.mutate).not.toHaveBeenCalled()
-    expect(screen.getAllByText(/Không xác định được trạng thái booking/)).not
+    expect(screen.getAllByText(/Chưa xác nhận được trạng thái đặt phòng/)).not
       .toHaveLength(0)
   })
 

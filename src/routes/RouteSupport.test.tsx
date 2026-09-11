@@ -36,7 +36,7 @@ describe("ScrollToTop", () => {
 
   it("updates the document title and focuses the main landmark", async () => {
     const { getByRole } = render(
-      <MemoryRouter initialEntries={["/rooms/search"]}>
+      <MemoryRouter initialEntries={["/rooms"]}>
         <ScrollToTop />
         <main id="main-content" tabIndex={-1}>
           Nội dung
@@ -45,7 +45,7 @@ describe("ScrollToTop", () => {
     );
 
     await waitFor(() => {
-      expect(document.title).toBe("Tìm phòng | Homestay Green");
+      expect(document.title).toBe("Khám phá phòng | Homestay Green");
       expect(getByRole("main")).toHaveFocus();
     });
     expect(window.scrollTo).toHaveBeenCalledWith({

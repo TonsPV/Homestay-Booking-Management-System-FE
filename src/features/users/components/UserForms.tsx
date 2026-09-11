@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import type { User } from '@/auth/types'
 import { Button } from '@/shared/components/Button'
 import { Alert } from '@/shared/components/Feedback'
-import { Field, Input } from '@/shared/components/FormControls'
+import { Field, Input, PasswordInput } from '@/shared/components/FormControls'
 
 import {
   useCreateUserMutation,
@@ -90,7 +90,7 @@ export function CreateUserForm({ onCancel, onSaved }: UserFormCallbacks) {
         động.
       </Alert>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid items-start gap-5 sm:grid-cols-2">
         <Field error={errors.fullName?.message} label="Họ và tên" required>
           <Input autoComplete="name" {...register('fullName')} />
         </Field>
@@ -112,9 +112,8 @@ export function CreateUserForm({ onCancel, onSaved }: UserFormCallbacks) {
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field error={errors.password?.message} label="Mật khẩu" required>
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register('password')}
           />
         </Field>
@@ -123,9 +122,8 @@ export function CreateUserForm({ onCancel, onSaved }: UserFormCallbacks) {
           label="Xác nhận mật khẩu"
           required
         >
-          <Input
+          <PasswordInput
             autoComplete="new-password"
-            type="password"
             {...register('confirmPassword')}
           />
         </Field>
@@ -222,9 +220,8 @@ export function UpdateUserForm({
         hint="Để trống nếu không đổi. Đổi mật khẩu sẽ thu hồi các phiên đăng nhập cũ."
         label="Mật khẩu mới"
       >
-        <Input
+        <PasswordInput
           autoComplete="new-password"
-          type="password"
           {...register('password')}
         />
       </Field>
