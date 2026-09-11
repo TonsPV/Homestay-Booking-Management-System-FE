@@ -84,6 +84,16 @@ export function VnPayReturnPage() {
     attempt,
     returnResult,
   )
+  const bookingDetailsPath = customerBookingIdForNavigation
+    ? `/bookings/${customerBookingIdForNavigation}`
+    : '/bookings'
+  const requiresCustomerSignIn =
+    paymentStatus === 'PENDING' && authStatus === 'anonymous'
+  const canRetryAuthoritativeState =
+    paymentStatus === 'PENDING' && canReadCustomerHistory
+  const refreshingAuthoritativeState =
+    canRetryAuthoritativeState &&
+    (paymentsQuery.isFetching || bookingQuery.isFetching)
   const polling =
     canReadCustomerHistory &&
     paymentStatus === 'PENDING' &&
@@ -121,13 +131,13 @@ export function VnPayReturnPage() {
   ])
 
   const retryAuthoritativeState = () => {
-    setPollingDeadline(Date.now() + POLLING_DURATION)
-    void returnQuery.refetch()
-
-    if (canReadCustomerHistory) {
-      void paymentsQuery.refetch()
-      void refetchBooking()
+    if (!canReadCustomerHistory) {
+      return
     }
+
+    setPollingDeadline(Date.now() + POLLING_DURATION)
+    void paymentsQuery.refetch()
+    void refetchBooking()
   }
 
   let content
@@ -233,10 +243,15 @@ export function VnPayReturnPage() {
           ? ' Quá trình kiểm tra tự động đã tạm dừng; bạn có thể kiểm tra lại ngay.'
           : null}
       </Alert>
+    ) : authStatus === 'anonymous' ? (
+      <Alert tone="warning" title="Cần đăng nhập để kiểm tra">
+        Phiên đăng nhập của bạn không còn trên trình duyệt này. Hãy đăng nhập
+        để hệ thống kiểm tra trạng thái mới nhất trong chi tiết đặt phòng.
+      </Alert>
     ) : (
       <Alert tone="warning" title="Chưa thể kiểm tra tự động">
-        Vui lòng đăng nhập và mở chi tiết đặt phòng để xem kết quả. Không nên
-        tạo thêm giao dịch khi trạng thái hiện tại chưa rõ ràng.
+        Hãy mở chi tiết đặt phòng để xem trạng thái mới nhất. Không nên tạo
+        thêm giao dịch khi trạng thái hiện tại chưa rõ ràng.
       </Alert>
     )
   } else if (paymentStatus === 'REQUIRES_REVIEW') {
@@ -271,25 +286,34 @@ export function VnPayReturnPage() {
       <Card>
         {content}
         <div className="mt-5 flex flex-wrap gap-3">
-          {paymentStatus === 'PENDING' ? (
+          {requiresCustomerSignIn ? (
+            <LinkButton
+              state={{ returnTo: bookingDetailsPath }}
+              to="/login"
+              variant="outline"
+            >
+              Đăng nhập để kiểm tra
+            </LinkButton>
+          ) : canRetryAuthoritativeState ? (
             <Button
+              loading={refreshingAuthoritativeState}
               onClick={retryAuthoritativeState}
               variant="outline"
             >
               Kiểm tra lại
             </Button>
           ) : null}
-          {customerBookingIdForNavigation ? (
+          {!requiresCustomerSignIn && customerBookingIdForNavigation ? (
             <LinkButton
-              to={`/bookings/${customerBookingIdForNavigation}`}
+              to={bookingDetailsPath}
             >
               Xem chi tiết đặt phòng
             </LinkButton>
-          ) : (
+          ) : !requiresCustomerSignIn ? (
             <LinkButton to="/bookings">
               Về danh sách đặt phòng
             </LinkButton>
-          )}
+          ) : null}
         </div>
       </Card>
     </div>

@@ -38,11 +38,36 @@ test('customer sees a pending confirmation until payment history is available', 
     page.getByText('Đang xác nhận thanh toán'),
   ).toBeVisible()
   await expect(
-    page.getByText(/chưa xác nhận khoản thanh toán trong lịch sử/i),
+    page.getByText(/khoản thanh toán chưa xuất hiện trong lịch sử/i),
   ).toBeVisible()
   await expect(
     page.getByText(
       /\bSUCCESS\b|\bPENDING\b|backend|URL Return|polling|attempt|idempotency|Mã payment/i,
     ),
   ).toHaveCount(0)
+})
+
+test('a signed-out customer is sent to login before checking a pending VNPay payment', async ({
+  page,
+}) => {
+  await page.goto(
+    '/payments/vnpay/return?validSignature=true&paymentId=38&bookingId=38&paymentStatus=PENDING&responseCode=00&transactionStatus=00',
+  )
+
+  await expect(
+    page.getByRole('heading', { name: 'Kết quả thanh toán' }),
+  ).toBeVisible()
+  await expect(
+    page.getByText('Cần đăng nhập để kiểm tra'),
+  ).toBeVisible()
+
+  await page.getByRole('link', { name: 'Đăng nhập để kiểm tra' }).click()
+
+  await expect(page).toHaveURL(/\/login$/)
+  await expect
+    .poll(() => page.evaluate(() => history.state.usr?.returnTo))
+    .toBe('/bookings/38')
+  await expect(
+    page.getByRole('heading', { name: 'Đăng nhập' }),
+  ).toBeVisible()
 })
