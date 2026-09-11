@@ -1,4 +1,4 @@
-name: Frontend Deploy
+name: Frontend CI and Vercel verification
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  deployments: read
 
 concurrency:
   group: frontend-deploy-production
@@ -14,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Quality gates and Vercel deployment
+    name: Quality gates and Vercel verification
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -68,26 +69,41 @@ jobs:
           VITE_API_ORIGIN: https://homestay-booking-management-system.onrender.com
         run: npm run build
 
-      - name: Pull Vercel environment information
+      - name: Verify Vercel Git deployment
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          DEPLOYMENT_SHA: ${{ github.sha }}
         run: |
-          npx vercel pull --yes --environment=production --token "$VERCEL_TOKEN"
+          for attempt in {1..30}; do
+            deployment_id=$(gh api "repos/${REPOSITORY}/deployments?sha=${DEPLOYMENT_SHA}&environment=Production&per_page=1" --jq '.[0].id // empty')
 
-      - name: Build for Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          npx vercel build --prod --token "$VERCEL_TOKEN"
+            if [ -n "$deployment_id" ]; then
+              state=$(gh api "repos/${REPOSITORY}/deployments/${deployment_id}/statuses?per_page=1" --jq '.[0].state // empty')
+              environment_url=$(gh api "repos/${REPOSITORY}/deployments/${deployment_id}/statuses?per_page=1" --jq '.[0].environment_url // empty')
 
-      - name: Deploy to Vercel production
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          url=$(npx vercel deploy --prebuilt --prod --token "$VERCEL_TOKEN")
-          echo "Deployed to $url"
+              case "$state" in
+                success)
+                  echo "Vercel deployment succeeded: $environment_url"
+                  exit 0
+                  ;;
+                failure|error|inactive)
+                  echo "Vercel deployment ended with state: $state"
+                  exit 1
+                  ;;
+                *)
+                  echo "Vercel deployment state: ${state:-not reported yet}"
+                  ;;
+              esac
+            else
+              echo "Waiting for Vercel to create the production deployment for ${DEPLOYMENT_SHA}"
+            fi
+
+            sleep 10
+          done
+
+          echo "Timed out waiting for the Vercel production deployment"
+          exit 1
 
       - name: Smoke test deployed site
         run: |
