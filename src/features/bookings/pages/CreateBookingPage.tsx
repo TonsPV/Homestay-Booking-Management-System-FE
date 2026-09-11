@@ -228,7 +228,7 @@ export function CreateBookingPage() {
         ]}
         eyebrow="Đặt phòng"
         title="Xác nhận kỳ nghỉ"
-        description="Rà soát kỳ lưu trú và thông tin người ở trước khi gửi yêu cầu. Giá và tình trạng phòng sẽ được Backend kiểm tra lại."
+        description="Rà soát kỳ lưu trú và thông tin người ở trước khi gửi yêu cầu. Giá và tình trạng phòng sẽ được kiểm tra lại."
       />
 
       {createMutation.isError && (!serverField || isConflict) ? (
@@ -546,7 +546,7 @@ export function CreateBookingPage() {
                     <span className="ml-1 text-sm font-semibold text-muted">/ đêm</span>
                   </p>
                   <p className="mt-2 text-xs leading-5 text-muted">
-                    Tổng tiền được Backend xác nhận khi bạn gửi yêu cầu.
+                    Tổng tiền được xác nhận khi bạn gửi yêu cầu.
                   </p>
                 </div>
               ) : null}

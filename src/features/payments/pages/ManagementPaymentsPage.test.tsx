@@ -217,7 +217,7 @@ describe('ManagementPaymentsPage filters', () => {
     })
   }, 15_000)
 
-  it('shows Backend stale-refund metadata and opens the pending queue', async () => {
+  it('shows a clear stale-refund notice and opens the pending queue', async () => {
     const user = userEvent.setup()
     mocks.useManagementPayments.mockReturnValue({
       data: {
@@ -248,8 +248,9 @@ describe('ManagementPaymentsPage filters', () => {
     expect(
       screen.getByText(/2 giao dịch cần được kiểm tra/i),
     ).toBeInTheDocument()
+    expect(screen.queryByText(/Backend|REQUIRES_REVIEW/)).not.toBeInTheDocument()
     await user.click(
-      screen.getByRole('button', { name: 'Refund quá hạn (2)' }),
+      screen.getByRole('button', { name: 'Yêu cầu hoàn tiền quá hạn (2)' }),
     )
 
     await waitFor(() => {
@@ -312,8 +313,8 @@ describe('ManagementPaymentsPage filters', () => {
 
     expect(mutate).not.toHaveBeenCalled()
     const dialog = screen.getByRole('dialog', {
-        name: `Hoàn tiền payment #${refundablePayment.id}?`,
-      })
+      name: 'Hoàn tiền giao dịch này?',
+    })
     expect(dialog).toBeInTheDocument()
     expect(
       within(dialog).getByRole('link', {

@@ -141,12 +141,15 @@ test("admin resolves a duplicate successful payment through the review queue", a
    * Both viewport layouts render the row; keep the visible one only. */
   await expect(
     page
-      .getByText("Trùng thanh toán cho cùng booking")
+      .getByText("Trùng thanh toán cho cùng đặt phòng")
       .filter({ visible: true })
       .first(),
   ).toBeVisible();
   await expect(
-    page.getByText(/giao dịch chính #90/).filter({ visible: true }).first(),
+    page
+      .getByText(/Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng/)
+      .filter({ visible: true })
+      .first(),
   ).toBeVisible();
 
   /* Standard refund must be unavailable for the duplicate charge. */
@@ -183,7 +186,7 @@ test("admin resolves a duplicate successful payment through the review queue", a
 
   await expect(page.getByText("Đã xử lý giao dịch trùng")).toBeVisible();
   await expect(
-    page.getByText(/Backend đã xác nhận hoàn tiền giao dịch trùng/),
+    page.getByText(/Khoản thu trùng đã được xử lý/),
   ).toBeVisible();
   expect(resolveCount).toBe(1);
   expect(refundAttempts).toBe(0);

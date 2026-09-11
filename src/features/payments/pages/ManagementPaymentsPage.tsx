@@ -165,13 +165,13 @@ export function ManagementPaymentsPage() {
             payment.status === 'REFUND_PENDING'
               ? {
                   message:
-                    'VNPay chưa trả kết quả cuối. Không gửi yêu cầu hoàn lần hai; hãy dùng thao tác đối soát.',
+                    'VNPay đang xử lý yêu cầu hoàn tiền. Không gửi thêm yêu cầu; hãy đối soát lại sau.',
                   title: 'Yêu cầu hoàn tiền đang được xử lý',
                   tone: 'warning',
                 }
               : {
                   message:
-                    'Backend đã xác nhận hoàn tiền và đang làm mới booking cùng lịch phòng.',
+                    'Khoản hoàn tiền đã được ghi nhận. Trạng thái đặt phòng và lịch phòng đã được cập nhật.',
                   title: 'Hoàn tiền thành công',
                   tone: 'success',
                 },
@@ -215,13 +215,13 @@ export function ManagementPaymentsPage() {
             payment.status === 'REFUND_PENDING'
               ? {
                   message:
-                    'VNPay chưa trả kết quả cuối cho giao dịch trùng. Không gửi yêu cầu lần hai; hãy dùng thao tác đối soát.',
-                  title: 'Yêu cầu hoàn giao dịch trùng đang được xử lý',
+                    'VNPay đang xử lý khoản hoàn của giao dịch trùng. Không gửi thêm yêu cầu; hãy đối soát lại sau.',
+                  title: 'Hoàn giao dịch trùng đang được xử lý',
                   tone: 'warning',
                 }
               : {
                   message:
-                    'Backend đã xác nhận hoàn tiền giao dịch trùng và đang làm mới dữ liệu payment.',
+                    'Khoản thu trùng đã được xử lý. Dữ liệu thanh toán đã được cập nhật.',
                   title: 'Đã xử lý giao dịch trùng',
                   tone: 'success',
                 },
@@ -246,12 +246,12 @@ export function ManagementPaymentsPage() {
       <PageHeader
         eyebrow="Quản lý"
         title="Thanh toán và đối soát"
-        description="Theo dõi payment toàn hệ thống. REQUIRES_REVIEW cần được xử lý theo quy trình đối soát, không sửa booking cục bộ."
+        description="Theo dõi các khoản thanh toán và xử lý các giao dịch cần đối soát."
         actions={
           <div className="flex flex-wrap gap-2">
             {staleRefundCount > 0 ? (
               <Button onClick={showPendingRefunds} variant="outline">
-                Refund quá hạn ({staleRefundCount})
+                Yêu cầu hoàn tiền quá hạn ({staleRefundCount})
               </Button>
             ) : null}
             <Button onClick={showReviewQueue} variant="outline">
@@ -262,9 +262,9 @@ export function ManagementPaymentsPage() {
       />
 
       {staleRefundCount > 0 ? (
-        <Alert tone="warning" title="Có refund VNPay chờ quá 7 ngày">
-          {staleRefundCount} giao dịch cần được kiểm tra. Chỉ báo này do
-          Backend tính trên toàn bộ dữ liệu, không phụ thuộc trang đang xem.
+        <Alert tone="warning" title="Có yêu cầu hoàn tiền VNPay chờ quá 7 ngày">
+          {staleRefundCount} giao dịch cần được kiểm tra. Chỉ báo áp dụng cho
+          toàn bộ kết quả, không chỉ trang đang xem.
         </Alert>
       ) : null}
 
@@ -276,13 +276,14 @@ export function ManagementPaymentsPage() {
 
       {status === 'REQUIRES_REVIEW' ? (
         <Alert tone="warning" title="Hàng đợi cần đối soát">
-          Đây là các giao dịch VNPay thành công đến muộn sau khi booking đã bị
-          hủy. Admin có thể gửi yêu cầu hoàn tiền toàn phần qua VNPay.
+          Danh sách này gồm các giao dịch cần kiểm tra, như thanh toán đến sau
+          khi đặt phòng đã hủy hoặc khoản thanh toán trùng. Mở từng giao dịch để
+          chọn hướng xử lý phù hợp.
         </Alert>
       ) : null}
 
       {reconcileMutation.isError ? (
-        <Alert tone="error" title="Không thể đối soát refund">
+        <Alert tone="error" title="Không thể đối soát hoàn tiền">
           {getPaymentActionError(reconcileMutation.error)}
         </Alert>
       ) : null}
@@ -352,7 +353,7 @@ export function ManagementPaymentsPage() {
       </form>
 
       {paymentsQuery.isPending ? (
-        <LoadingState label="Đang tải danh sách payment…" />
+        <LoadingState label="Đang tải danh sách thanh toán…" />
       ) : paymentsQuery.isError ? (
         <ErrorState
           description={getPaymentActionError(paymentsQuery.error)}
@@ -377,14 +378,14 @@ export function ManagementPaymentsPage() {
                     result.status === 'REFUNDED'
                       ? {
                           message:
-                            'Backend đã xác nhận refund hoàn tất và đang làm mới booking cùng lịch phòng.',
+                            'Khoản hoàn tiền đã được ghi nhận. Trạng thái đặt phòng và lịch phòng đã được cập nhật.',
                           title: 'Đối soát hoàn tiền thành công',
                           tone: 'success',
                         }
                       : {
                           message:
-                            'VNPay vẫn đang xử lý. Không gửi refund mới; hãy đối soát lại sau.',
-                          title: 'Refund vẫn đang chờ',
+                            'VNPay vẫn đang xử lý. Không gửi thêm yêu cầu hoàn tiền; hãy đối soát lại sau.',
+                          title: 'Hoàn tiền vẫn đang chờ',
                           tone: 'warning',
                         },
                   )
@@ -437,21 +438,21 @@ export function ManagementPaymentsPage() {
         cancelLabel="Đóng"
         confirmDisabled={refundTarget === null}
         confirmLabel="Xác nhận hoàn tiền"
-        description="Hoàn toàn bộ payment trước check-in. Với VNPay, hệ thống gửi yêu cầu đến cổng và giữ trạng thái chờ nếu kết quả chưa chắc chắn."
+        description="Hoàn toàn bộ khoản thanh toán trước khi khách nhận phòng. Với VNPay, kết quả có thể cần thêm thời gian xác nhận."
         onCancel={closeRefundDialog}
         onConfirm={() => void submitRefund()}
         open={refundTarget !== null}
         title={
           refundTarget
-            ? `Hoàn tiền payment #${refundTarget.id}?`
-            : 'Hoàn tiền payment?'
+            ? 'Hoàn tiền giao dịch này?'
+            : 'Hoàn tiền giao dịch?'
         }
       >
         {refundTarget ? (
           <>
             <dl className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 text-sm">
               <div>
-                <dt className="text-slate-500">Booking</dt>
+                <dt className="text-slate-500">Đặt phòng</dt>
                 <dd className="mt-1 font-semibold">
                   <Link
                     className="text-blue-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
@@ -482,8 +483,8 @@ export function ManagementPaymentsPage() {
             </dl>
 
             <Alert className="mt-4">
-              Backend sẽ kiểm tra trạng thái booking, payment và quyền thao
-              tác tại thời điểm xác nhận.
+              Hệ thống sẽ kiểm tra trạng thái đặt phòng, khoản thanh toán và
+              quyền thao tác khi xác nhận.
             </Alert>
             <div className="mt-5 grid gap-4">
               <Field
@@ -507,14 +508,14 @@ export function ManagementPaymentsPage() {
         cancelLabel="Đóng"
         confirmDisabled={duplicateTarget === null}
         confirmLabel="Xác nhận hoàn giao dịch trùng"
-        description="Hệ thống sẽ gửi yêu cầu hoàn tiền VNPay riêng cho giao dịch trùng này. Giao dịch chính của booking không bị ảnh hưởng."
+        description="Hoàn riêng giao dịch trùng này qua VNPay. Giao dịch chính của đặt phòng không bị ảnh hưởng."
         onCancel={closeDuplicateDialog}
         onConfirm={() => void confirmResolveDuplicate()}
         open={duplicateTarget !== null}
         tone="danger"
         title={
           duplicateTarget
-            ? `Xử lý giao dịch trùng #${duplicateTarget.id}?`
+            ? 'Xử lý giao dịch trùng?'
             : 'Xử lý giao dịch trùng?'
         }
       >
@@ -522,7 +523,7 @@ export function ManagementPaymentsPage() {
           <>
             <dl className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 text-sm">
               <div>
-                <dt className="text-slate-500">Booking</dt>
+                <dt className="text-slate-500">Đặt phòng</dt>
                 <dd className="mt-1 font-semibold">
                   <Link
                     className="text-blue-700 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
@@ -563,7 +564,7 @@ export function ManagementPaymentsPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Lý do review</dt>
+                <dt className="text-slate-500">Lý do cần đối soát</dt>
                 <dd className="mt-1 font-semibold text-slate-950">
                   {duplicateTarget.reviewReason
                     ? getPaymentReviewReasonLabel(duplicateTarget.reviewReason)
@@ -579,10 +580,8 @@ export function ManagementPaymentsPage() {
             </dl>
 
             <Alert className="mt-4" tone="warning">
-              Chỉ hoàn tiền giao dịch trùng này. Giao dịch chính{' '}
-              #{duplicateTarget.reviewCanonicalPaymentId ?? '—'} vẫn giữ nguyên
-              cho booking. Backend sẽ kiểm tra lại trạng thái tại thời điểm xác
-              nhận.
+              Chỉ hoàn tiền giao dịch trùng này. Giao dịch chính vẫn giữ nguyên
+              cho đặt phòng; hệ thống sẽ kiểm tra lại trạng thái khi xác nhận.
             </Alert>
           </>
         ) : null}

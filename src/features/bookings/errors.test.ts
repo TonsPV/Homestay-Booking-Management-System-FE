@@ -22,16 +22,16 @@ describe("getBookingActionError", () => {
   it("translates stable Backend booking codes into clear Vietnamese", () => {
     expect(
       getBookingActionError(httpError("BOOKING_CHECKIN_REQUIRES_PAYMENT")),
-    ).toBe("Booking cần được thanh toán trước khi check-in.");
+    ).toBe("Đặt phòng cần được thanh toán trước khi nhận phòng.");
     expect(getBookingActionError(httpError("BOOKING_ROOM_NOT_READY"))).toBe(
       "Phòng chưa ở trạng thái sẵn sàng để check-in.",
     );
     expect(
       getBookingActionError(httpError("BOOKING_CANCELLATION_NOT_ALLOWED")),
-    ).toBe("Booking không thể hủy ở trạng thái hiện tại.");
+    ).toBe("Đặt phòng không thể hủy ở trạng thái hiện tại.");
     expect(
       getBookingActionError(httpError("BOOKING_REQUEST_INTENT_CONFLICT")),
-    ).toContain("kiểm tra danh sách booking");
+    ).toContain("kiểm tra danh sách đặt phòng");
     expect(
       getBookingActionError(
         httpError("BOOKING_ROOM_MISSING_FOR_BOOKING"),
@@ -45,33 +45,26 @@ describe("getBookingActionError", () => {
     );
   });
 
-  it("appends requestId as reference code for system or unknown errors when present", () => {
-    // System 500 error with requestId
+  it("never exposes backend request IDs or raw messages", () => {
     const systemError = httpError(undefined, "req-sys-500", 500);
     expect(getBookingActionError(systemError)).toBe(
-      "Hệ thống đang tạm thời gián đoạn. Vui lòng thử lại sau. (Mã tham chiếu: req-sys-500)",
+      "Hệ thống đang tạm thời gián đoạn. Vui lòng thử lại sau.",
     );
 
-    // Unknown conflict error with requestId
     const unknownConflict = httpError(undefined, "req-conf-409", 409);
     expect(getBookingActionError(unknownConflict)).toBe(
-      "Dữ liệu đã thay đổi hoặc xung đột. Vui lòng tải lại và thử lại. (Mã tham chiếu: req-conf-409)",
+      "Dữ liệu đã thay đổi hoặc xung đột. Vui lòng tải lại và thử lại.",
     );
 
-    // Network error with requestId
     const networkError = new ApiError("Failed to fetch", {
       kind: "network",
       requestId: "req-net-001",
     });
     expect(getBookingActionError(networkError)).toBe(
-      "Không thể kết nối hệ thống. Vui lòng kiểm tra đường truyền và thử lại. (Mã tham chiếu: req-net-001)",
+      "Không thể kết nối hệ thống. Vui lòng kiểm tra đường truyền và thử lại.",
     );
-
-    // Known business error should NOT append requestId even if present
-    const businessError = httpError("BOOKING_ROOM_UNAVAILABLE", "req-biz-123");
-    expect(getBookingActionError(businessError)).toBe(
-      "Phòng vừa được đặt hoặc khóa trong khoảng ngày này. Vui lòng chọn phòng hoặc ngày khác.",
-    );
+    expect(getBookingActionError(systemError)).not.toContain("req-sys-500");
+    expect(getBookingActionError(systemError)).not.toContain("Backend message");
   });
 });
 

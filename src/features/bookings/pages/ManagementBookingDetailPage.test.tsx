@@ -296,7 +296,7 @@ describe("ManagementBookingDetailPage cancellation safety", () => {
     ).toBeDisabled();
     expect(
       screen.getByText(
-        "Booking online cần được thanh toán trước khi xác nhận.",
+        "Đặt phòng trực tuyến cần được thanh toán trước khi xác nhận.",
       ),
     ).toBeInTheDocument();
   });

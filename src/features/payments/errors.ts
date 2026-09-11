@@ -26,7 +26,7 @@ export function getPaymentActionError(error: unknown) {
     }
 
     if (error.errorCode === "PAYMENT_IDEMPOTENCY_KEY_CONFLICT") {
-      return "Yêu cầu này trùng khóa xử lý với một giao dịch khác. Vui lòng tải lại trước khi thử lại.";
+      return "Thông tin thanh toán vừa thay đổi hoặc thao tác này đã được xử lý. Vui lòng tải lại lịch sử trước khi thử lại.";
     }
   }
 

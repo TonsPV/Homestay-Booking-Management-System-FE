@@ -59,7 +59,7 @@ describe('PaymentList management view', () => {
     const columnHeaders = screen.getAllByRole('columnheader')
     expect(columnHeaders.map((header) => header.textContent)).toEqual([
       'Giao dịch',
-      'Booking',
+      'Đặt phòng',
       'Phương thức',
       'Số tiền',
       'Trạng thái',
@@ -194,10 +194,10 @@ describe('PaymentList review-reason business-state matrix', () => {
     )
 
     expect(
-      screen.getAllByText('Thanh toán sau khi booking đã hủy').length,
+      screen.getAllByText('Thanh toán sau khi đặt phòng đã hủy').length,
     ).toBeGreaterThan(0)
     expect(
-      screen.getAllByText(/VNPay báo thành công sau khi booking đã bị hủy/)
+      screen.getAllByText(/VNPay báo thanh toán thành công sau khi đặt phòng đã hủy/)
         .length,
     ).toBeGreaterThan(0)
     expect(
@@ -233,10 +233,12 @@ describe('PaymentList review-reason business-state matrix', () => {
     )
 
     expect(
-      screen.getAllByText('Trùng thanh toán cho cùng booking').length,
+      screen.getAllByText('Trùng thanh toán cho cùng đặt phòng').length,
     ).toBeGreaterThan(0)
     expect(
-      screen.getAllByText(/giao dịch chính #90/).length,
+      screen.getAllByText(
+        /Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng/,
+      ).length,
     ).toBeGreaterThan(0)
     expect(
       screen.queryByRole('button', { name: 'Hoàn tiền giao dịch #91' }),

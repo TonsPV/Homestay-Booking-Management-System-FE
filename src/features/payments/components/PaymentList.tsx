@@ -92,8 +92,8 @@ function PaymentLifecycleNote({ payment }: { payment: Payment }) {
   ) {
     return (
       <p className="mt-3 rounded-card bg-surface-muted px-3 py-2 text-xs text-muted">
-        Attempt đã được hệ thống đóng theo vòng đời booking. Trạng thái này
-        không tự khẳng định giao dịch ngân hàng thất bại.
+        Giao dịch này đã được đóng theo trạng thái đặt phòng. Trạng thái này
+        chưa khẳng định kết quả phía ngân hàng.
       </p>
     )
   }
@@ -216,14 +216,14 @@ function PaymentCards({
                   <ReviewReasonBadge payment={payment} />
                 </div>
                 <p className="mt-1 text-sm text-muted">
-                  Giao dịch #{payment.id} · Booking{' '}
+                  Giao dịch #{payment.id} · Đặt phòng{' '}
                   <BookingReference
                     bookingBasePath={bookingBasePath}
                     management={management}
                     payment={payment}
                   />
                 </p>
-                <p className="mt-2 text-lg font-black text-ink">
+                <p className="mt-2 text-lg font-bold text-ink">
                   {formatMoney(payment.amount)}
                 </p>
               </div>
@@ -286,7 +286,7 @@ function ManagementPaymentTable({
               Giao dịch
             </th>
             <th className="px-4 py-3" scope="col">
-              Booking
+              Đặt phòng
             </th>
             <th className="px-4 py-3" scope="col">
               Phương thức

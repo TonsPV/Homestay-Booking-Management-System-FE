@@ -6,49 +6,49 @@ const bookingCodeMessages: Record<string, string> = {
   BOOKING_CUSTOMER_CONTACT_REQUIRED:
     "Vui lòng nhập đầy đủ tên và số điện thoại của khách tại quầy.",
   BOOKING_ACTIVE_UNPAID_LIMIT_REACHED:
-    "Bạn đang có quá nhiều booking chờ thanh toán. Hãy thanh toán, hủy hoặc chờ booking cũ hết hạn.",
+    "Bạn đang có quá nhiều đặt phòng chờ thanh toán. Hãy thanh toán, hủy hoặc chờ đơn cũ hết hạn.",
   BOOKING_HELD_NIGHTS_LIMIT_REACHED:
-    "Số đêm đang được giữ đã đạt giới hạn. Vui lòng xử lý các booking hiện có trước.",
+    "Số đêm đang được giữ đã đạt giới hạn. Vui lòng xử lý các đặt phòng hiện có trước.",
   BOOKING_ROOM_NOT_BOOKABLE:
-    "Phòng hiện không thể nhận booking. Vui lòng chọn phòng khác.",
+    "Phòng hiện không thể nhận đặt phòng. Vui lòng chọn phòng khác.",
   BOOKING_CHECKIN_IN_PAST: "Ngày nhận phòng không được nằm trong quá khứ.",
   BOOKING_CHECKIN_TOO_FAR:
     "Ngày nhận phòng vượt quá khoảng thời gian được phép đặt trước.",
   BOOKING_DATE_RANGE_INVALID:
     "Ngày trả phòng phải sau ngày nhận phòng.",
   BOOKING_STAY_TOO_LONG:
-    "Thời gian lưu trú vượt quá giới hạn cho một booking.",
+    "Thời gian lưu trú vượt quá giới hạn cho một lần đặt phòng.",
   BOOKING_TOTAL_LIMIT_EXCEEDED:
-    "Tổng tiền booking vượt quá giới hạn hệ thống. Vui lòng kiểm tra lại thời gian lưu trú.",
+    "Tổng tiền đặt phòng vượt quá giới hạn hệ thống. Vui lòng kiểm tra lại thời gian lưu trú.",
   BOOKING_ROOM_UNAVAILABLE:
     "Phòng vừa được đặt hoặc khóa trong khoảng ngày này. Vui lòng chọn phòng hoặc ngày khác.",
   BOOKING_CREATE_CONFLICT:
-    "Booking chưa thể tạo vì dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại.",
+    "Đặt phòng chưa thể được tạo vì dữ liệu vừa thay đổi. Vui lòng tải lại và thử lại.",
   BOOKING_REQUEST_INTENT_CONFLICT:
-    "Mã của lần tạo booking này đã xung đột với nội dung khác. Hệ thống đang đồng bộ lại dữ liệu; hãy kiểm tra danh sách booking rồi xác nhận lại thông tin để bắt đầu một lần tạo mới.",
+    "Thông tin của lần tạo đặt phòng này vừa thay đổi. Hệ thống đang đồng bộ lại dữ liệu; hãy kiểm tra danh sách đặt phòng rồi xác nhận lại thông tin để tạo một đơn mới.",
   CUSTOMER_EMAIL_IN_USE:
     "Email đã được sử dụng. Vui lòng chọn khách hiện có hoặc dùng email khác.",
   CUSTOMER_PHONE_IN_USE:
     "Số điện thoại đã được sử dụng. Vui lòng chọn khách hiện có hoặc dùng số khác.",
   BOOKING_CANCELLATION_REASON_REQUIRED: "Vui lòng nhập lý do hủy đặt phòng.",
   BOOKING_REFUND_PENDING:
-    "Booking đang chờ đối soát hoàn tiền. Vui lòng thử lại sau.",
+    "Đặt phòng đang chờ đối soát hoàn tiền. Vui lòng thử lại sau.",
   BOOKING_TRANSITION_NOT_ALLOWED:
-    "Trạng thái booking không thể chuyển theo quy trình hiện tại.",
+    "Trạng thái đặt phòng không thể chuyển theo quy trình hiện tại.",
   BOOKING_CONFIRMATION_REQUIRES_PAYMENT:
-    "Booking online cần được thanh toán trước khi xác nhận.",
+    "Đặt phòng trực tuyến cần được thanh toán trước khi xác nhận.",
   BOOKING_CHECKIN_REQUIRES_PAYMENT:
-    "Booking cần được thanh toán trước khi check-in.",
+    "Đặt phòng cần được thanh toán trước khi nhận phòng.",
   BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW:
     "Chỉ có thể check-in trong khoảng thời gian lưu trú.",
-  BOOKING_ROOM_NOT_FOUND: "Phòng của booking không còn tồn tại.",
+  BOOKING_ROOM_NOT_FOUND: "Phòng của đặt phòng này không còn tồn tại.",
   BOOKING_ROOM_MISSING_FOR_BOOKING:
-    "Booking không còn liên kết với phòng. Không thể tiếp tục chuyển trạng thái; vui lòng kiểm tra dữ liệu booking.",
+    "Đặt phòng không còn liên kết với phòng. Không thể tiếp tục chuyển trạng thái; vui lòng kiểm tra lại thông tin đặt phòng.",
   BOOKING_ROOM_NOT_READY: "Phòng chưa ở trạng thái sẵn sàng để check-in.",
   BOOKING_CANCELLATION_ALREADY_PAID:
-    "Booking đã thanh toán. Cần hoàn tiền trước khi hủy.",
+    "Đặt phòng đã thanh toán. Cần hoàn tiền trước khi hủy.",
   BOOKING_CANCELLATION_NOT_ALLOWED:
-    "Booking không thể hủy ở trạng thái hiện tại.",
+    "Đặt phòng không thể hủy ở trạng thái hiện tại.",
 };
 
 const customerBookingCodeMessages: Record<string, string> = {
@@ -84,48 +84,13 @@ const customerBookingCodeMessages: Record<string, string> = {
     "Đặt phòng này chưa thể hủy ở thời điểm hiện tại.",
 };
 
-const knownClientErrorCodes = new Set([
-  "COMMON_VALIDATION_FAILED",
-  "COMMON_UNAUTHORIZED",
-  "COMMON_FORBIDDEN",
-  "COMMON_NOT_FOUND",
-  "COMMON_RATE_LIMITED",
-  "COMMON_PAYLOAD_TOO_LARGE",
-  "COMMON_UNSUPPORTED_MEDIA_TYPE",
-]);
-
-function isSystemOrUnknownError(error: ApiError): boolean {
-  if (
-    (error.status && error.status >= 500) ||
-    error.kind === "network" ||
-    error.kind === "parse" ||
-    error.errorCode === "COMMON_INTERNAL_ERROR" ||
-    error.errorCode === "COMMON_SERVICE_UNAVAILABLE"
-  ) {
-    return true;
-  }
-
-  if (!error.errorCode) {
-    return true;
-  }
-
-  return (
-    bookingCodeMessages[error.errorCode] === undefined &&
-    !knownClientErrorCodes.has(error.errorCode)
-  );
-}
-
 export function getBookingActionError(error: unknown): string {
   if (error instanceof ApiError) {
     if (error.errorCode && bookingCodeMessages[error.errorCode]) {
       return bookingCodeMessages[error.errorCode];
     }
 
-    const message = getErrorMessage(error);
-    if (isSystemOrUnknownError(error) && error.requestId) {
-      return `${message} (Mã tham chiếu: ${error.requestId})`;
-    }
-    return message;
+    return getErrorMessage(error);
   }
 
   return getErrorMessage(error);
@@ -218,6 +183,6 @@ export function getBookingTransitionReason(reasonCode: string | null) {
 
   return (
     bookingCodeMessages[reasonCode] ??
-    "Thao tác này chưa khả dụng với trạng thái hiện tại của booking."
+    "Thao tác này chưa khả dụng với trạng thái hiện tại của đặt phòng."
   );
 }

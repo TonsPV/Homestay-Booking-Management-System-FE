@@ -45,7 +45,7 @@ describe('ManagementBookingPaymentPanel', () => {
     })
   })
 
-  it('confirms a Backend-recorded manual payment to the operator', () => {
+  it('confirms a recorded manual payment without exposing technical details', () => {
     render(
       <MemoryRouter>
         <ManagementBookingPaymentPanel bookingId="42" canRecord />
@@ -55,7 +55,12 @@ describe('ManagementBookingPaymentPanel', () => {
     expect(
       screen.getByText('Đã ghi nhận thanh toán'),
     ).toBeInTheDocument()
-    expect(screen.getByText(/Payment #92/)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được cập nhật.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/Payment #92|Backend/)).not.toBeInTheDocument()
   })
 
   it('locks manual payment while a VNPay attempt is pending', () => {

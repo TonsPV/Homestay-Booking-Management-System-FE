@@ -81,9 +81,9 @@ const scenarios: Scenario[] = [
     expected: {
       refundEligible: true,
       duplicateEligible: false,
-      reasonLabel: 'Thanh toán sau khi booking đã hủy',
+      reasonLabel: 'Thanh toán sau khi đặt phòng đã hủy',
       explanation:
-        'VNPay báo thành công sau khi booking đã bị hủy. Có thể gửi yêu cầu hoàn tiền qua VNPay; Backend vẫn kiểm tra lại điều kiện tại thời điểm xác nhận.',
+        'VNPay báo thanh toán thành công sau khi đặt phòng đã hủy. Có thể gửi yêu cầu hoàn tiền qua VNPay.',
     },
   },
   {
@@ -96,9 +96,9 @@ const scenarios: Scenario[] = [
     expected: {
       refundEligible: false,
       duplicateEligible: true,
-      reasonLabel: 'Trùng thanh toán cho cùng booking',
+      reasonLabel: 'Trùng thanh toán cho cùng đặt phòng',
       explanation:
-        'Booking đã có một giao dịch VNPay thành công khác (giao dịch chính #90). Đây là khoản thu trùng; dùng "Xử lý giao dịch trùng" để hoàn tiền riêng giao dịch này mà không ảnh hưởng booking.',
+        'Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng. Chọn “Xử lý giao dịch trùng” để hoàn tiền riêng giao dịch này mà không ảnh hưởng đến đặt phòng.',
     },
   },
   {
@@ -139,9 +139,9 @@ const scenarios: Scenario[] = [
     expected: {
       refundEligible: false,
       duplicateEligible: false,
-      reasonLabel: 'Trùng thanh toán cho cùng booking',
+      reasonLabel: 'Trùng thanh toán cho cùng đặt phòng',
       explanation:
-        'Phát hiện nhiều giao dịch thành công cho cùng booking nhưng thiếu liên kết giao dịch chính. Không thể xử lý tự động; cần kiểm tra dữ liệu Backend.',
+        'Có nhiều khoản thanh toán thành công cho cùng một đặt phòng. Hãy kiểm tra lại trước khi xử lý.',
     },
   },
   {
@@ -154,9 +154,9 @@ const scenarios: Scenario[] = [
     expected: {
       refundEligible: false,
       duplicateEligible: false,
-      reasonLabel: 'Trùng thanh toán cho cùng booking',
+      reasonLabel: 'Trùng thanh toán cho cùng đặt phòng',
       explanation:
-        'Booking đã có một giao dịch VNPay thành công khác (giao dịch chính #91). Đây là khoản thu trùng; dùng "Xử lý giao dịch trùng" để hoàn tiền riêng giao dịch này mà không ảnh hưởng booking.',
+        'Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng. Chọn “Xử lý giao dịch trùng” để hoàn tiền riêng giao dịch này mà không ảnh hưởng đến đặt phòng.',
     },
   },
   {
@@ -173,9 +173,9 @@ const scenarios: Scenario[] = [
     expected: {
       refundEligible: false,
       duplicateEligible: false,
-      reasonLabel: 'Trùng thanh toán cho cùng booking',
+      reasonLabel: 'Trùng thanh toán cho cùng đặt phòng',
       explanation:
-        'Booking đã có một giao dịch VNPay thành công khác (giao dịch chính #90). Đây là khoản thu trùng; dùng "Xử lý giao dịch trùng" để hoàn tiền riêng giao dịch này mà không ảnh hưởng booking.',
+        'Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng. Chọn “Xử lý giao dịch trùng” để hoàn tiền riêng giao dịch này mà không ảnh hưởng đến đặt phòng.',
     },
   },
 ]

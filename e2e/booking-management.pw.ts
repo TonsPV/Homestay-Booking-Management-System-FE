@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { fulfillJson, installSession } from "./helpers";
+import { envelope, fulfillJson, installSession } from "./helpers";
 
 test("staff creates a counter booking and Backend decides lifecycle transitions", async ({
   page,
@@ -231,4 +231,98 @@ test("staff creates a counter booking and Backend decides lifecycle transitions"
     cancellationReason: "Khách đổi kế hoạch",
     status: "CANCELLED",
   });
+});
+
+test("management booking total excludes cancelled bookings", async ({ page }) => {
+  await installSession(page, { actorType: "user", role: "ADMIN" });
+
+  const baseBooking = {
+    bookingCode: "HBMS-901",
+    cancelledAt: null,
+    cancellationReason: null,
+    checkInDate: "2099-02-10",
+    checkOutDate: "2099-02-12",
+    contactEmail: null,
+    contactName: "Khách kiểm thử",
+    contactPhone: "0901234567",
+    createdAt: "2026-07-24T00:00:00.000Z",
+    createdByUser: null,
+    createdByUserId: null,
+    credentialCapabilities: {
+      canSetInitialPassword: false,
+      reasonCode: null,
+    },
+    customer: {
+      fullName: "Khách kiểm thử",
+      id: "301",
+      phone: "0901234567",
+    },
+    customerId: "301",
+    customerNote: null,
+    guestCount: 2,
+    paymentExpiresAt: null,
+    paymentStatus: "PAID",
+    room: {
+      id: "10",
+      name: "Suite Vườn",
+      roomNumber: "A101",
+      roomType: { id: "5", name: "Family Suite" },
+    },
+    roomId: "10",
+    transitionCapabilities: [],
+    updatedAt: "2026-07-24T00:00:00.000Z",
+  };
+  const bookings = [
+    {
+      ...baseBooking,
+      id: "901",
+      status: "PENDING_PAYMENT",
+      totalAmount: "1250000.00",
+    },
+    {
+      ...baseBooking,
+      bookingCode: "HBMS-902",
+      id: "902",
+      status: "CONFIRMED",
+      totalAmount: "1450000.00",
+    },
+    {
+      ...baseBooking,
+      bookingCode: "HBMS-903",
+      id: "903",
+      status: "CHECKED_IN",
+      totalAmount: "800000.00",
+    },
+    {
+      ...baseBooking,
+      bookingCode: "HBMS-904",
+      cancelledAt: "2026-07-24T01:00:00.000Z",
+      cancellationReason: "Khách đổi kế hoạch",
+      id: "904",
+      paymentStatus: "UNPAID",
+      status: "CANCELLED",
+      totalAmount: "900000.00",
+    },
+  ];
+
+  await page.route("**/api/v1/management/bookings**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    await route.fulfill({
+      body: JSON.stringify({
+        ...envelope(bookings, path),
+        meta: {
+          pagination: { limit: 10, page: 1, total: 4, totalPages: 1 },
+        },
+      }),
+      contentType: "application/json",
+      status: 200,
+    });
+  });
+
+  await page.goto("/management/bookings");
+
+  await expect(page.getByText("Tổng tiền đơn chưa hủy")).toBeVisible();
+  await expect(page.getByTestId("stat-displayed-total")).toHaveText(
+    /3\.500\.000/,
+  );
 });

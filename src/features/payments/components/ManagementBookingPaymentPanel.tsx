@@ -82,8 +82,7 @@ export function ManagementBookingPaymentPanel({
           Ghi nhận thanh toán
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Chỉ chọn phương thức. Tổng tiền luôn được lấy từ booking và không gửi
-          từ giao diện.
+          Chỉ chọn phương thức. Số tiền được lấy từ thông tin đặt phòng.
         </p>
 
         {!canRecord ? (
@@ -93,13 +92,13 @@ export function ManagementBookingPaymentPanel({
         ) : paymentsQuery.isPending ||
           paymentsQuery.isFetching ? (
           <Alert className="mt-4">
-            Đang đối chiếu lịch sử payment trước khi cho phép ghi nhận thủ
+            Đang kiểm tra lịch sử thanh toán trước khi cho phép ghi nhận thủ
             công…
           </Alert>
         ) : paymentsQuery.isError ? (
           <Alert className="mt-4" tone="warning">
-            Chưa thể xác nhận booking có VNPay đang xử lý hay không. Ghi nhận
-            thủ công tạm thời bị khóa.
+            Chưa thể xác định có giao dịch VNPay đang xử lý hay không. Tạm thời
+            chưa thể ghi nhận thanh toán thủ công.
           </Alert>
         ) : pendingVnPayPayment ? (
           <Alert
@@ -107,8 +106,8 @@ export function ManagementBookingPaymentPanel({
             tone="warning"
             title="VNPay đang xử lý"
           >
-            Payment #{pendingVnPayPayment.id} chưa có kết quả cuối. Không ghi
-            nhận CASH hoặc BANK_TRANSFER trong lúc attempt này còn PENDING.
+            Một giao dịch VNPay đang chờ kết quả. Hãy chờ hoàn tất trước khi
+            ghi nhận thanh toán khác.
           </Alert>
         ) : (
           <form className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-end" onSubmit={submit}>
@@ -135,14 +134,14 @@ export function ManagementBookingPaymentPanel({
             tone="success"
             title="Đã ghi nhận thanh toán"
           >
-            Payment #{createMutation.data.id} đã được Backend xác nhận thành
-            công. Trạng thái booking đang được làm mới.
+            Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được
+            cập nhật.
           </Alert>
         ) : null}
       </Card>
 
       {paymentsQuery.isPending ? (
-        <LoadingState label="Đang tải lịch sử payment…" />
+        <LoadingState label="Đang tải lịch sử thanh toán…" />
       ) : paymentsQuery.isError ? (
         <ErrorState
           description={getPaymentActionError(paymentsQuery.error)}

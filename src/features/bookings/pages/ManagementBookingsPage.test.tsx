@@ -121,13 +121,22 @@ describe('ManagementBookingsPage filters', () => {
         status: 'CHECKED_IN',
         paymentStatus: 'PAID',
       },
+      {
+        ...baseBooking,
+        id: '4',
+        bookingCode: 'BK-004',
+        cancelledAt: '2026-09-10T02:00:00.000Z',
+        cancellationReason: 'Khách đổi kế hoạch',
+        totalAmount: '900000.00',
+        status: 'CANCELLED',
+      },
     ]
 
     mocks.useManagementBookings.mockReturnValue({
       data: {
         data: pageBookings,
         meta: {
-          pagination: { limit: 10, page: 1, total: 3, totalPages: 1 },
+          pagination: { limit: 10, page: 1, total: 4, totalPages: 1 },
         },
       },
       error: null,
@@ -144,12 +153,11 @@ describe('ManagementBookingsPage filters', () => {
 
     expect(screen.getByText('Đơn chờ xử lý')).toBeInTheDocument()
     expect(screen.getByText('Đơn đã xác nhận')).toBeInTheDocument()
-    expect(screen.getByText('Tổng tiền hiển thị')).toBeInTheDocument()
+    expect(screen.getByText('Tổng tiền đơn chưa hủy')).toBeInTheDocument()
     expect(screen.getByText('Lối tắt')).toBeInTheDocument()
 
-    // Count cards reflect the statuses on the current page (1 pending, 1
-    // confirmed); the money card sums the current page's totalAmount column
-    // (1.25m + 1.45m + 0.8m) via exact decimal-string addition.
+    // Count cards reflect the statuses on the current page. The money card
+    // intentionally excludes cancelled bookings: 1.25m + 1.45m + 0.8m.
     expect(screen.getByTestId('stat-pending-payment')).toHaveTextContent('1')
     expect(screen.getByTestId('stat-confirmed')).toHaveTextContent('1')
     expect(screen.getByTestId('stat-displayed-total')).toHaveTextContent(

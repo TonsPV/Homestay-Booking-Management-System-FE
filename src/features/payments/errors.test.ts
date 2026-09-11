@@ -51,4 +51,18 @@ describe("getCustomerPaymentActionError", () => {
       "Thông tin thanh toán vừa thay đổi. Vui lòng tải lại trang trước khi thử lại.",
     );
   });
+
+  it("does not expose request IDs or raw service messages", () => {
+    const error = new ApiError("Gateway internal error", {
+      kind: "http",
+      requestId: "req-payment-17",
+      status: 503,
+    });
+
+    expect(getPaymentActionError(error)).toBe(
+      "Hệ thống đang tạm thời gián đoạn. Vui lòng thử lại sau.",
+    );
+    expect(getPaymentActionError(error)).not.toContain("req-payment-17");
+    expect(getPaymentActionError(error)).not.toContain("Gateway internal error");
+  });
 });

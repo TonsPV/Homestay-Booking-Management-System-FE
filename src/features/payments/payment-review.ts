@@ -41,13 +41,13 @@ export function getPaymentReviewReasonLabel(
   reason: PaymentReviewReason,
 ): string {
   return reason === 'BOOKING_CANCELLED'
-    ? 'Thanh toán sau khi booking đã hủy'
-    : 'Trùng thanh toán cho cùng booking'
+    ? 'Thanh toán sau khi đặt phòng đã hủy'
+    : 'Trùng thanh toán cho cùng đặt phòng'
 }
 
 /**
  * Full review explanation shown in the payment row/detail so an admin can
- * decide without opening the Backend.
+ * decide from the transaction record.
  */
 export function getPaymentReviewExplanation(payment: Payment): string | null {
   if (payment.status !== 'REQUIRES_REVIEW' || !payment.reviewReason) {
@@ -55,12 +55,10 @@ export function getPaymentReviewExplanation(payment: Payment): string | null {
   }
 
   if (payment.reviewReason === 'BOOKING_CANCELLED') {
-    return 'VNPay báo thành công sau khi booking đã bị hủy. Có thể gửi yêu cầu hoàn tiền qua VNPay; Backend vẫn kiểm tra lại điều kiện tại thời điểm xác nhận.'
+    return 'VNPay báo thanh toán thành công sau khi đặt phòng đã hủy. Có thể gửi yêu cầu hoàn tiền qua VNPay.'
   }
 
-  const canonicalId = payment.reviewCanonicalPaymentId
-
-  return canonicalId
-    ? `Booking đã có một giao dịch VNPay thành công khác (giao dịch chính #${canonicalId}). Đây là khoản thu trùng; dùng "Xử lý giao dịch trùng" để hoàn tiền riêng giao dịch này mà không ảnh hưởng booking.`
-    : 'Phát hiện nhiều giao dịch thành công cho cùng booking nhưng thiếu liên kết giao dịch chính. Không thể xử lý tự động; cần kiểm tra dữ liệu Backend.'
+  return payment.reviewCanonicalPaymentId
+    ? 'Đã phát hiện khoản thanh toán trùng cho cùng một đặt phòng. Chọn “Xử lý giao dịch trùng” để hoàn tiền riêng giao dịch này mà không ảnh hưởng đến đặt phòng.'
+    : 'Có nhiều khoản thanh toán thành công cho cùng một đặt phòng. Hãy kiểm tra lại trước khi xử lý.'
 }

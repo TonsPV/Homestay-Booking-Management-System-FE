@@ -218,7 +218,7 @@ describe('PaymentDetailPage actions', () => {
       screen.getByRole('button', { name: 'Xử lý giao dịch trùng' }),
     )
     const dialog = screen.getByRole('dialog')
-    expect(dialog).toHaveTextContent('Xử lý giao dịch trùng #91?')
+    expect(dialog).toHaveTextContent('Xử lý giao dịch trùng?')
     expect(screen.getByRole('link', { name: '#90' })).toHaveAttribute(
       'href',
       '/management/payments/90',
@@ -246,7 +246,7 @@ describe('PaymentDetailPage actions', () => {
 
     await user.click(screen.getByRole('button', { name: 'Hoàn tiền' }))
     const dialog = screen.getByRole('dialog')
-    expect(dialog).toHaveTextContent('Hoàn tiền payment #91?')
+    expect(dialog).toHaveTextContent('Hoàn tiền giao dịch này?')
 
     await user.click(
       screen.getByRole('button', { name: 'Xác nhận hoàn tiền' }),

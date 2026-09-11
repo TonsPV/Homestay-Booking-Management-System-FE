@@ -36,7 +36,9 @@ export function BookingStatsSummary({
   const confirmedCount = bookings.filter(
     (booking) => booking.status === 'CONFIRMED',
   ).length
-  const displayedTotal = sumBookingAmounts(bookings)
+  const displayedTotal = sumBookingAmounts(
+    bookings.filter((booking) => booking.status !== 'CANCELLED'),
+  )
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -51,7 +53,7 @@ export function BookingStatsSummary({
           {pendingPaymentCount}
         </p>
         <p className="mt-1 text-xs text-muted">
-          Đơn ở trạng thái PENDING_PAYMENT trong trang này
+          Đơn đang chờ thanh toán trong trang này
         </p>
       </Card>
 
@@ -66,13 +68,13 @@ export function BookingStatsSummary({
           {confirmedCount}
         </p>
         <p className="mt-1 text-xs text-muted">
-          Đơn ở trạng thái CONFIRMED trong trang này
+          Đơn đã được xác nhận trong trang này
         </p>
       </Card>
 
       <Card className="p-4">
         <p className="text-xs font-bold uppercase tracking-wide text-muted">
-          Tổng tiền hiển thị
+          Tổng tiền đơn chưa hủy
         </p>
         <p
           className="mt-1 text-2xl font-bold text-ink"
@@ -81,7 +83,7 @@ export function BookingStatsSummary({
           {formatMoney(displayedTotal)}
         </p>
         <p className="mt-1 text-xs text-muted">
-          Tổng cột Tổng tiền của các đơn trong trang này
+          Tổng tiền của các đơn chưa hủy trong trang này
         </p>
       </Card>
 
