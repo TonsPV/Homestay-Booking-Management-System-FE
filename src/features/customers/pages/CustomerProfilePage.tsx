@@ -110,121 +110,148 @@ export function CustomerProfilePage() {
   const customer = profileQuery.data
 
   return (
-    <section className="mx-auto w-full max-w-5xl space-y-6 p-4 sm:p-6">
+    <section className="w-full space-y-8">
       <PageHeader
         description="Thông tin này được dùng làm dữ liệu mặc định khi bạn đặt phòng."
         eyebrow="Tài khoản"
         title="Hồ sơ khách hàng"
       />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-        <Card className="h-fit">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-blue-100 text-xl font-black text-blue-700">
-            {customer.fullName.trim().charAt(0).toUpperCase()}
-          </div>
-          <h2 className="mt-4 text-lg font-black text-slate-950">
-            {customer.fullName}
-          </h2>
-          <div className="mt-2">
-            {customer.status === 'ACTIVE' ? (
-              <Badge tone="emerald">Đang hoạt động</Badge>
-            ) : (
-              <Badge tone="rose">Đã khóa</Badge>
-            )}
-          </div>
-          <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-5 text-sm">
-            <div>
-              <dt className="text-slate-500">Ngày tham gia</dt>
-              <dd className="mt-1 font-semibold text-slate-900">
-                {formatDateTime(customer.createdAt)}
-              </dd>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(17rem,0.8fr)_minmax(0,2fr)]">
+        <aside aria-labelledby="account-summary-title">
+          <Card className="sm:p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-xl font-bold text-brand-strong">
+                {customer.fullName.trim().charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <h2
+                  className="truncate text-lg font-bold text-ink"
+                  id="account-summary-title"
+                >
+                  {customer.fullName}
+                </h2>
+                <p className="mt-1 text-sm text-muted">Tài khoản khách hàng</p>
+              </div>
             </div>
-          </dl>
-        </Card>
 
-        <Card>
-          <h2 className="text-lg font-black text-slate-950">
-            Thông tin liên hệ
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Số điện thoại phải là số di động Việt Nam hợp lệ.
-          </p>
+            <dl className="mt-6 grid gap-4 border-t border-line pt-5 text-sm">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted">Trạng thái</dt>
+                <dd>
+                  {customer.status === 'ACTIVE' ? (
+                    <Badge tone="emerald">Đang hoạt động</Badge>
+                  ) : (
+                    <Badge tone="rose">Đã khóa</Badge>
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted">Ngày tham gia</dt>
+                <dd className="mt-1 font-semibold text-ink">
+                  {formatDateTime(customer.createdAt)}
+                </dd>
+              </div>
+            </dl>
+          </Card>
+        </aside>
 
-          <form
-            className="mt-6 grid gap-5"
-            noValidate
-            onSubmit={handleSubmit((values) => {
-              updateMutation.reset()
-              clearErrors(['email', 'phone'])
-              setSaved(false)
-              updateMutation.mutate(
-                {
-                  email: values.email || null,
-                  fullName: values.fullName,
-                  phone: values.phone,
-                },
-                {
-                  onSuccess: (updatedCustomer) => {
-                    auth.updatePrincipal({
-                      actorType: 'customer',
-                      ...updatedCustomer,
-                    })
-                    reset({
-                      email: updatedCustomer.email ?? '',
-                      fullName: updatedCustomer.fullName,
-                      phone: updatedCustomer.phone,
-                    })
-                    setSaved(true)
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card className="flex h-full flex-col sm:p-6">
+            <h2 className="text-lg font-bold text-ink">Thông tin liên hệ</h2>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Số điện thoại phải là số di động Việt Nam hợp lệ.
+            </p>
+
+            <form
+              className="mt-6 flex flex-1 flex-col gap-6"
+              noValidate
+              onSubmit={handleSubmit((values) => {
+                updateMutation.reset()
+                clearErrors(['email', 'phone'])
+                setSaved(false)
+                updateMutation.mutate(
+                  {
+                    email: values.email || null,
+                    fullName: values.fullName,
+                    phone: values.phone,
                   },
-                },
-              )
-            })}
-          >
-            {saved ? (
-              <Alert tone="success">Đã lưu thay đổi hồ sơ.</Alert>
-            ) : null}
-            {updateMutation.error && !emailFieldError && !phoneFieldError ? (
-              <Alert title="Không thể cập nhật" tone="error">
-                {getCustomerProfileActionError(updateMutation.error)}
-              </Alert>
-            ) : null}
-
-            <Field error={errors.fullName?.message} label="Họ và tên" required>
-              <Input autoComplete="name" {...register('fullName')} />
-            </Field>
-            <Field error={errors.phone?.message} label="Số điện thoại" required>
-              <Input
-                autoComplete="tel"
-                inputMode="tel"
-                {...register('phone')}
-              />
-            </Field>
-            <Field
-              error={errors.email?.message}
-              hint="Để trống nếu bạn không muốn lưu email."
-              label="Email"
+                  {
+                    onSuccess: (updatedCustomer) => {
+                      auth.updatePrincipal({
+                        actorType: 'customer',
+                        ...updatedCustomer,
+                      })
+                      reset({
+                        email: updatedCustomer.email ?? '',
+                        fullName: updatedCustomer.fullName,
+                        phone: updatedCustomer.phone,
+                      })
+                      setSaved(true)
+                    },
+                  },
+                )
+              })}
             >
-              <Input
-                autoComplete="email"
-                inputMode="email"
-                type="email"
-                {...register('email')}
-              />
-            </Field>
+              <div className="grid gap-5">
+                {saved ? (
+                  <Alert tone="success">Đã lưu thay đổi hồ sơ.</Alert>
+                ) : null}
+                {updateMutation.error &&
+                !emailFieldError &&
+                !phoneFieldError ? (
+                  <Alert title="Không thể cập nhật" tone="error">
+                    {getCustomerProfileActionError(updateMutation.error)}
+                  </Alert>
+                ) : null}
 
-            <div className="flex justify-end">
-              <Button
-                disabled={!isDirty}
-                loading={updateMutation.isPending}
-                type="submit"
-              >
-                Lưu thay đổi
-              </Button>
-            </div>
-          </form>
-        </Card>
+                <Field
+                  error={errors.fullName?.message}
+                  label="Họ và tên"
+                  required
+                >
+                  <Input autoComplete="name" {...register('fullName')} />
+                </Field>
+                <Field
+                  error={errors.phone?.message}
+                  label="Số điện thoại"
+                  required
+                >
+                  <Input
+                    autoComplete="tel"
+                    inputMode="tel"
+                    {...register('phone')}
+                  />
+                </Field>
+                <Field
+                  error={errors.email?.message}
+                  hint="Để trống nếu bạn không muốn lưu email."
+                  label="Email"
+                >
+                  <Input
+                    autoComplete="email"
+                    inputMode="email"
+                    type="email"
+                    {...register('email')}
+                  />
+                </Field>
+              </div>
 
-        <CustomerPasswordForm />
+              <div className="mt-auto flex border-t border-line pt-5">
+                <Button
+                  className="w-full sm:ml-auto sm:w-auto"
+                  disabled={!isDirty}
+                  loading={updateMutation.isPending}
+                  type="submit"
+                >
+                  Lưu thay đổi
+                </Button>
+              </div>
+            </form>
+          </Card>
+
+          <CustomerPasswordForm />
+        </div>
       </div>
     </section>
   )

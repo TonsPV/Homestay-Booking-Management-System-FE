@@ -76,15 +76,15 @@ export function CustomerPasswordForm() {
   ])
 
   return (
-    <Card className="lg:col-start-2">
-      <h2 className="text-lg font-black text-slate-950">Đổi mật khẩu</h2>
-      <p className="mt-1 text-sm text-slate-600">
+    <Card className="flex h-full flex-col sm:p-6">
+      <h2 className="text-lg font-bold text-ink">Đổi mật khẩu</h2>
+      <p className="mt-1 text-sm leading-6 text-muted">
         Sau khi đổi, bạn cần đăng nhập lại trên thiết bị này và các thiết bị
         khác.
       </p>
 
       <form
-        className="mt-6 grid gap-5"
+        className="mt-6 flex flex-1 flex-col gap-6"
         noValidate
         onSubmit={handleSubmit((values) => {
           mutation.reset()
@@ -105,47 +105,53 @@ export function CustomerPasswordForm() {
           )
         })}
       >
-        {mutation.error &&
-        !currentPasswordFieldError &&
-        !newPasswordFieldError ? (
-          <Alert title="Không thể đổi mật khẩu" tone="error">
-            {getCustomerPasswordActionError(mutation.error)}
-          </Alert>
-        ) : null}
+        <div className="grid gap-5">
+          {mutation.error &&
+          !currentPasswordFieldError &&
+          !newPasswordFieldError ? (
+            <Alert title="Không thể đổi mật khẩu" tone="error">
+              {getCustomerPasswordActionError(mutation.error)}
+            </Alert>
+          ) : null}
 
-        <Field
-          error={errors.currentPassword?.message}
-          label="Mật khẩu hiện tại"
-          required
-        >
-          <PasswordInput
-            autoComplete="current-password"
-            {...register('currentPassword')}
-          />
-        </Field>
-        <Field
-          error={errors.newPassword?.message}
-          label="Mật khẩu mới"
-          required
-        >
-          <PasswordInput
-            autoComplete="new-password"
-            {...register('newPassword')}
-          />
-        </Field>
-        <Field
-          error={errors.confirmPassword?.message}
-          label="Xác nhận mật khẩu mới"
-          required
-        >
-          <PasswordInput
-            autoComplete="new-password"
-            {...register('confirmPassword')}
-          />
-        </Field>
+          <Field
+            error={errors.currentPassword?.message}
+            label="Mật khẩu hiện tại"
+            required
+          >
+            <PasswordInput
+              autoComplete="current-password"
+              {...register('currentPassword')}
+            />
+          </Field>
+          <Field
+            error={errors.newPassword?.message}
+            label="Mật khẩu mới"
+            required
+          >
+            <PasswordInput
+              autoComplete="new-password"
+              {...register('newPassword')}
+            />
+          </Field>
+          <Field
+            error={errors.confirmPassword?.message}
+            label="Xác nhận mật khẩu mới"
+            required
+          >
+            <PasswordInput
+              autoComplete="new-password"
+              {...register('confirmPassword')}
+            />
+          </Field>
+        </div>
 
-        <div className="flex justify-end">
-          <Button loading={mutation.isPending} type="submit">
+        <div className="mt-auto flex border-t border-line pt-5">
+          <Button
+            className="w-full sm:ml-auto sm:w-auto"
+            loading={mutation.isPending}
+            type="submit"
+          >
             Đổi mật khẩu
           </Button>
         </div>

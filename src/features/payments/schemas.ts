@@ -5,18 +5,6 @@ import {
   PAYMENT_STATUSES,
 } from './types'
 
-export const createVnPayFormSchema = z.object({
-  bankCode: z.union([
-    z.literal(''),
-    z.enum(['VNPAYQR', 'VNBANK', 'INTCARD']),
-  ]),
-  locale: z.enum(['vn', 'en']),
-})
-
-export type CreateVnPayFormValues = z.infer<
-  typeof createVnPayFormSchema
->
-
 export const createManualPaymentFormSchema = z.object({
   method: z.enum(['CASH', 'BANK_TRANSFER']),
 })

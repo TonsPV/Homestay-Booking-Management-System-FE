@@ -10,7 +10,6 @@ import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import {
   Alert,
-  ErrorState,
   LoadingState,
 } from '@/shared/components/Feedback'
 import { LinkButton } from '@/shared/components/LinkButton'
@@ -53,22 +52,26 @@ export function VnPayReturnPage() {
     attempt,
     returnResult,
   )
+  const customerBookingIdForNavigation = getVnPayCustomerBookingId(
+    attempt,
+    returnResult,
+  )
   const canReadCustomerHistory =
     authStatus === 'authenticated' &&
     principal?.actorType === 'customer' &&
-    returnMatchesAttempt
-  const customerBookingId = canReadCustomerHistory
-    ? attempt?.bookingId
-    : undefined
+    Boolean(customerBookingIdForNavigation)
+  const customerBookingId =
+    canReadCustomerHistory && customerBookingIdForNavigation
+      ? customerBookingIdForNavigation
+      : undefined
   const paymentId = returnResult?.paymentId ?? 'missing'
   const paymentsQuery = useCustomerPayments(
     customerBookingId,
     { limit: 20, page: 1 },
     {
-      deadline:
-        returnResult?.paymentStatus === 'PENDING'
-          ? pollingDeadline
-          : null,
+      deadline: returnResult?.validSignature
+        ? pollingDeadline
+        : null,
       enabled: canReadCustomerHistory,
       paymentId,
     },
@@ -78,25 +81,27 @@ export function VnPayReturnPage() {
   const authoritativePayment = paymentsQuery.data?.data.find(
     (payment) => payment.id === returnResult?.paymentId,
   )
-  const paymentStatus =
-    authoritativePayment?.status ?? returnResult?.paymentStatus ?? null
-  const customerBookingIdForNavigation = getVnPayCustomerBookingId(
-    attempt,
-    returnResult,
+  const paymentStatus = authoritativePayment?.status ?? null
+  const paymentIsTerminal = Boolean(
+    authoritativePayment &&
+      isTerminalPaymentStatus(authoritativePayment.status),
   )
   const bookingDetailsPath = customerBookingIdForNavigation
     ? `/bookings/${customerBookingIdForNavigation}`
     : '/bookings'
   const requiresCustomerSignIn =
-    paymentStatus === 'PENDING' && authStatus === 'anonymous'
+    authStatus === 'anonymous' &&
+    Boolean(customerBookingIdForNavigation)
   const canRetryAuthoritativeState =
-    paymentStatus === 'PENDING' && canReadCustomerHistory
+    canReadCustomerHistory &&
+    (paymentsQuery.isError ||
+      (!paymentIsTerminal && pollingDeadline === null))
   const refreshingAuthoritativeState =
     canRetryAuthoritativeState &&
     (paymentsQuery.isFetching || bookingQuery.isFetching)
   const polling =
     canReadCustomerHistory &&
-    paymentStatus === 'PENDING' &&
+    !paymentIsTerminal &&
     pollingDeadline !== null
 
   useEffect(() => {
@@ -150,18 +155,18 @@ export function VnPayReturnPage() {
       </Alert>
     )
   } else if (hasGatewayParameters && returnQuery.isPending) {
-    content = <LoadingState label="Đang kiểm tra kết quả thanh toán…" />
+    content = <LoadingState label="Đang xác nhận thanh toán…" />
   } else if (hasGatewayParameters && returnQuery.isError) {
     content = (
-      <ErrorState
-        description={getCustomerPaymentActionError(returnQuery.error)}
-        onRetry={() => void returnQuery.refetch()}
-      />
+      <Alert tone="error" title="Không thể xác nhận thanh toán">
+        {getCustomerPaymentActionError(returnQuery.error)}
+      </Alert>
     )
   } else if (!returnResult) {
     content = (
-      <Alert tone="warning">
-        Chưa thể kiểm tra kết quả thanh toán. Vui lòng thử lại sau ít phút.
+      <Alert tone="warning" title="Đang chờ kết quả thanh toán">
+        Chúng tôi chưa nhận được kết quả từ VNPay. Vui lòng thử kiểm tra lại
+        sau ít phút.
       </Alert>
     )
   } else if (!returnResult.validSignature) {
@@ -171,10 +176,10 @@ export function VnPayReturnPage() {
         phòng để kiểm tra trạng thái trước khi thanh toán lại.
       </Alert>
     )
-  } else if (!returnResult.paymentId || !returnResult.paymentStatus) {
+  } else if (!returnResult.paymentId) {
     content = (
       <Alert tone="warning" title="Chưa xác định được giao dịch">
-        Chưa tìm thấy khoản thanh toán tương ứng. Vui lòng kiểm tra lịch sử
+        Chưa tìm thấy mã khoản thanh toán tương ứng. Vui lòng kiểm tra lịch sử
         trong chi tiết đặt phòng.
       </Alert>
     )
@@ -185,73 +190,63 @@ export function VnPayReturnPage() {
         này. Vui lòng kiểm tra trạng thái trong chi tiết đặt phòng.
       </Alert>
     )
-  } else if (
-    attempt &&
-    authStatus === 'restoring'
-  ) {
+  } else if (authStatus === 'restoring') {
+    content = <LoadingState label="Đang xác nhận thanh toán…" />
+  } else if (requiresCustomerSignIn) {
     content = (
-      <LoadingState label="Đang khôi phục phiên đăng nhập…" />
+      <Alert tone="warning" title="Cần đăng nhập để kiểm tra">
+        Phiên đăng nhập của bạn không còn trên trình duyệt này. Hãy đăng nhập
+        để hệ thống xác nhận trạng thái mới nhất trong chi tiết đặt phòng.
+      </Alert>
     )
   } else if (
     canReadCustomerHistory &&
     paymentsQuery.isPending
   ) {
-    content = (
-      <LoadingState label="Đang kiểm tra trạng thái thanh toán…" />
-    )
+    content = <LoadingState label="Đang xác nhận thanh toán…" />
   } else if (
     canReadCustomerHistory &&
     paymentsQuery.isError
   ) {
     content = (
-      <ErrorState
-        description={getCustomerPaymentActionError(paymentsQuery.error)}
-        onRetry={retryAuthoritativeState}
-      />
+      <Alert tone="error" title="Không thể xác nhận thanh toán">
+        {getCustomerPaymentActionError(paymentsQuery.error)}
+      </Alert>
+    )
+  } else if (polling) {
+    content = <LoadingState label="Đang xác nhận thanh toán…" />
+  } else if (
+    canReadCustomerHistory &&
+    paymentStatus === 'PENDING'
+  ) {
+    content = (
+      <Alert tone="warning" title="Giao dịch vẫn đang được xử lý">
+        VNPay chưa gửi kết quả cuối cùng. Bạn chưa cần thanh toán lại; hãy kiểm
+        tra lại sau ít phút hoặc xem chi tiết đặt phòng.
+      </Alert>
     )
   } else if (
     canReadCustomerHistory &&
     !authoritativePayment
   ) {
     content = (
-      <Alert tone="warning" title="Đang cập nhật kết quả">
-        Chưa thấy giao dịch trong lịch sử đặt phòng. Trang sẽ tiếp tục cập nhật
-        trong ít phút{polling ? '…' : '.'}
+      <Alert tone="warning" title="Chưa tìm thấy giao dịch">
+        Hệ thống chưa thấy khoản thanh toán trong lịch sử đặt phòng. Bạn có thể
+        kiểm tra lại sau ít phút.
       </Alert>
     )
   } else if (paymentStatus === 'SUCCESS') {
     content = (
-      <Alert
-        tone={authoritativePayment ? 'success' : 'info'}
-        title={
-          authoritativePayment
-            ? 'Thanh toán thành công'
-            : 'Đang xác nhận thanh toán'
-        }
-      >
-        {authoritativePayment
-          ? 'Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được cập nhật.'
-          : 'VNPay đã gửi kết quả, nhưng khoản thanh toán chưa xuất hiện trong lịch sử. Vui lòng đăng nhập và kiểm tra chi tiết đặt phòng.'}
+      <Alert tone="success" title="Thanh toán thành công">
+        Khoản thanh toán đã được ghi nhận. Trạng thái đặt phòng đang được cập
+        nhật.
       </Alert>
     )
-  } else if (paymentStatus === 'PENDING') {
-    content = canReadCustomerHistory ? (
-      <Alert tone="info" title="Giao dịch đang được xử lý">
-        Chúng tôi đang cập nhật kết quả từ VNPay. Bạn chưa cần thanh toán lại
-        {polling ? '…' : '.'}
-        {!polling
-          ? ' Quá trình kiểm tra tự động đã tạm dừng; bạn có thể kiểm tra lại ngay.'
-          : null}
-      </Alert>
-    ) : authStatus === 'anonymous' ? (
-      <Alert tone="warning" title="Cần đăng nhập để kiểm tra">
-        Phiên đăng nhập của bạn không còn trên trình duyệt này. Hãy đăng nhập
-        để hệ thống kiểm tra trạng thái mới nhất trong chi tiết đặt phòng.
-      </Alert>
-    ) : (
-      <Alert tone="warning" title="Chưa thể kiểm tra tự động">
-        Hãy mở chi tiết đặt phòng để xem trạng thái mới nhất. Không nên tạo
-        thêm giao dịch khi trạng thái hiện tại chưa rõ ràng.
+  } else if (paymentStatus === 'FAILED') {
+    content = (
+      <Alert tone="error" title="Thanh toán không thành công">
+        Giao dịch chưa được ghi nhận. Hãy quay lại chi tiết đặt phòng để kiểm
+        tra trạng thái trước khi thử thanh toán lại.
       </Alert>
     )
   } else if (paymentStatus === 'REQUIRES_REVIEW') {
@@ -261,17 +256,24 @@ export function VnPayReturnPage() {
         kiểm tra và sẽ cập nhật khi có kết quả cuối cùng.
       </Alert>
     )
-  } else if (paymentStatus === 'FAILED') {
+  } else if (paymentStatus === 'REFUND_PENDING') {
     content = (
-      <Alert tone="warning" title="Thanh toán chưa thành công">
-        Giao dịch đã kết thúc mà chưa ghi nhận thanh toán. Vui lòng quay lại
-        đặt phòng và kiểm tra trạng thái trước khi thử lại.
+      <Alert tone="warning" title="Hoàn tiền đang được xử lý">
+        Yêu cầu hoàn tiền đang chờ VNPay xử lý. Trạng thái sẽ được cập nhật khi
+        có kết quả.
+      </Alert>
+    )
+  } else if (paymentStatus === 'REFUNDED') {
+    content = (
+      <Alert tone="success" title="Đã hoàn tiền">
+        Khoản thanh toán đã được ghi nhận hoàn tiền.
       </Alert>
     )
   } else {
     content = (
-      <Alert title="Giao dịch đã hoàn tiền">
-        Khoản thanh toán đã được ghi nhận hoàn tiền.
+      <Alert tone="info" title="Đang xác nhận thanh toán">
+        VNPay đã gửi kết quả. Chúng tôi sẽ hiển thị trạng thái cuối cùng ngay
+        khi hệ thống xác nhận giao dịch.
       </Alert>
     )
   }
@@ -281,7 +283,7 @@ export function VnPayReturnPage() {
       <PageHeader
         eyebrow="Thanh toán VNPay"
         title="Kết quả thanh toán"
-        description="Kết quả thanh toán sẽ được cập nhật trong chi tiết đặt phòng."
+        description="Kết quả chỉ được hiển thị sau khi hệ thống xác nhận giao dịch."
       />
       <Card>
         {content}
@@ -294,6 +296,14 @@ export function VnPayReturnPage() {
             >
               Đăng nhập để kiểm tra
             </LinkButton>
+          ) : hasGatewayParameters && returnQuery.isError ? (
+            <Button
+              loading={returnQuery.isFetching}
+              onClick={() => void returnQuery.refetch()}
+              variant="outline"
+            >
+              Thử lại
+            </Button>
           ) : canRetryAuthoritativeState ? (
             <Button
               loading={refreshingAuthoritativeState}
@@ -304,9 +314,7 @@ export function VnPayReturnPage() {
             </Button>
           ) : null}
           {!requiresCustomerSignIn && customerBookingIdForNavigation ? (
-            <LinkButton
-              to={bookingDetailsPath}
-            >
+            <LinkButton to={bookingDetailsPath}>
               Xem chi tiết đặt phòng
             </LinkButton>
           ) : !requiresCustomerSignIn ? (

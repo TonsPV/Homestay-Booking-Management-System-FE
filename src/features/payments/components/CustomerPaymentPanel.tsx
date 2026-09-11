@@ -1,10 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
-import { useForm } from 'react-hook-form'
 
 import { ApiError } from '@/api/errors'
 import { Button } from '@/shared/components/Button'
@@ -14,10 +13,6 @@ import {
   ErrorState,
   LoadingState,
 } from '@/shared/components/Feedback'
-import {
-  Field,
-  Select,
-} from '@/shared/components/FormControls'
 
 import { getCustomerPaymentActionError } from '../errors'
 import {
@@ -31,10 +26,6 @@ import {
   rememberVnPayPayment,
 } from '../idempotency'
 import { resolveSecurePaymentUrl } from '../payment-url'
-import {
-  createVnPayFormSchema,
-  type CreateVnPayFormValues,
-} from '../schemas'
 import {
   decideVnPayAttempt,
   findPendingVnPayPayment,
@@ -58,14 +49,7 @@ export function CustomerPaymentPanel({
   const [conflictBlocked, setConflictBlocked] = useState(false)
   const [redirecting, setRedirecting] = useState(false)
   const [redirectError, setRedirectError] = useState<string | null>(null)
-  const {
-    formState: { errors },
-    handleSubmit,
-    register,
-  } = useForm<CreateVnPayFormValues>({
-    defaultValues: { bankCode: '', locale: 'vn' },
-    resolver: zodResolver(createVnPayFormSchema),
-  })
+  const paymentStartInFlightRef = useRef(false)
   const payments = useMemo(
     () => paymentsQuery.data?.data ?? [],
     [paymentsQuery.data?.data],
@@ -81,6 +65,7 @@ export function CustomerPaymentPanel({
     setConflictBlocked(false)
     setRedirecting(false)
     setRedirectError(null)
+    paymentStartInFlightRef.current = false
   }, [bookingId])
 
   useEffect(() => {
@@ -94,10 +79,11 @@ export function CustomerPaymentPanel({
     }
   }, [attemptDecision, bookingId, redirecting])
 
-  const submit = handleSubmit((values) => {
+  const startPayment = () => {
     setRedirectError(null)
 
     if (
+      paymentStartInFlightRef.current ||
       !paymentsQuery.isSuccess ||
       paymentsQuery.isFetching ||
       conflictBlocked ||
@@ -119,18 +105,19 @@ export function CustomerPaymentPanel({
         ? attemptDecision.attempt
         : getOrCreateVnPayAttempt(bookingId)
     setAttempt(activeAttempt)
+    paymentStartInFlightRef.current = true
+    setRedirecting(true)
 
     createMutation.mutate(
       {
         bookingId,
         idempotencyKey: activeAttempt.idempotencyKey,
-        input: {
-          bankCode: values.bankCode || undefined,
-          locale: values.locale,
-        },
+        input: {},
       },
       {
         onError: (error) => {
+          paymentStartInFlightRef.current = false
+          setRedirecting(false)
           if (error instanceof ApiError && error.isStatus(409)) {
             setConflictBlocked(true)
           }
@@ -144,6 +131,7 @@ export function CustomerPaymentPanel({
           const paymentUrl = resolveSecurePaymentUrl(result.paymentUrl)
 
           if (!paymentUrl) {
+            paymentStartInFlightRef.current = false
             setRedirecting(false)
             setRedirectError(
               'Không thể mở cổng thanh toán. Yêu cầu của bạn không bị gửi lại; vui lòng kiểm tra lịch sử bên dưới rồi thử lại.',
@@ -152,22 +140,21 @@ export function CustomerPaymentPanel({
             return
           }
 
-          setRedirecting(true)
           window.location.assign(paymentUrl)
         },
       },
     )
-  })
+  }
 
   return (
     <section className="grid gap-4" aria-labelledby="customer-payments-title">
       {canPay ? <Card>
-        <h2 id="customer-payments-title" className="text-lg font-bold text-slate-950">
+        <h2 id="customer-payments-title" className="text-lg font-bold text-ink">
           Thanh toán
         </h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          Chọn kênh thanh toán phù hợp. Số tiền được lấy từ thông tin đặt phòng
-          đã xác nhận.
+        <p className="mt-1 max-w-2xl text-sm leading-6 text-muted">
+          Bạn sẽ chọn phương thức thanh toán và ngôn ngữ tại cổng VNPay ở bước
+          tiếp theo. Số tiền được lấy từ thông tin đặt phòng đã xác nhận.
         </p>
 
         {paymentsQuery.isPending ||
@@ -204,57 +191,43 @@ export function CustomerPaymentPanel({
               : 'Chưa thể xác nhận giao dịch đang mở. Vui lòng tải lại trang hoặc liên hệ Homestay Green nếu tình trạng vẫn tiếp diễn.'}
           </Alert>
         ) : (
-          <form className="mt-5 grid gap-4 sm:grid-cols-2" onSubmit={submit}>
-            <Field label="Kênh thanh toán" error={errors.bankCode?.message}>
-              <Select {...register('bankCode')}>
-                <option value="">Chọn tại cổng VNPay</option>
-                <option value="VNPAYQR">VNPay QR</option>
-                <option value="VNBANK">Thẻ/tài khoản nội địa</option>
-                <option value="INTCARD">Thẻ quốc tế</option>
-              </Select>
-            </Field>
-            <Field label="Ngôn ngữ cổng thanh toán" error={errors.locale?.message}>
-              <Select {...register('locale')}>
-                <option value="vn">Tiếng Việt</option>
-                <option value="en">English</option>
-              </Select>
-            </Field>
-
+          <div className="mt-5 grid gap-4">
             {createMutation.isError ? (
-              <Alert className="sm:col-span-2" tone="error">
+              <Alert tone="error">
                 {getCustomerPaymentActionError(createMutation.error)}
               </Alert>
             ) : null}
 
             {redirectError ? (
-              <Alert className="sm:col-span-2" tone="error">
+              <Alert tone="error">
                 {redirectError}
               </Alert>
             ) : null}
 
             {pendingPayment ? (
-              <Alert className="sm:col-span-2" tone="warning">
+              <Alert tone="warning">
                 Một giao dịch VNPay đang chờ kết quả. Bạn có thể tiếp tục giao
                 dịch này mà không tạo thêm khoản thanh toán mới.
               </Alert>
             ) : null}
 
-            <div className="sm:col-span-2">
+            <div className="flex">
               <Button
+                className="w-full sm:w-auto"
                 loading={createMutation.isPending || redirecting}
-                type="submit"
+                onClick={startPayment}
               >
                 {pendingPayment
                   ? 'Tiếp tục giao dịch VNPay'
-                  : 'Thanh toán qua VNPay'}
+                  : 'Tiếp tục đến VNPay'}
               </Button>
             </div>
-          </form>
+          </div>
         )}
       </Card> : null}
 
       <h2
-        className="text-base font-bold text-slate-950"
+        className="text-base font-bold text-ink"
         id={canPay ? undefined : 'customer-payments-title'}
       >
         {canPay ? 'Lịch sử thanh toán' : 'Thanh toán'}

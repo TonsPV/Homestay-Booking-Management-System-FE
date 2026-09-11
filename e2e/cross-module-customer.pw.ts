@@ -261,7 +261,7 @@ test('customer register, login, search, booking and VNPay return use authoritati
       'Đã tạo đặt phòng. Hãy thanh toán trước thời hạn để giữ phòng.',
     ),
   ).toBeVisible()
-  await page.getByRole('button', { name: 'Thanh toán qua VNPay' }).click()
+  await page.getByRole('button', { name: 'Tiếp tục đến VNPay' }).click()
 
   await expect(page).toHaveURL(/\/payments\/vnpay\/return/)
   await expect(page.getByText('Thanh toán thành công')).toBeVisible()

@@ -79,6 +79,7 @@ test("customer payment is created once and waits for confirmed history", async (
   await installSession(page, { actorType: "customer" });
   let createCount = 0;
   let idempotencyKey: string | null = null;
+  let paymentRequestBody: unknown = null;
   let authoritativePayment = payment();
   const customerBooking = {
     ...booking,
@@ -111,6 +112,7 @@ test("customer payment is created once and waits for confirmed history", async (
 
       createCount += 1;
       idempotencyKey = request.headers()["idempotency-key"] ?? null;
+      paymentRequestBody = request.postDataJSON();
       await new Promise((resolve) => setTimeout(resolve, 150));
       authoritativePayment = payment({
         gatewayReference: "P91",
@@ -135,7 +137,9 @@ test("customer payment is created once and waits for confirmed history", async (
   });
 
   await page.goto("/bookings/901");
-  await page.getByRole("button", { name: "Thanh toán qua VNPay" }).dblclick();
+  await expect(page.getByLabel("Kênh thanh toán")).toHaveCount(0);
+  await expect(page.getByLabel("Ngôn ngữ cổng thanh toán")).toHaveCount(0);
+  await page.getByRole("button", { name: "Tiếp tục đến VNPay" }).dblclick();
 
   await expect(page).toHaveURL(/\/payments\/vnpay\/return/);
   await expect
@@ -156,6 +160,7 @@ test("customer payment is created once and waits for confirmed history", async (
   ).toHaveCount(0);
   expect(createCount).toBe(1);
   expect(idempotencyKey).toMatch(/^vnpay-/);
+  expect(paymentRequestBody).toEqual({});
 });
 
 test("admin sees stale refunds, reconciles pending VNPay, and refunds manual payment once", async ({
