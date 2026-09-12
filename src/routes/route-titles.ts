@@ -2,9 +2,10 @@ const APP_NAME = "Homestay Green";
 
 export function getPageTitle(pathname: string) {
   if (pathname === "/") return "Trang chủ";
-  if (pathname === "/login" || pathname === "/management/login") {
+  if (pathname === "/login") {
     return "Đăng nhập";
   }
+  if (pathname === "/management/login") return "Đăng nhập vận hành";
   if (pathname === "/register") return "Đăng ký tài khoản";
   if (pathname === "/account") return "Hồ sơ của tôi";
   if (pathname === "/rooms/search" || pathname === "/rooms") {

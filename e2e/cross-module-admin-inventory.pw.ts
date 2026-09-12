@@ -69,24 +69,8 @@ test("admin login continues through amenity, room type, room, image cover and ca
       return;
     }
 
-    /* The unified login flow probes the customer endpoint first; keep the
-     * 401 local so no request reaches the real backend. */
     if (path.endsWith("/auth/customers/login")) {
-      await route.fulfill({
-        body: JSON.stringify({
-          error: "Unauthorized",
-          errorCode: "COMMON_UNAUTHORIZED",
-          message: "Thong tin dang nhap khong hop le.",
-          path,
-          requestId: "req-e2e-401",
-          statusCode: 401,
-          success: false,
-          timestamp: "2026-07-24T00:00:00.000Z",
-        }),
-        contentType: "application/json",
-        status: 401,
-      });
-      return;
+      throw new Error("Operations login must not call the customer endpoint.");
     }
 
     /* ADMIN lands on the bookings workflow (dashboard is dormant); mock the

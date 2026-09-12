@@ -1,9 +1,6 @@
 import type { UserRole } from "@/auth/types";
 
-export const STAFF_WORKSPACE_ROLES = [
-  "STAFF",
-  "ADMIN",
-] as const satisfies readonly UserRole[];
+export const STAFF_WORKSPACE_ROLES: readonly UserRole[] = ["STAFF"];
 
 export const STAFF_PATHS = {
   root: "/staff",

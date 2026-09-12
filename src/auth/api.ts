@@ -79,10 +79,9 @@ export async function loginUser(input: UserLoginInput) {
   return normalizeLoginResponse(result.data, 'user')
 }
 
-/* Unified password login: try the customer identity endpoint first, fall
- * back to the user endpoint only when the backend rejects the credential.
- * Backend remains the authority on actor classification; the frontend never
- * asks the user to declare an actor type. */
+/* Legacy actor discovery for callers that do not know their login surface.
+ * Customer and operations screens must call their actor-specific endpoint so
+ * a staff login never probes the customer credential store first. */
 export async function login(
   input: CustomerLoginInput | UserLoginInput,
 ): Promise<LoginResponse> {

@@ -19,7 +19,6 @@ import {
 } from '@/shared/components/FormControls'
 import { PageHeader } from '@/shared/components/PageHeader'
 import { PaginationControls } from '@/shared/components/PaginationControls'
-import { LinkButton } from '@/shared/components/LinkButton'
 
 import { ManagementBookingList } from '../components/ManagementBookingList'
 import { getBookingStatusLabel } from '../components/bookingStatusLabels'
@@ -117,11 +116,6 @@ export function ManagementBookingsPage() {
         eyebrow="Quản lý"
         title="Danh sách đặt phòng"
         description="Tìm theo mã booking, người liên hệ, số điện thoại hoặc lọc theo đối tượng liên quan."
-        actions={
-          <LinkButton to="new">
-            Tạo booking tại quầy
-          </LinkButton>
-        }
       />
 
       <BookingStatsSummary
@@ -173,7 +167,7 @@ export function ManagementBookingsPage() {
       ) : bookingsQuery.data.data.length === 0 ? (
         <EmptyState
           title="Không có booking phù hợp"
-          description="Hãy điều chỉnh bộ lọc hoặc tạo booking mới tại quầy."
+          description="Hãy điều chỉnh bộ lọc rồi thử lại."
           action={
             <Button onClick={resetFilters} variant="outline">
               Xóa bộ lọc

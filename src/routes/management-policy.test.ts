@@ -49,6 +49,7 @@ describe("management route policy", () => {
     );
     expect(canAccessManagementPath("/management/rooms", "STAFF")).toBe(false);
     expect(canAccessStaffPath("/staff/rooms", "STAFF")).toBe(true);
-    expect(canAccessStaffPath("/staff/rooms", "ADMIN")).toBe(true);
+    expect(canAccessStaffPath("/staff/rooms", "ADMIN")).toBe(false);
+    expect(canAccessStaffPath("/staff/counter", "ADMIN")).toBe(false);
   });
 });

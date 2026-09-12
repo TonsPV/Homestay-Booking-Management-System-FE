@@ -109,24 +109,10 @@ for (const role of ["STAFF", "ADMIN"] as const) {
   }) => {
     const principal = principalFor({ actorType: "user", role });
 
-    /* The unified login flow tries the customer endpoint first and falls
-     * back to the user endpoint on 401; both must be mocked so no request
-     * reaches the real backend. */
+    let customerLoginRequests = 0;
     await page.route("**/api/v1/auth/customers/login", async (route) => {
-      await route.fulfill({
-        body: JSON.stringify({
-          error: "Unauthorized",
-          errorCode: "COMMON_UNAUTHORIZED",
-          message: "Thong tin dang nhap khong hop le.",
-          path: "/api/v1/auth/customers/login",
-          requestId: "req-e2e-401",
-          statusCode: 401,
-          success: false,
-          timestamp: "2026-07-24T00:00:00.000Z",
-        }),
-        contentType: "application/json",
-        status: 401,
-      });
+      customerLoginRequests += 1;
+      await route.abort();
     });
     await page.route("**/api/v1/auth/users/login", async (route) => {
       expect(route.request().method()).toBe("POST");
@@ -149,6 +135,25 @@ for (const role of ["STAFF", "ADMIN"] as const) {
           },
         },
         "/api/v1/auth/users/login",
+      );
+    });
+    await page.route("**/api/v1/auth/me", async (route) => {
+      await fulfillJson(
+        route,
+        {
+          actorType: "user",
+          user: {
+            createdAt: principal.createdAt,
+            email: principal.email,
+            fullName: principal.fullName,
+            id: principal.id,
+            phone: principal.phone,
+            role,
+            status: principal.status,
+            updatedAt: principal.updatedAt,
+          },
+        },
+        "/api/v1/auth/me",
       );
     });
     await page.route(
@@ -196,5 +201,11 @@ for (const role of ["STAFF", "ADMIN"] as const) {
     await expect(
       page.getByRole("heading", { name: expectedHeading }).first(),
     ).toBeVisible();
+    expect(customerLoginRequests).toBe(0);
+
+    if (role === "ADMIN") {
+      await page.goto("/staff/counter");
+      await expect(page).toHaveURL(/\/forbidden$/);
+    }
   });
 }

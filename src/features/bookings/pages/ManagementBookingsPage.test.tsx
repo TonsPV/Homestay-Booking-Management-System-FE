@@ -167,6 +167,9 @@ describe('ManagementBookingsPage filters', () => {
     expect(
       screen.getByRole('link', { name: /Quản lý thanh toán/ }),
     ).toHaveAttribute('href', '/management/payments')
+    expect(
+      screen.queryByRole('link', { name: 'Tạo booking tại quầy' }),
+    ).not.toBeInTheDocument()
   })
 
   it('keeps all controls synchronized with browser history', async () => {

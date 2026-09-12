@@ -21,6 +21,7 @@ function resolveNotice(state: unknown, search: string) {
 export function LoginRoute() {
   const { principal } = useAuth();
   const location = useLocation();
+  const isManagementLogin = location.pathname === "/management/login";
 
   if (principal) {
     return <Navigate replace to={resolvePostLoginRoute(principal, location.state)} />;
@@ -28,8 +29,10 @@ export function LoginRoute() {
 
   return (
     <LoginPage
+      actor={isManagementLogin ? "user" : "customer"}
       locationState={location.state}
       notice={resolveNotice(location.state, location.search)}
+      registerPath={isManagementLogin ? null : "/register"}
     />
   );
 }

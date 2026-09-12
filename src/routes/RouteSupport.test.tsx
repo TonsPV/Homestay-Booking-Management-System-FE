@@ -7,6 +7,8 @@ import { getPageTitle } from "./route-titles";
 
 describe("route title metadata", () => {
   it("distinguishes the dashboard, counter, and booking detail routes", () => {
+    expect(getPageTitle("/login")).toBe("Đăng nhập");
+    expect(getPageTitle("/management/login")).toBe("Đăng nhập vận hành");
     expect(getPageTitle("/management/dashboard")).toBe("Tổng quan vận hành");
     expect(getPageTitle("/staff/counter")).toBe("Tạo booking tại quầy");
     expect(getPageTitle("/management/bookings/42")).toBe("Chi tiết booking");

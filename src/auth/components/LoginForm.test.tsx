@@ -18,8 +18,10 @@ function LocationProbe() {
 }
 
 function renderLoginForm({
+  actor = "customer",
   locationState,
 }: {
+  actor?: "customer" | "user";
   locationState?: unknown;
 } = {}) {
   const queryClient = new QueryClient({
@@ -30,6 +32,7 @@ function renderLoginForm({
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <LoginForm
+          actor={actor}
           description="Truy cập tài khoản Homestay Green của bạn."
           locationState={locationState}
           title="Đăng nhập"
@@ -55,16 +58,16 @@ beforeEach(() => {
 });
 
 describe("LoginForm", () => {
-  it("calls the unified auth.login with the entered credentials", async () => {
-    const login = vi.fn(() => new Promise<never>(() => {}));
-    useAuthMock.mockReturnValue({ login });
+  it("calls customer login with the entered credentials on the public surface", async () => {
+    const loginCustomer = vi.fn(() => new Promise<never>(() => {}));
+    useAuthMock.mockReturnValue({ loginCustomer });
 
     renderLoginForm();
     fillCredentials("who@example.com", "password123");
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
-    await waitFor(() => expect(login).toHaveBeenCalledOnce());
-    expect(login).toHaveBeenCalledWith(
+    await waitFor(() => expect(loginCustomer).toHaveBeenCalledOnce());
+    expect(loginCustomer).toHaveBeenCalledWith(
       { identifier: "who@example.com", password: "password123" },
       "session",
     );
@@ -72,7 +75,7 @@ describe("LoginForm", () => {
 
   it("announces login errors through an alert live region", async () => {
     useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
+      loginCustomer: vi.fn(() =>
         Promise.reject(
           new ApiError("Invalid credentials.", {
             kind: "http",
@@ -87,12 +90,12 @@ describe("LoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Email, số điện thoại hoặc mật khẩu chưa chính xác.",
+      "Email, số điện thoại hoặc mật khẩu chưa chính xác. Nếu đây là tài khoản nhân viên hoặc quản trị viên, hãy đăng nhập tại khu vực vận hành.",
     );
   });
 
   it("exposes accessible labels and error descriptions", async () => {
-    useAuthMock.mockReturnValue({ login: vi.fn() });
+    useAuthMock.mockReturnValue({ loginCustomer: vi.fn() });
 
     renderLoginForm();
 
@@ -105,9 +108,14 @@ describe("LoginForm", () => {
         name: /Duy trì đăng nhập trên thiết bị này/,
       }),
     ).toBeInTheDocument();
-    // a unified form does not ask the user to pick an actor type
     expect(
-      screen.queryByText(/khách hàng|nhân viên/i),
+      screen.getByRole("link", { name: "Đăng nhập vận hành" }),
+    ).toHaveAttribute("href", "/management/login");
+
+    // The public form offers the right surface rather than asking people to
+    // choose a technical actor type.
+    expect(
+      screen.queryByRole("combobox", { name: /loại tài khoản|vai trò/i }),
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
@@ -129,9 +137,9 @@ describe("LoginForm", () => {
 
   it("shows a pending label, disables submit, and ignores duplicate submits", async () => {
     const pendingPromise = new Promise<never>(() => {});
-    const login = vi.fn(() => pendingPromise);
+    const loginCustomer = vi.fn(() => pendingPromise);
 
-    useAuthMock.mockReturnValue({ login });
+    useAuthMock.mockReturnValue({ loginCustomer });
 
     renderLoginForm();
     fillCredentials("who@example.com", "password123");
@@ -150,12 +158,12 @@ describe("LoginForm", () => {
     });
 
     fireEvent.submit(form!);
-    expect(login).toHaveBeenCalledTimes(1);
+    expect(loginCustomer).toHaveBeenCalledTimes(1);
   });
 
   it("redirects a customer principal to the public home page", async () => {
     useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
+      loginCustomer: vi.fn(() =>
         Promise.resolve({
           actorType: "customer" as const,
           createdAt: "2026-07-26T00:00:00.000Z",
@@ -177,34 +185,39 @@ describe("LoginForm", () => {
   });
 
   it("redirects a staff principal to the staff surface", async () => {
-    useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
-        Promise.resolve({
-          actorType: "user" as const,
-          createdAt: "2026-07-26T00:00:00.000Z",
-          email: "staff@example.com",
-          fullName: "Nhân viên",
-          id: "2",
-          phone: null,
-          role: "STAFF" as const,
-          status: "ACTIVE" as const,
-          updatedAt: "2026-07-26T00:00:00.000Z",
-        }),
-      ),
-    });
+    const loginCustomer = vi.fn();
+    const loginUser = vi.fn(() =>
+      Promise.resolve({
+        actorType: "user" as const,
+        createdAt: "2026-07-26T00:00:00.000Z",
+        email: "staff@example.com",
+        fullName: "Nhân viên",
+        id: "2",
+        phone: null,
+        role: "STAFF" as const,
+        status: "ACTIVE" as const,
+        updatedAt: "2026-07-26T00:00:00.000Z",
+      }),
+    );
+    useAuthMock.mockReturnValue({ loginCustomer, loginUser });
 
-    renderLoginForm();
+    renderLoginForm({ actor: "user" });
     fillCredentials("staff@example.com", "password123");
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
     expect(
       await screen.findByText("location:/staff/counter"),
     ).toBeInTheDocument();
+    expect(loginUser).toHaveBeenCalledWith(
+      { identifier: "staff@example.com", password: "password123" },
+      "session",
+    );
+    expect(loginCustomer).not.toHaveBeenCalled();
   });
 
   it("redirects an admin principal to the management dashboard", async () => {
     useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
+      loginUser: vi.fn(() =>
         Promise.resolve({
           actorType: "user" as const,
           createdAt: "2026-07-26T00:00:00.000Z",
@@ -219,7 +232,7 @@ describe("LoginForm", () => {
       ),
     });
 
-    renderLoginForm();
+    renderLoginForm({ actor: "user" });
     fillCredentials("admin@example.com", "password123");
     fireEvent.click(screen.getByRole("button", { name: "Đăng nhập" }));
 
@@ -230,7 +243,7 @@ describe("LoginForm", () => {
 
   it("honors returnTo only when the principal is allowed to access it", async () => {
     useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
+      loginCustomer: vi.fn(() =>
         Promise.resolve({
           actorType: "customer" as const,
           createdAt: "2026-07-26T00:00:00.000Z",
@@ -253,7 +266,7 @@ describe("LoginForm", () => {
 
   it("falls back to the workspace home when returnTo is not accessible", async () => {
     useAuthMock.mockReturnValue({
-      login: vi.fn(() =>
+      loginCustomer: vi.fn(() =>
         Promise.resolve({
           actorType: "customer" as const,
           createdAt: "2026-07-26T00:00:00.000Z",

@@ -58,10 +58,8 @@ function workspaceOf(principal: AuthPrincipal): PostLoginWorkspace {
   return principal.role === "ADMIN" ? "management" : "staff";
 }
 
-/* canAccess(route) decides whether a principal may open a route; post-login
- * destination decides which workspace the principal LANDS on. They are not
- * the same: an ADMIN may access staff routes at runtime but must still land
- * on the management workspace after login. */
+/* A principal may only land in the workspace granted to its role. A safe
+ * returnTo is preserved only when it belongs to that workspace. */
 export function isPostLoginDestinationForPrincipal(
   principal: AuthPrincipal,
   returnTo: string,

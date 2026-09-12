@@ -8,16 +8,22 @@ const useAuthMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/auth", () => ({
   LoginPage: ({
+    actor,
     locationState,
     notice,
+    registerPath,
   }: {
+    actor?: "customer" | "user";
     locationState?: { returnTo?: string };
     notice?: string;
+    registerPath?: string | null;
   }) => (
     <div>
       <div>login-page</div>
+      <div>actor:{actor ?? "none"}</div>
       <div>return-to:{locationState?.returnTo ?? "none"}</div>
       <div>notice:{notice ?? "none"}</div>
+      <div>register-path:{registerPath ?? "none"}</div>
     </div>
   ),
   RegisterPage: () => <div>register</div>,
@@ -82,15 +88,19 @@ describe("LoginRoute (unified)", () => {
     renderAdapter(<LoginRoute />, "/login");
 
     expect(screen.getByText("login-page")).toBeInTheDocument();
+    expect(screen.getByText("actor:customer")).toBeInTheDocument();
+    expect(screen.getByText("register-path:/register")).toBeInTheDocument();
     expect(screen.getByText("return-to:none")).toBeInTheDocument();
   });
 
-  it("renders the same login page at the legacy /management/login alias", () => {
+  it("uses the user-only login surface at /management/login", () => {
     useAuthMock.mockReturnValue({ principal: null });
 
     renderAdapter(<LoginRoute />, "/management/login");
 
     expect(screen.getByText("login-page")).toBeInTheDocument();
+    expect(screen.getByText("actor:user")).toBeInTheDocument();
+    expect(screen.getByText("register-path:none")).toBeInTheDocument();
   });
 
   it("passes the intended destination through to the login page state", () => {

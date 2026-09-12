@@ -112,6 +112,12 @@ describe('RouteGuard', () => {
     expect(screen.getByText('forbidden')).toBeInTheDocument()
   })
 
+  it('rejects an admin account from a staff-only POS route', () => {
+    renderGuard(user('ADMIN'), ['STAFF'])
+
+    expect(screen.getByText('forbidden')).toBeInTheDocument()
+  })
+
   it('renders the protected route for an allowed role', () => {
     renderGuard(user('ADMIN'), ['ADMIN'])
 

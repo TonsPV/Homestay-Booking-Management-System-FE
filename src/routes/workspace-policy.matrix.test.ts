@@ -110,7 +110,7 @@ describe("workspace landing policy (Step 4 matrix)", () => {
     });
 
     it.each(["/staff/counter", "/staff/bookings", "/staff/payments"])(
-      "rejects cross-workspace %s — even though ADMIN can technically access it — and falls back to /management/bookings",
+      "rejects staff-only %s and falls back to /management/bookings",
       (path) => {
         const result = resolvePostLoginRoute(user("ADMIN"), {
           returnTo: path,

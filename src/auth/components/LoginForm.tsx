@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { resolvePostLoginRoute } from '@/routes/workspace-policy'
 
-import type { AuthPrincipal } from '../types'
+import type { ActorType, AuthPrincipal } from '../types'
 import { getAuthActionError } from '../errors'
 import { Alert } from '@/shared/components/Feedback'
 import { Button } from '@/shared/components/Button'
@@ -24,14 +24,16 @@ import {
 import { AuthPageLayout } from './AuthPageLayout'
 
 interface LoginFormProps {
+  actor: ActorType
   description: string
   locationState?: unknown
   notice?: string
-  registerPath?: string
+  registerPath?: string | null
   title: string
 }
 
 export function LoginForm({
+  actor,
   description,
   locationState,
   notice,
@@ -60,7 +62,9 @@ export function LoginForm({
       }
       const persistence = values.remember ? ('local' as const) : ('session' as const)
 
-      return auth.login(input, persistence)
+      return actor === 'user'
+        ? auth.loginUser(input, persistence)
+        : auth.loginCustomer(input, persistence)
     },
     onSuccess: (principal: AuthPrincipal) =>
       navigate(resolvePostLoginRoute(principal, locationState), {
@@ -88,11 +92,18 @@ export function LoginForm({
       >
         {notice ? <Alert tone="success">{notice}</Alert> : null}
         {loginMutation.error ? (
-          <Alert title="Không thể đăng nhập" tone="error">
+          <Alert
+            title={
+              actor === 'user'
+                ? 'Không thể đăng nhập vận hành'
+                : 'Không thể đăng nhập'
+            }
+            tone="error"
+          >
             {getRateLimitErrorMessage(
               loginMutation.error,
               remainingSeconds,
-              getAuthActionError,
+              (error) => getAuthActionError(error, actor),
             )}
           </Alert>
         ) : null}
@@ -141,17 +152,30 @@ export function LoginForm({
         </Button>
       </form>
 
-      {registerPath ? (
+      {registerPath || actor === 'customer' ? (
         <div className="mt-6 border-t border-line pt-6 text-center text-sm">
-          <p className="text-muted">
-            Chưa có tài khoản?{' '}
-            <Link
-              className="inline-flex min-h-11 items-center font-bold text-brand-strong hover:underline"
-              to={registerPath}
-            >
-              Đăng ký ngay
-            </Link>
-          </p>
+          {registerPath ? (
+            <p className="text-muted">
+              Chưa có tài khoản?{' '}
+              <Link
+                className="inline-flex min-h-11 items-center font-bold text-brand-strong hover:underline"
+                to={registerPath}
+              >
+                Đăng ký ngay
+              </Link>
+            </p>
+          ) : null}
+          {actor === 'customer' ? (
+            <p className={registerPath ? 'mt-3 text-muted' : 'text-muted'}>
+              Nhân viên hoặc quản trị viên?{' '}
+              <Link
+                className="inline-flex min-h-11 items-center font-bold text-brand-strong hover:underline"
+                to="/management/login"
+              >
+                Đăng nhập vận hành
+              </Link>
+            </p>
+          ) : null}
         </div>
       ) : null}
     </AuthPageLayout>

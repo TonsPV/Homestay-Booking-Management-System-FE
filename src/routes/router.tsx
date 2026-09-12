@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     element: (
       <RouteGuard
         actor="user"
-        loginPath="/login"
+        loginPath="/management/login"
         roles={MANAGEMENT_ROLES}
       />
     ),
@@ -47,7 +47,7 @@ export const router = createBrowserRouter([
     element: (
       <RouteGuard
         actor="user"
-        loginPath="/login"
+        loginPath="/management/login"
         roles={STAFF_WORKSPACE_ROLES}
       />
     ),
