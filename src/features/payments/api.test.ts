@@ -28,6 +28,26 @@ afterEach(() => {
 })
 
 describe('payment API contract', () => {
+  it('loads a management payment by its identifier instead of guessing from the first page', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      successResponse({ id: '91', status: 'SUCCESS' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    configureAccessTokenProvider(() => 'staff-token')
+
+    await paymentApi.getManagement('91')
+
+    const [url, options] = fetchMock.mock.calls[0] as [URL, RequestInit]
+
+    expect(url.toString()).toBe(
+      'http://localhost:3000/api/v1/management/payments/91',
+    )
+    expect(options.method).toBe('GET')
+    expect(new Headers(options.headers).get('Authorization')).toBe(
+      'Bearer staff-token',
+    )
+  })
+
   it('creates VNPay with the Backend payload and idempotency header', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       successResponse({

@@ -28,11 +28,7 @@ export const router = createBrowserRouter([
   },
   {
     element: (
-      <RouteGuard
-        actor="user"
-        loginPath="/management/login"
-        roles={MANAGEMENT_ROLES}
-      />
+      <RouteGuard actor="user" loginPath="/login" roles={MANAGEMENT_ROLES} />
     ),
     HydrateFallback: RouteLoading,
     children: [
@@ -47,7 +43,7 @@ export const router = createBrowserRouter([
     element: (
       <RouteGuard
         actor="user"
-        loginPath="/management/login"
+        loginPath="/login"
         roles={STAFF_WORKSPACE_ROLES}
       />
     ),

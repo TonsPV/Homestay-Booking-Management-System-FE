@@ -4,6 +4,7 @@ import { getErrorMessage } from "@/api/errors";
 import { Badge } from "@/shared/components/Badge";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
+import { ConfirmationDialog } from "@/shared/components/ConfirmationDialog";
 import { Alert, ErrorState, LoadingState } from "@/shared/components/Feedback";
 import { Field, Input } from "@/shared/components/FormControls";
 
@@ -39,9 +40,11 @@ export function RoomImageManager({ roomId }: RoomImageManagerProps) {
   const [sortOrder, setSortOrder] = useState("0");
   const [isCover, setIsCover] = useState(false);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [deleteImageId, setDeleteImageId] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
-  const actionError =
-    createMutation.error ?? deleteMutation.error ?? coverMutation.error;
+  const actionError = deleteImageId
+    ? createMutation.error ?? coverMutation.error
+    : createMutation.error ?? deleteMutation.error ?? coverMutation.error;
 
   useEffect(() => {
     if (!file) {
@@ -127,6 +130,25 @@ export function RoomImageManager({ roomId }: RoomImageManagerProps) {
   }
 
   const room = roomQuery.data;
+
+  function requestImageRemoval(imageId: string) {
+    deleteMutation.reset();
+    setSuccessMessage(undefined);
+    setDeleteImageId(imageId);
+  }
+
+  function removeImage() {
+    if (!deleteImageId || deleteMutation.isPending) {
+      return;
+    }
+
+    deleteMutation.mutate(deleteImageId, {
+      onSuccess: () => {
+        setDeleteImageId(undefined);
+        setSuccessMessage("Đã xóa ảnh khỏi phòng.");
+      },
+    });
+  }
 
   return (
     <Card>
@@ -290,15 +312,7 @@ export function RoomImageManager({ roomId }: RoomImageManagerProps) {
                       deleteMutation.isPending &&
                       deleteMutation.variables === image.id
                     }
-                    onClick={() => {
-                      if (window.confirm("Xóa ảnh này khỏi phòng?")) {
-                        setSuccessMessage(undefined);
-                        deleteMutation.mutate(image.id, {
-                          onSuccess: () =>
-                            setSuccessMessage("Đã xóa ảnh khỏi phòng."),
-                        });
-                      }
-                    }}
+                    onClick={() => requestImageRemoval(image.id)}
                     variant="danger"
                   >
                     Xóa
@@ -309,6 +323,26 @@ export function RoomImageManager({ roomId }: RoomImageManagerProps) {
           ))}
         </div>
       )}
+
+      <ConfirmationDialog
+        busy={deleteMutation.isPending}
+        confirmLabel="Xóa ảnh"
+        description="Ảnh sẽ bị xóa vĩnh viễn khỏi phòng này."
+        onCancel={() => {
+          if (!deleteMutation.isPending) {
+            deleteMutation.reset();
+            setDeleteImageId(undefined);
+          }
+        }}
+        onConfirm={removeImage}
+        open={deleteImageId !== undefined}
+        title="Xóa ảnh này?"
+        tone="danger"
+      >
+        {deleteMutation.isError ? (
+          <Alert tone="error">{getErrorMessage(deleteMutation.error)}</Alert>
+        ) : null}
+      </ConfirmationDialog>
     </Card>
   );
 }

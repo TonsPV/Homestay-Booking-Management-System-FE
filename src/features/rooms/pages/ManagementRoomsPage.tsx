@@ -4,6 +4,7 @@ import { getErrorMessage } from "@/api/errors";
 import { useRoomTypeOptions } from "@/features/room-types";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
+import { ConfirmationDialog } from "@/shared/components/ConfirmationDialog";
 import {
   Alert,
   EmptyState,
@@ -27,6 +28,7 @@ import { resolveRoomImageUrl } from "../image-url";
 import { getRoomStatusLabel } from "../status";
 import {
   ROOM_STATUSES,
+  type ManagementRoom,
   type ManagementRole,
   type RoomStatus,
 } from "../types";
@@ -67,6 +69,7 @@ export function ManagementRoomsPage({
     status: "",
   });
   const [statusDraft, setStatusDraft] = useState<StatusDraft>();
+  const [deleteTarget, setDeleteTarget] = useState<ManagementRoom>();
   const [successMessage, setSuccessMessage] = useState<string>();
   const roomTypesQuery = useRoomTypeOptions();
   const roomsQuery = useManagementRooms({
@@ -78,7 +81,9 @@ export function ManagementRoomsPage({
   const totalPages = roomsQuery.data?.pagination?.totalPages;
   const deleteMutation = useDeleteRoom();
   const statusMutation = useUpdateRoomStatus();
-  const actionError = deleteMutation.error ?? statusMutation.error;
+  const actionError = deleteTarget
+    ? statusMutation.error
+    : deleteMutation.error ?? statusMutation.error;
 
   useEffect(() => {
     if (totalPages === undefined) {
@@ -128,6 +133,25 @@ export function ManagementRoomsPage({
         },
       },
     );
+  }
+
+  function requestRoomRemoval(room: ManagementRoom) {
+    deleteMutation.reset();
+    setSuccessMessage(undefined);
+    setDeleteTarget(room);
+  }
+
+  function removeRoom() {
+    if (!deleteTarget || deleteMutation.isPending) {
+      return;
+    }
+
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(undefined);
+        setSuccessMessage("Đã xóa phòng.");
+      },
+    });
   }
 
   return (
@@ -411,19 +435,7 @@ export function ManagementRoomsPage({
                               deleteMutation.isPending &&
                               deleteMutation.variables === room.id
                             }
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
-                                )
-                              ) {
-                                setSuccessMessage(undefined);
-                                deleteMutation.mutate(room.id, {
-                                  onSuccess: () =>
-                                    setSuccessMessage("Đã xóa phòng."),
-                                });
-                              }
-                            }}
+                            onClick={() => requestRoomRemoval(room)}
                             variant="danger"
                           >
                             Xóa
@@ -443,6 +455,30 @@ export function ManagementRoomsPage({
           />
         </>
       )}
+
+      <ConfirmationDialog
+        busy={deleteMutation.isPending}
+        confirmLabel="Xóa phòng"
+        description={
+          deleteTarget
+            ? `Phòng ${deleteTarget.roomNumber} sẽ bị xóa vĩnh viễn. Phòng có lịch sử đặt sẽ không thể xóa.`
+            : undefined
+        }
+        onCancel={() => {
+          if (!deleteMutation.isPending) {
+            deleteMutation.reset();
+            setDeleteTarget(undefined);
+          }
+        }}
+        onConfirm={removeRoom}
+        open={deleteTarget !== undefined}
+        title="Xóa phòng này?"
+        tone="danger"
+      >
+        {deleteMutation.isError ? (
+          <Alert tone="error">{getErrorMessage(deleteMutation.error)}</Alert>
+        ) : null}
+      </ConfirmationDialog>
     </div>
   );
 }

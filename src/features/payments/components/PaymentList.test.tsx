@@ -335,4 +335,24 @@ describe('PaymentList review-reason business-state matrix', () => {
       screen.queryByRole('link', { name: 'Xem chi tiết' }),
     ).not.toBeInTheDocument()
   })
+
+  it('keeps Staff payment and booking links inside the staff workspace', () => {
+    render(
+      <MemoryRouter>
+        <PaymentList
+          bookingBasePath="/staff/bookings"
+          management
+          paymentBasePath="/staff/payments"
+          payments={[payment]}
+        />
+      </MemoryRouter>,
+    )
+
+    for (const link of screen.getAllByRole('link', { name: '#42' })) {
+      expect(link).toHaveAttribute('href', '/staff/bookings/42')
+    }
+    for (const link of screen.getAllByRole('link', { name: 'Xem chi tiết' })) {
+      expect(link).toHaveAttribute('href', '/staff/payments/91')
+    }
+  })
 })

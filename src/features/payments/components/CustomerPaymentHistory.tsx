@@ -16,7 +16,7 @@ function getCustomerStatusMessage(payment: CustomerPayment) {
     case 'FAILED':
       return 'Thanh toán chưa thành công. Bạn có thể thử lại khi đặt phòng vẫn còn hiệu lực.'
     case 'REQUIRES_REVIEW':
-      return 'Homestay Green đang kiểm tra giao dịch này. Chúng tôi sẽ cập nhật trạng thái đặt phòng sau khi có kết quả.'
+      return 'Homi Stay đang kiểm tra giao dịch này. Chúng tôi sẽ cập nhật trạng thái đặt phòng sau khi có kết quả.'
     case 'REFUND_PENDING':
       return 'Yêu cầu hoàn tiền đang được xử lý. Vui lòng chờ kết quả trước khi gửi yêu cầu khác.'
     case 'REFUNDED':

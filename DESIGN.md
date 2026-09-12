@@ -1,4 +1,4 @@
-# Hệ thống thiết kế Homestay Green
+# Hệ thống thiết kế Homi Stay
 
 ## Định hướng chung
 

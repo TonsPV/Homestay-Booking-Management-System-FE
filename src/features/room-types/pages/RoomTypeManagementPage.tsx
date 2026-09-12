@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/api/errors'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
 import { Alert, EmptyState, ErrorState, LoadingState } from '@/shared/components/Feedback'
 import { Field, Input } from '@/shared/components/FormControls'
 import { PageHeader } from '@/shared/components/PageHeader'
@@ -41,6 +42,7 @@ export function ManagementRoomTypesPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [amenityRoomType, setAmenityRoomType] =
     useState<AdminRoomType | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<AdminRoomType | null>(null)
   const query = useAdminRoomTypes({
     includeDeleted,
     page,
@@ -93,17 +95,23 @@ export function ManagementRoomTypesPage() {
     }
   }
 
-  function removeRoomType(roomType: AdminRoomType) {
-    if (
-      window.confirm(
-        `Xóa loại phòng “${roomType.name}”? Bạn có thể khôi phục lại sau.`,
-      )
-    ) {
-      setSuccessMessage('')
-      deleteMutation.mutate(roomType.id, {
-        onSuccess: () => setSuccessMessage('Đã xóa loại phòng.'),
-      })
+  function requestRoomTypeRemoval(roomType: AdminRoomType) {
+    deleteMutation.reset()
+    setSuccessMessage('')
+    setDeleteTarget(roomType)
+  }
+
+  function removeRoomType() {
+    if (!deleteTarget || deleteMutation.isPending) {
+      return
     }
+
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        setSuccessMessage('Đã xóa loại phòng.')
+      },
+    })
   }
 
   function recoverRoomType(roomType: AdminRoomType) {
@@ -169,7 +177,7 @@ export function ManagementRoomTypesPage() {
         </Card>
       ) : null}
 
-      {!editor && actionError ? (
+      {!editor && !deleteTarget && actionError ? (
         <Alert tone="error">{getRoomTypeActionError(actionError)}</Alert>
       ) : null}
 
@@ -335,7 +343,7 @@ export function ManagementRoomTypesPage() {
                           deleteMutation.isPending &&
                           deleteMutation.variables === roomType.id
                         }
-                        onClick={() => removeRoomType(roomType)}
+                        onClick={() => requestRoomTypeRemoval(roomType)}
                         variant="danger"
                       >
                         Xóa
@@ -353,6 +361,32 @@ export function ManagementRoomTypesPage() {
           />
         </>
       )}
+
+      <ConfirmationDialog
+        busy={deleteMutation.isPending}
+        confirmLabel="Xóa loại phòng"
+        description={
+          deleteTarget
+            ? `Loại phòng “${deleteTarget.name}” sẽ bị ẩn khỏi danh mục. Bạn có thể khôi phục lại sau.`
+            : undefined
+        }
+        onCancel={() => {
+          if (!deleteMutation.isPending) {
+            deleteMutation.reset()
+            setDeleteTarget(null)
+          }
+        }}
+        onConfirm={removeRoomType}
+        open={deleteTarget !== null}
+        title="Xóa loại phòng này?"
+        tone="danger"
+      >
+        {deleteMutation.isError ? (
+          <Alert tone="error">
+            {getRoomTypeActionError(deleteMutation.error)}
+          </Alert>
+        ) : null}
+      </ConfirmationDialog>
     </div>
   )
 }

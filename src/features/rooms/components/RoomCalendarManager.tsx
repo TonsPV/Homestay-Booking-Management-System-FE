@@ -28,6 +28,7 @@ import type {
 } from '../schemas'
 
 interface RoomCalendarManagerProps {
+  bookingBasePath?: string
   roomId: string
 }
 
@@ -76,6 +77,7 @@ function issuesToErrors(
 }
 
 export function RoomCalendarManager({
+  bookingBasePath = '/management/bookings',
   roomId,
 }: RoomCalendarManagerProps) {
   const [range, setRange] = useState(initialRange)
@@ -311,51 +313,91 @@ export function RoomCalendarManager({
               Phòng đang trống trong khoảng này.
             </p>
           ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[34rem] text-left text-sm">
-                <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="px-3 py-3 font-bold">Ngày</th>
-                    <th className="px-3 py-3 font-bold">Trạng thái</th>
-                    <th className="px-3 py-3 font-bold">Thông tin</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {calendarQuery.data.map((entry) => (
-                    <tr key={entry.id}>
-                      <td className="px-3 py-3 font-semibold text-slate-900">
-                        {entry.stayDate}
-                      </td>
-                      <td className="px-3 py-3">
-                        <Badge
-                          tone={
-                            entry.status === 'RESERVED'
-                              ? 'blue'
-                              : 'amber'
-                          }
+            <>
+              <div className="mt-4 grid gap-3 sm:hidden">
+                {calendarQuery.data.map((entry) => (
+                  <article
+                    className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    key={entry.id}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                          Ngày
+                        </p>
+                        <p className="mt-1 font-semibold text-slate-900">
+                          {entry.stayDate}
+                        </p>
+                      </div>
+                      <Badge
+                        tone={entry.status === 'RESERVED' ? 'blue' : 'amber'}
+                      >
+                        {entry.status === 'RESERVED' ? 'Đã đặt' : 'Đã khóa'}
+                      </Badge>
+                    </div>
+                    <div className="mt-4 border-t border-slate-200 pt-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                        Thông tin
+                      </p>
+                      {entry.booking ? (
+                        <Link
+                          className="mt-1 inline-flex min-h-11 items-center font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                          to={`${bookingBasePath}/${entry.booking.id}`}
                         >
-                          {entry.status === 'RESERVED'
-                            ? 'Đã đặt'
-                            : 'Đã khóa'}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-3 text-slate-600">
-                        {entry.booking ? (
-                          <Link
-                            className="font-semibold text-brand-strong hover:underline"
-                            to={`/management/bookings/${entry.booking.id}`}
-                          >
-                            {entry.booking.bookingCode}
-                          </Link>
-                        ) : (
-                          entry.reason
-                        )}
-                      </td>
+                          {entry.booking.bookingCode}
+                        </Link>
+                      ) : (
+                        <p className="mt-1 text-sm text-slate-600">
+                          {entry.reason}
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div className="mt-4 hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-[34rem] text-left text-sm">
+                  <thead className="border-b border-slate-200 text-xs uppercase text-slate-500">
+                    <tr>
+                      <th className="px-3 py-3 font-bold">Ngày</th>
+                      <th className="px-3 py-3 font-bold">Trạng thái</th>
+                      <th className="px-3 py-3 font-bold">Thông tin</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {calendarQuery.data.map((entry) => (
+                      <tr key={entry.id}>
+                        <td className="px-3 py-3 font-semibold text-slate-900">
+                          {entry.stayDate}
+                        </td>
+                        <td className="px-3 py-3">
+                          <Badge
+                            tone={
+                              entry.status === 'RESERVED' ? 'blue' : 'amber'
+                            }
+                          >
+                            {entry.status === 'RESERVED' ? 'Đã đặt' : 'Đã khóa'}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-3 text-slate-600">
+                          {entry.booking ? (
+                            <Link
+                              className="font-semibold text-brand-strong hover:underline"
+                              to={`${bookingBasePath}/${entry.booking.id}`}
+                            >
+                              {entry.booking.bookingCode}
+                            </Link>
+                          ) : (
+                            entry.reason
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
       </div>

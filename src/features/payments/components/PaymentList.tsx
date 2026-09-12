@@ -20,6 +20,7 @@ interface PaymentListProps {
   bookingBasePath?: string
   canRefund?: boolean
   management?: boolean
+  paymentBasePath?: string
   onReconcile?: (payment: Payment) => void
   onRefund?: (payment: Payment) => void
   onResolveDuplicate?: (payment: Payment) => void
@@ -191,6 +192,7 @@ function PaymentCards({
   bookingBasePath,
   canRefund,
   management,
+  paymentBasePath,
   onReconcile,
   onRefund,
   onResolveDuplicate,
@@ -245,10 +247,10 @@ function PaymentCards({
                   onRefund={onRefund}
                   payment={payment}
                 />
-                {management ? (
+                {management && paymentBasePath ? (
                   <Link
                     className="inline-flex min-h-9 items-center px-1 font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    to={`/management/payments/${payment.id}`}
+                    to={`${paymentBasePath}/${payment.id}`}
                   >
                     Xem chi tiết
                   </Link>
@@ -267,6 +269,7 @@ function PaymentCards({
 function ManagementPaymentTable({
   bookingBasePath,
   canRefund,
+  paymentBasePath,
   onReconcile,
   onRefund,
   onResolveDuplicate,
@@ -363,12 +366,14 @@ function ManagementPaymentTable({
                     onRefund={onRefund}
                     payment={payment}
                   />
-                  <Link
-                    className="inline-flex min-h-9 items-center px-1 font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-                    to={`/management/payments/${payment.id}`}
-                  >
-                    Xem chi tiết
-                  </Link>
+                  {paymentBasePath ? (
+                    <Link
+                      className="inline-flex min-h-9 items-center px-1 font-semibold text-brand-strong hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      to={`${paymentBasePath}/${payment.id}`}
+                    >
+                      Xem chi tiết
+                    </Link>
+                  ) : null}
                 </div>
               </td>
             </tr>
@@ -383,6 +388,7 @@ export function PaymentList({
   bookingBasePath,
   canRefund = false,
   management = false,
+  paymentBasePath,
   onReconcile,
   onRefund,
   onResolveDuplicate,
@@ -390,6 +396,9 @@ export function PaymentList({
   reconcilingPaymentId,
   resolvingDuplicatePaymentId,
 }: PaymentListProps) {
+  const detailBasePath =
+    paymentBasePath ?? (management ? '/management/payments' : undefined)
+
   if (payments.length === 0) {
     return (
       <EmptyState
@@ -405,6 +414,7 @@ export function PaymentList({
         bookingBasePath={bookingBasePath}
         canRefund={canRefund}
         management={false}
+        paymentBasePath={detailBasePath}
         onReconcile={onReconcile}
         onRefund={onRefund}
         onResolveDuplicate={onResolveDuplicate}
@@ -420,6 +430,7 @@ export function PaymentList({
       <ManagementPaymentTable
         bookingBasePath={bookingBasePath}
         canRefund={canRefund}
+        paymentBasePath={detailBasePath}
         onReconcile={onReconcile}
         onRefund={onRefund}
         onResolveDuplicate={onResolveDuplicate}
@@ -432,6 +443,7 @@ export function PaymentList({
           bookingBasePath={bookingBasePath}
           canRefund={canRefund}
           management
+          paymentBasePath={detailBasePath}
           onReconcile={onReconcile}
           onRefund={onRefund}
           onResolveDuplicate={onResolveDuplicate}

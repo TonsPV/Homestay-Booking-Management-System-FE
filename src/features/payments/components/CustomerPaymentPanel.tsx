@@ -188,7 +188,7 @@ export function CustomerPaymentPanel({
           >
             {attemptDecision.reason === 'pending-without-key'
               ? 'Một giao dịch VNPay đang chờ kết quả. Để tránh thanh toán trùng, bạn chưa thể tạo giao dịch mới.'
-              : 'Chưa thể xác nhận giao dịch đang mở. Vui lòng tải lại trang hoặc liên hệ Homestay Green nếu tình trạng vẫn tiếp diễn.'}
+              : 'Chưa thể xác nhận giao dịch đang mở. Vui lòng tải lại trang hoặc liên hệ Homi Stay nếu tình trạng vẫn tiếp diễn.'}
           </Alert>
         ) : (
           <div className="mt-5 grid gap-4">

@@ -104,33 +104,29 @@ test("staff login continues through counter booking, manual payment, check-in an
     const url = new URL(request.url());
     const path = url.pathname;
 
-    if (path.endsWith("/auth/users/login")) {
-          await fulfillJson(
-            route,
-            {
-              accessToken: "staff-cross-module-token",
-              actorType: "user",
-              expiresIn: 3600,
-              tokenType: "Bearer",
-              user: {
-                createdAt: principal.createdAt,
-                email: principal.email,
-                fullName: principal.fullName,
-                id: principal.id,
-                phone: principal.phone,
-                role: "STAFF",
-                status: principal.status,
-                updatedAt: principal.updatedAt,
-              },
-            },
-            path,
-          );
-          return;
-        }
-
-        if (path.endsWith("/auth/customers/login")) {
-          throw new Error("Operations login must not call the customer endpoint.");
-        }
+    if (path.endsWith("/auth/login")) {
+      await fulfillJson(
+        route,
+        {
+          accessToken: "staff-cross-module-token",
+          actorType: "user",
+          expiresIn: 3600,
+          tokenType: "Bearer",
+          user: {
+            createdAt: principal.createdAt,
+            email: principal.email,
+            fullName: principal.fullName,
+            id: principal.id,
+            phone: principal.phone,
+            role: "STAFF",
+            status: principal.status,
+            updatedAt: principal.updatedAt,
+          },
+        },
+        path,
+      );
+      return;
+    }
 
     if (path.endsWith("/management/dashboard/summary")) {
       await fulfillJson(
@@ -224,6 +220,69 @@ test("staff login continues through counter booking, manual payment, check-in an
       return;
     }
 
+    if (path.endsWith("/management/rooms/10") && request.method() === "GET") {
+      await fulfillJson(
+        route,
+        {
+          calendarSummary: {
+            asOfDate: "2026-08-02",
+            nextEvent: {
+              booking: {
+                bookingCode: booking.bookingCode,
+                id: booking.id,
+              },
+              reason: null,
+              status: "RESERVED",
+              stayDate: booking.checkInDate,
+            },
+            todayStatus: "AVAILABLE",
+          },
+          createdAt: "2026-07-29T00:00:00.000Z",
+          description: "Phòng gia đình nhìn ra vườn.",
+          id: "10",
+          images: [],
+          name: "Suite Vườn",
+          roomNumber: "A101",
+          roomType: {
+            amenities: [],
+            basePrice: "900000.00",
+            description: null,
+            id: "5",
+            maxGuests: 4,
+            name: "Family Suite",
+          },
+          roomTypeId: "5",
+          status: "READY",
+          updatedAt: "2026-07-29T00:00:00.000Z",
+        },
+        path,
+      );
+      return;
+    }
+
+    if (
+      path.endsWith("/management/rooms/10/calendar") &&
+      request.method() === "GET"
+    ) {
+      await fulfillJson(
+        route,
+        [
+          {
+            booking: {
+              bookingCode: booking.bookingCode,
+              id: booking.id,
+            },
+            id: "calendar-902",
+            reason: null,
+            status: "RESERVED",
+            stayDate: booking.checkInDate,
+          },
+        ],
+        path,
+      );
+      return;
+    }
+
     if (path.endsWith("/management/bookings") && request.method() === "POST") {
       bookingCreated = true;
       await fulfillJson(route, managementBooking(), path, 201);
@@ -291,6 +350,19 @@ test("staff login continues through counter booking, manual payment, check-in an
       return;
     }
 
+    if (path.endsWith("/management/payments") && request.method() === "GET") {
+      await fulfillJson(route, payments, path);
+      return;
+    }
+
+    if (
+      path.endsWith("/management/payments/95") &&
+      request.method() === "GET"
+    ) {
+      await fulfillJson(route, payments[0], path);
+      return;
+    }
+
     if (
       path.endsWith("/management/bookings/902/status") &&
       request.method() === "PATCH"
@@ -310,7 +382,7 @@ test("staff login continues through counter booking, manual payment, check-in an
     await route.fallback();
   });
 
-  await page.goto("/management/login");
+  await page.goto("/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
   await page
     .getByRole("textbox", { name: "Mật khẩu", exact: true })
@@ -332,6 +404,10 @@ test("staff login continues through counter booking, manual payment, check-in an
     page.locator("span").filter({ hasText: /^Sẵn sàng đón khách$/ }),
   ).toBeVisible();
   await expect(page.getByText(/Booking gần nhất HBMS-STAFF-902/)).toBeVisible();
+  await page.getByRole("button", { name: "Xem chi tiết" }).click();
+  await expect(page).toHaveURL(/\/staff\/rooms\/10$/);
+  await page.getByRole("link", { name: booking.bookingCode }).click();
+  await expect(page).toHaveURL(/\/staff\/bookings\/902$/);
 
   await openStaffSection(page, "Đặt phòng");
   await page.getByLabel("Ngày nhận phòng").fill("2099-03-10");
@@ -341,7 +417,6 @@ test("staff login continues through counter booking, manual payment, check-in an
     page.getByRole("heading", { name: "Hết phòng trống" }),
   ).toBeVisible();
 
-  await page.goBack();
   await page.goBack();
   await expect(page).toHaveURL(/\/staff\/bookings\/902$/);
   await page.getByRole("button", { name: "Ghi nhận đã thanh toán" }).click();
@@ -374,4 +449,14 @@ test("staff login continues through counter booking, manual payment, check-in an
       .filter({ hasText: /^Đã trả phòng$/ })
       .first(),
   ).toBeVisible();
+
+  await openStaffSection(page, "Thanh toán");
+  await expect(page).toHaveURL(/\/staff\/payments$/);
+  await page.getByRole("link", { name: "Xem chi tiết" }).first().click();
+  await expect(page).toHaveURL(/\/staff\/payments\/95$/);
+  await expect(page.getByRole("link", { name: "#902" })).toHaveAttribute(
+    "href",
+    "/staff/bookings/902",
+  );
+  await expect(page.getByRole("button", { name: "Hoàn tiền" })).toHaveCount(0);
 });

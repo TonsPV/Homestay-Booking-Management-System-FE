@@ -45,7 +45,7 @@ trong khi chưa chọn ngày thì không có phòng để khám phá. Màn danh 
 chuyển trang để kiểm tra ngày. Một số ảnh phòng đang lỗi tải; cần kiểm tra URL và
 nguồn ảnh khi triển khai, không kết luận lỗi Backend chỉ từ ảnh chụp.
 
-Giữ nền trung tính, bề mặt trắng, nút xanh dương và ảnh thật của Homestay Green.
+Giữ nền trung tính, bề mặt trắng, nút xanh dương và ảnh thật của Homi Stay.
 Ưu tiên thao tác tìm phòng và so sánh; không thêm hero quảng bá lớn ở màn này.
 
 ```text
@@ -393,7 +393,7 @@ hiện có và trở lại đúng biểu mẫu đặt phòng. Không hỏi khác
 để khách muốn tìm hiểu rồi đặt phòng.** Không nghiệm thu chỉ vì đã thêm đủ nút.
 Tham khảo ảnh chủ dự án gửi: tên và thông tin nhận diện phía trên, nhiều góc ảnh
 cùng xuất hiện, tiện nghi dễ quét, mô tả có chiều sâu, vùng chọn kỳ nghỉ rõ ràng.
-Giữ màu, chữ, thành phần và `max-w-app` của Homestay Green trong `DESIGN.md`.
+Giữ màu, chữ, thành phần và `max-w-app` của Homi Stay trong `DESIGN.md`.
 Không thu nhỏ chữ theo mật độ của ảnh chụp tham khảo.
 
 | Mẫu trong ảnh tham khảo | Cách áp dụng đúng cho HBMS |

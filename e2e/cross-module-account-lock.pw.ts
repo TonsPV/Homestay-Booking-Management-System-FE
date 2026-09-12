@@ -148,11 +148,14 @@ test("locking a staff account revokes its session on the next request", async ({
   ).toBeVisible();
 
   await page.goto("/management/users");
-  page.on("dialog", (dialog) => dialog.accept());
   const staffRow = page.getByRole("row").filter({
     hasText: "Nhân viên cần khóa",
   });
   await staffRow.getByRole("button", { name: "Khóa" }).click();
+  await page
+    .getByRole("dialog", { name: "Khóa tài khoản nhân viên?" })
+    .getByRole("button", { name: "Khóa tài khoản" })
+    .click();
   await expect(page.getByText("Đã khóa tài khoản nhân viên.")).toBeVisible();
 
   await targetPage.reload();
@@ -235,8 +238,11 @@ test("locking a customer account revokes its session on the next request", async
   ).toBeVisible();
 
   await page.goto("/management/customers");
-  page.on("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Khóa tài khoản" }).click();
+  await page
+    .getByRole("dialog", { name: "Khóa tài khoản khách hàng?" })
+    .getByRole("button", { name: "Khóa tài khoản" })
+    .click();
   await expect(page.getByRole("button", { name: "Mở khóa" })).toBeVisible();
 
   await targetPage.reload();

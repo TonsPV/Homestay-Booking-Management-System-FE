@@ -68,7 +68,7 @@ export function RegisterPage({
     <AuthPageLayout
       description="Tạo tài khoản khách hàng để đặt phòng và theo dõi chuyến đi thuận tiện hơn."
       eyebrow="Tài khoản khách hàng"
-      title="Bắt đầu cùng Homestay Green"
+      title="Bắt đầu cùng Homi Stay"
     >
       <form
         className="grid gap-5"

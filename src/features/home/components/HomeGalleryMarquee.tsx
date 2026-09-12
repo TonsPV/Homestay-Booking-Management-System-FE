@@ -36,7 +36,7 @@ export function HomeGalleryMarquee() {
       <FadeIn className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-bold text-brand-strong">
-            Góc nhìn Homestay Green
+            Góc nhìn Homi Stay
           </p>
           <h2
             className="mt-2 text-3xl font-black tracking-[-0.025em] text-ink sm:text-4xl"

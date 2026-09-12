@@ -141,8 +141,11 @@ test('admin creates, edits and locks a STAFF account without role mutation', asy
   })
   await expect(staffRow).toBeVisible()
 
-  page.on('dialog', (dialog) => dialog.accept())
   await staffRow.getByRole('button', { name: 'Khóa' }).click()
+  await page
+    .getByRole('dialog', { name: 'Khóa tài khoản nhân viên?' })
+    .getByRole('button', { name: 'Khóa tài khoản' })
+    .click()
   await expect(staffRow).toContainText('Đã khóa')
 })
 

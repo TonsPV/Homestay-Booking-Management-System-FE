@@ -299,6 +299,11 @@ export function ManagementRoomDetailRoute() {
 
   return (
     <ManagementRoomDetailPage
+      bookingBasePath={
+        roomsPath.startsWith("/staff")
+          ? "/staff/bookings"
+          : "/management/bookings"
+      }
       onBack={() => navigate(roomsPath)}
       onDeleted={() => navigate(roomsPath, { replace: true })}
       onEditRoom={

@@ -4,6 +4,7 @@ import type {
   AuthMeCustomerResponseDto,
   AuthMeUserResponseDto,
   AuthUserDto,
+  GoogleCustomerLoginDtoWritable,
   LoginDtoWritable,
   RegisterCustomerDtoWritable,
 } from '@/api/generated'
@@ -63,6 +64,8 @@ export interface AuthSession {
 export type CustomerLoginInput = LoginDtoWritable
 export type UserLoginInput = LoginDtoWritable
 export type RegisterCustomerInput = RegisterCustomerDtoWritable
+
+export type GoogleCustomerLoginInput = GoogleCustomerLoginDtoWritable
 
 export function principalFromMe(response: MeResponse): AuthPrincipal {
   if (response.actorType === 'customer') {

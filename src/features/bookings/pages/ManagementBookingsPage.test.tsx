@@ -172,6 +172,18 @@ describe('ManagementBookingsPage filters', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('keeps the payment shortcut inside the staff workspace', () => {
+    render(
+      <MemoryRouter initialEntries={['/staff/bookings']}>
+        <ManagementBookingsPage />
+      </MemoryRouter>,
+    )
+
+    expect(
+      screen.getByRole('link', { name: /Quản lý thanh toán/ }),
+    ).toHaveAttribute('href', '/staff/payments')
+  })
+
   it('keeps all controls synchronized with browser history', async () => {
     const user = userEvent.setup()
     render(

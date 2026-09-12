@@ -325,12 +325,16 @@ test('admin handles room status, calendar conflict and image operations', async 
 
   await page.getByRole('button', { name: 'Khóa ngày' }).click()
   await expect(page.getByText('Đã khóa 2 đêm.')).toBeVisible()
-  await expect(page.getByText('HBMS-RESERVED')).toBeVisible()
+  await expect(
+    page.locator('a:visible').filter({ hasText: 'HBMS-RESERVED' }),
+  ).toBeVisible()
   await expect(page.getByText('Đã khóa').first()).toBeVisible()
 
   await page.getByRole('button', { name: 'Mở khóa khoảng đang xem' }).click()
   await expect(page.getByText('Đã mở khóa 2 đêm.')).toBeVisible()
-  await expect(page.getByText('HBMS-RESERVED')).toBeVisible()
+  await expect(
+    page.locator('a:visible').filter({ hasText: 'HBMS-RESERVED' }),
+  ).toBeVisible()
   await expect(page.getByText('Đã khóa')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Quản lý ảnh' }).click()
@@ -345,7 +349,10 @@ test('admin handles room status, calendar conflict and image operations', async 
   await page.getByRole('button', { name: 'Đặt làm bìa' }).last().click()
   await expect(page.getByText('Đã đặt ảnh bìa mới.')).toBeVisible()
 
-  page.once('dialog', (dialog) => dialog.accept())
   await page.getByRole('button', { name: 'Xóa' }).last().click()
+  await page
+    .getByRole('dialog', { name: 'Xóa ảnh này?' })
+    .getByRole('button', { name: 'Xóa ảnh' })
+    .click()
   await expect(page.getByText('Đã xóa ảnh khỏi phòng.')).toBeVisible()
 })

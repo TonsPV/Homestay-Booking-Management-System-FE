@@ -1,8 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-import { dashboardSummary, envelope, fulfillJson, principalFor } from "./helpers";
+import {
+  dashboardSummary,
+  envelope,
+  fulfillJson,
+  principalFor,
+} from "./helpers";
 
-test("anonymous customer route redirects to the customer login", async ({
+test("anonymous customer route redirects to the unified login", async ({
   page,
 }) => {
   await page.goto("/bookings");
@@ -44,9 +49,9 @@ test("registration password controls remain aligned and can be toggled repeatedl
 
   await revealControls.nth(0).click();
   await expect(password).toHaveAttribute("type", "text");
-  await expect(
-    page.getByRole("button", { name: "Ẩn mật khẩu" }),
-  ).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Ẩn mật khẩu" })).toHaveCount(
+    1,
+  );
 
   await page.getByRole("button", { name: "Ẩn mật khẩu" }).click();
   await expect(password).toHaveAttribute("type", "password");
@@ -59,12 +64,12 @@ test("registration password controls remain aligned and can be toggled repeatedl
   await expect(revealControls).toHaveCount(2);
 });
 
-test("customer login uses the customer actor and opens the public home page", async ({
+test("customer login uses the unified endpoint and opens the public home page", async ({
   page,
 }) => {
   const principal = principalFor({ actorType: "customer" });
 
-  await page.route("**/api/v1/auth/customers/login", async (route) => {
+  await page.route("**/api/v1/auth/login", async (route) => {
     expect(route.request().method()).toBe("POST");
     expect(route.request().postDataJSON()).toEqual({
       identifier: principal.email,
@@ -87,7 +92,7 @@ test("customer login uses the customer actor and opens the public home page", as
         expiresIn: 3600,
         tokenType: "Bearer",
       },
-      "/api/v1/auth/customers/login",
+      "/api/v1/auth/login",
     );
   });
   await page.route("**/api/v1/rooms**", async (route) => {
@@ -96,7 +101,9 @@ test("customer login uses the customer actor and opens the public home page", as
 
   await page.goto("/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-  await page.getByRole("textbox", { name: "Mật khẩu", exact: true }).fill("StrongPassword123!");
+  await page
+    .getByRole("textbox", { name: "Mật khẩu", exact: true })
+    .fill("StrongPassword123!");
   await page.getByRole("button", { name: "Đăng nhập" }).click();
 
   await expect(page).toHaveURL(/\/$/);
@@ -104,17 +111,12 @@ test("customer login uses the customer actor and opens the public home page", as
 });
 
 for (const role of ["STAFF", "ADMIN"] as const) {
-  test(`${role} login uses the user actor and opens its workspace`, async ({
+  test(`${role} login uses the unified endpoint and opens its workspace`, async ({
     page,
   }) => {
     const principal = principalFor({ actorType: "user", role });
 
-    let customerLoginRequests = 0;
-    await page.route("**/api/v1/auth/customers/login", async (route) => {
-      customerLoginRequests += 1;
-      await route.abort();
-    });
-    await page.route("**/api/v1/auth/users/login", async (route) => {
+    await page.route("**/api/v1/auth/login", async (route) => {
       expect(route.request().method()).toBe("POST");
       await fulfillJson(
         route,
@@ -134,7 +136,7 @@ for (const role of ["STAFF", "ADMIN"] as const) {
             updatedAt: principal.updatedAt,
           },
         },
-        "/api/v1/auth/users/login",
+        "/api/v1/auth/login",
       );
     });
     await page.route("**/api/v1/auth/me", async (route) => {
@@ -187,9 +189,11 @@ for (const role of ["STAFF", "ADMIN"] as const) {
       });
     });
 
-    await page.goto("/management/login");
+    await page.goto("/login");
     await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
-    await page.getByRole("textbox", { name: "Mật khẩu", exact: true }).fill("StrongPassword123!");
+    await page
+      .getByRole("textbox", { name: "Mật khẩu", exact: true })
+      .fill("StrongPassword123!");
     await page.getByRole("button", { name: "Đăng nhập" }).click();
 
     const expectedPath =
@@ -201,8 +205,6 @@ for (const role of ["STAFF", "ADMIN"] as const) {
     await expect(
       page.getByRole("heading", { name: expectedHeading }).first(),
     ).toBeVisible();
-    expect(customerLoginRequests).toBe(0);
-
     if (role === "ADMIN") {
       await page.goto("/staff/counter");
       await expect(page).toHaveURL(/\/forbidden$/);

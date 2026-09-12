@@ -8,19 +8,16 @@ const useAuthMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/auth", () => ({
   LoginPage: ({
-    actor,
     locationState,
     notice,
     registerPath,
   }: {
-    actor?: "customer" | "user";
     locationState?: { returnTo?: string };
     notice?: string;
     registerPath?: string | null;
   }) => (
     <div>
       <div>login-page</div>
-      <div>actor:{actor ?? "none"}</div>
       <div>return-to:{locationState?.returnTo ?? "none"}</div>
       <div>notice:{notice ?? "none"}</div>
       <div>register-path:{registerPath ?? "none"}</div>
@@ -30,10 +27,15 @@ vi.mock("@/auth", () => ({
   useAuth: useAuthMock,
 }));
 
-import { LoginRoute } from "./AuthRouteAdapters";
+import { LoginRoute, ManagementLoginRoute } from "./AuthRouteAdapters";
 
 function LocationProbe() {
-  return <div>location:{useLocation().pathname}</div>;
+  return (
+    <div>
+      location:{useLocation().pathname}
+      {useLocation().search}
+    </div>
+  );
 }
 
 function renderAdapter(
@@ -81,26 +83,30 @@ beforeEach(() => {
   useAuthMock.mockReset();
 });
 
-describe("LoginRoute (unified)", () => {
-  it("renders the single login page for anonymous users at /login", () => {
+describe("LoginRoute", () => {
+  it("renders the single login page for anonymous users", () => {
     useAuthMock.mockReturnValue({ principal: null });
 
     renderAdapter(<LoginRoute />, "/login");
 
     expect(screen.getByText("login-page")).toBeInTheDocument();
-    expect(screen.getByText("actor:customer")).toBeInTheDocument();
     expect(screen.getByText("register-path:/register")).toBeInTheDocument();
     expect(screen.getByText("return-to:none")).toBeInTheDocument();
   });
 
-  it("uses the user-only login surface at /management/login", () => {
+  it("redirects the retired operational URL to the canonical login URL", () => {
     useAuthMock.mockReturnValue({ principal: null });
 
-    renderAdapter(<LoginRoute />, "/management/login");
+    renderAdapter(
+      <ManagementLoginRoute />,
+      "/management/login",
+      { returnTo: "/staff/payments" },
+      "?notice=password-changed",
+    );
 
-    expect(screen.getByText("login-page")).toBeInTheDocument();
-    expect(screen.getByText("actor:user")).toBeInTheDocument();
-    expect(screen.getByText("register-path:none")).toBeInTheDocument();
+    expect(
+      screen.getByText("location:/login?notice=password-changed"),
+    ).toBeInTheDocument();
   });
 
   it("passes the intended destination through to the login page state", () => {
@@ -114,11 +120,14 @@ describe("LoginRoute (unified)", () => {
   it("maps the password-changed notice query into the login alert", () => {
     useAuthMock.mockReturnValue({ principal: null });
 
-    renderAdapter(<LoginRoute />, "/login", undefined, "?notice=password-changed");
+    renderAdapter(
+      <LoginRoute />,
+      "/login",
+      undefined,
+      "?notice=password-changed",
+    );
 
-    expect(
-      screen.getByText(/Đổi mật khẩu thành công/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Đổi mật khẩu thành công/i)).toBeInTheDocument();
   });
 
   it("redirects an authenticated customer to the public home page", () => {
@@ -134,7 +143,7 @@ describe("LoginRoute (unified)", () => {
     (role) => {
       useAuthMock.mockReturnValue({ principal: principalOf(role) });
 
-      renderAdapter(<LoginRoute />, "/management/login");
+      renderAdapter(<LoginRoute />, "/login");
 
       expect(
         screen.getByText(

@@ -4,7 +4,7 @@ import {
   useMemo,
 } from 'react'
 import { useForm } from 'react-hook-form'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/shared/components/Button'
 import {
@@ -44,6 +44,7 @@ function parseStatus(value: string | null): BookingStatus | undefined {
 }
 
 export function ManagementBookingsPage() {
+  const { pathname } = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const page = parsePage(searchParams.get('page'))
   const status = parseStatus(searchParams.get('status'))
@@ -121,6 +122,11 @@ export function ManagementBookingsPage() {
       <BookingStatsSummary
         bookings={pageBookings}
         loading={bookingsQuery.isPending}
+        paymentsPath={
+          pathname.startsWith('/staff/')
+            ? '/staff/payments'
+            : '/management/payments'
+        }
       />
 
       <form

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { envelope, fulfillJson, installSession } from "./helpers";
 
-test("a current-session 401 clears private access and returns to management login", async ({
+test("a current-session 401 clears private access and returns to the unified login", async ({
   page,
 }) => {
   await installSession(page, { actorType: "user", role: "STAFF" });
@@ -33,12 +33,12 @@ test("a current-session 401 clears private access and returns to management logi
 test("login 429 preserves the form and exposes the Retry-After cooldown", async ({
   page,
 }) => {
-  await page.route("**/api/v1/auth/customers/login", async (route) => {
+  await page.route("**/api/v1/auth/login", async (route) => {
     await route.fulfill({
       body: JSON.stringify({
         error: "Too Many Requests",
         message: "Bạn thao tác quá nhanh.",
-        path: "/api/v1/auth/customers/login",
+        path: "/api/v1/auth/login",
         requestId: "req-login-rate-limit",
         statusCode: 429,
         success: false,
@@ -178,10 +178,13 @@ test("a Backend 409 becomes an actionable operation error without diagnostics", 
   });
 
   await page.goto("/management/amenities");
-  page.on("dialog", (dialog) => dialog.accept());
   await page
     .getByRole("article", { name: "Tiện nghi Wi-Fi" })
     .getByRole("button", { name: "Xóa" })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Xóa tiện nghi này?" })
+    .getByRole("button", { name: "Xóa tiện nghi" })
     .click();
 
   await expect(

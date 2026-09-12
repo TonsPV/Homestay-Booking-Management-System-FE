@@ -21,7 +21,7 @@ test("public and auth shells remain usable on desktop and mobile", async ({
       name: "Một nơi để thật sự nghỉ ngơi.",
     }),
   ).toBeVisible();
-  await expect(page).toHaveTitle("Trang chủ | Homestay Green");
+  await expect(page).toHaveTitle("Trang chủ | Homi Stay");
   await expectNoDocumentOverflow(page);
 
   const menuButton = page.getByRole("button", { name: "Mở menu" });
@@ -42,7 +42,7 @@ test("public and auth shells remain usable on desktop and mobile", async ({
   await expect(
     page.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
-  await expect(page).toHaveTitle("Đăng nhập | Homestay Green");
+  await expect(page).toHaveTitle("Đăng nhập | Homi Stay");
   await expect(page.locator("main")).toHaveCount(1);
   await expectNoDocumentOverflow(page);
 });
@@ -61,7 +61,7 @@ test("staff POS navigation is responsive and separate from management", async ({
   ).toHaveCount(0);
 
   await expect(
-    page.getByRole("link", { name: "Homestay Green - Quầy lễ tân" }),
+    page.getByRole("link", { name: "Homi Stay - Quầy lễ tân" }),
   ).toBeVisible();
   await expect(
     page.locator("nav:visible").filter({ hasText: "Đặt phòng" }),

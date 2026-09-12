@@ -19,7 +19,7 @@ export type SuccessEnvelopeDto = {
     requestId: string;
 };
 
-export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
 
 export type ErrorEnvelopeDto = {
     success: boolean;
@@ -31,7 +31,7 @@ export type ErrorEnvelopeDto = {
      */
     fieldErrors?: {
         [key: string]: Array<{
-            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
             message?: string;
         }>;
     };
@@ -119,6 +119,13 @@ export type AuthLoginResponseDto = {
      * User profile if actorType is user
      */
     user?: AuthUserDto | null;
+};
+
+export type GoogleCustomerLoginDto = {
+    /**
+     * Vietnamese phone number required when this Google identity is new.
+     */
+    phone?: string;
 };
 
 export type LoginDto = {
@@ -699,6 +706,17 @@ export type RegisterCustomerDtoWritable = {
     password: string;
 };
 
+export type GoogleCustomerLoginDtoWritable = {
+    /**
+     * Google Identity Services ID token returned by the browser.
+     */
+    credential: string;
+    /**
+     * Vietnamese phone number required when this Google identity is new.
+     */
+    phone?: string;
+};
+
 export type LoginDtoWritable = {
     /**
      * Email or Vietnamese phone number.
@@ -803,6 +821,72 @@ export type AuthRegisterCustomerResponses = {
 };
 
 export type AuthRegisterCustomerResponse = AuthRegisterCustomerResponses[keyof AuthRegisterCustomerResponses];
+
+export type AuthLoginCustomerWithGoogleData = {
+    body: GoogleCustomerLoginDtoWritable;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/customers/google/login';
+};
+
+export type AuthLoginCustomerWithGoogleErrors = {
+    /**
+     * The request data is invalid.
+     */
+    400: ErrorEnvelopeDto;
+    /**
+     * The login credentials are invalid. Missing, locked, passwordless, and password-mismatch states use the same response.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * A customer account cannot be created with the supplied email or phone number.
+     */
+    409: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+};
+
+export type AuthLoginCustomerWithGoogleError = AuthLoginCustomerWithGoogleErrors[keyof AuthLoginCustomerWithGoogleErrors];
+
+export type AuthLoginCustomerWithGoogleResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: AuthLoginResponseDto;
+    };
+};
+
+export type AuthLoginCustomerWithGoogleResponse = AuthLoginCustomerWithGoogleResponses[keyof AuthLoginCustomerWithGoogleResponses];
+
+export type AuthLoginData = {
+    body: LoginDtoWritable;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/login';
+};
+
+export type AuthLoginErrors = {
+    /**
+     * The login credentials are invalid. Missing, locked, passwordless, and password-mismatch states use the same response.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+};
+
+export type AuthLoginError = AuthLoginErrors[keyof AuthLoginErrors];
+
+export type AuthLoginResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: AuthLoginResponseDto;
+    };
+};
+
+export type AuthLoginResponse = AuthLoginResponses[keyof AuthLoginResponses];
 
 export type AuthLoginCustomerData = {
     body: LoginDtoWritable;
@@ -1839,6 +1923,37 @@ export type PaymentManagementListAllResponses = {
 };
 
 export type PaymentManagementListAllResponse = PaymentManagementListAllResponses[keyof PaymentManagementListAllResponses];
+
+export type PaymentManagementGetOneData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/v1/management/payments/{id}';
+};
+
+export type PaymentManagementGetOneErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+};
+
+export type PaymentManagementGetOneError = PaymentManagementGetOneErrors[keyof PaymentManagementGetOneErrors];
+
+export type PaymentManagementGetOneResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: PaymentDto;
+    };
+};
+
+export type PaymentManagementGetOneResponse = PaymentManagementGetOneResponses[keyof PaymentManagementGetOneResponses];
 
 export type PaymentManagementListData = {
     body?: never;

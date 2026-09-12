@@ -4,6 +4,7 @@ import { getErrorMessage } from "@/api/errors";
 import type { AccountStatus } from "@/auth/types";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
+import { ConfirmationDialog } from "@/shared/components/ConfirmationDialog";
 import {
   Alert,
   EmptyState,
@@ -73,6 +74,7 @@ export function CustomerAdminPage() {
   const [status, setStatus] = useState<"" | AccountStatus>("");
   const [initialPasswordCustomer, setInitialPasswordCustomer] =
     useState<AdminCustomer | null>(null);
+  const [lockTarget, setLockTarget] = useState<AdminCustomer | null>(null);
   const [credentialSuccess, setCredentialSuccess] = useState<{
     customerId: string;
     message: string;
@@ -91,20 +93,30 @@ export function CustomerAdminPage() {
     setSearch(draftSearch.trim());
   };
 
-  const changeStatus = (customer: AdminCustomer) => {
-    if (
-      customer.status === "ACTIVE" &&
-      !window.confirm(
-        `Khóa tài khoản của ${customer.fullName}? Khách hàng sẽ không thể đăng nhập cho tới khi được mở khóa.`,
-      )
-    ) {
+  const updateStatus = (customer: AdminCustomer) => {
+    if (statusMutation.isPending) {
       return;
     }
 
-    statusMutation.mutate({
-      id: customer.id,
-      status: customer.status === "ACTIVE" ? "LOCKED" : "ACTIVE",
-    });
+    statusMutation.mutate(
+      {
+        id: customer.id,
+        status: customer.status === "ACTIVE" ? "LOCKED" : "ACTIVE",
+      },
+      {
+        onSuccess: () => setLockTarget(null),
+      },
+    );
+  };
+
+  const changeStatus = (customer: AdminCustomer) => {
+    if (customer.status === "ACTIVE") {
+      statusMutation.reset();
+      setLockTarget(customer);
+      return;
+    }
+
+    updateStatus(customer);
   };
 
   return (
@@ -146,11 +158,39 @@ export function CustomerAdminPage() {
         </form>
       </Card>
 
-      {statusMutation.error ? (
+      {statusMutation.error && !lockTarget ? (
         <Alert title="Không thể cập nhật trạng thái" tone="error">
           {getErrorMessage(statusMutation.error)}
         </Alert>
       ) : null}
+
+      <ConfirmationDialog
+        busy={statusMutation.isPending}
+        confirmLabel="Khóa tài khoản"
+        description={
+          lockTarget
+            ? `${lockTarget.fullName} sẽ không thể đăng nhập cho tới khi được mở khóa.`
+            : undefined
+        }
+        onCancel={() => {
+          if (!statusMutation.isPending) {
+            statusMutation.reset();
+            setLockTarget(null);
+          }
+        }}
+        onConfirm={() => {
+          if (lockTarget) {
+            updateStatus(lockTarget);
+          }
+        }}
+        open={lockTarget !== null}
+        title="Khóa tài khoản khách hàng?"
+        tone="danger"
+      >
+        {statusMutation.isError ? (
+          <Alert tone="error">{getErrorMessage(statusMutation.error)}</Alert>
+        ) : null}
+      </ConfirmationDialog>
 
       {credentialSuccess ? (
         <Alert title="Đã đặt mật khẩu ban đầu" tone="success">

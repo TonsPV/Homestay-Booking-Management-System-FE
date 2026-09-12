@@ -105,6 +105,9 @@ describe('StaffPaymentsPage', () => {
       'href',
       '/staff/bookings/42',
     )
+    expect(
+      screen.getAllByRole('link', { name: 'Xem chi tiết' })[0],
+    ).toHaveAttribute('href', '/staff/payments/1')
   })
 
   it('removes a VNPay filter injected through the URL', async () => {

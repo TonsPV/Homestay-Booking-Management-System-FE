@@ -96,8 +96,11 @@ test('admin completes the amenity soft-delete lifecycle', async ({ page }) => {
   amenityCard = page.getByRole('article', {
     name: 'Tiện nghi Điều hòa trung tâm',
   })
-  page.on('dialog', (dialog) => dialog.accept())
   await amenityCard.getByRole('button', { name: 'Xóa' }).click()
+  await page
+    .getByRole('dialog', { name: 'Xóa tiện nghi này?' })
+    .getByRole('button', { name: 'Xóa tiện nghi' })
+    .click()
   await expect(page.getByText('Đã xóa tiện nghi.')).toBeVisible()
   await expect(amenityCard).toHaveCount(0)
 
@@ -109,7 +112,7 @@ test('admin completes the amenity soft-delete lifecycle', async ({ page }) => {
   await amenityCard.getByRole('button', { name: 'Khôi phục' }).click()
   await expect(page.getByText('Đã khôi phục tiện nghi.')).toBeVisible()
   await expect(amenityCard).toContainText('Đang hoạt động')
-  await expect(page).toHaveTitle('Quản lý tiện nghi | Homestay Green')
+  await expect(page).toHaveTitle('Quản lý tiện nghi | Homi Stay')
 })
 
 test('explains how to resolve a conflict when an amenity is still in use', async ({
@@ -147,10 +150,13 @@ test('explains how to resolve a conflict when an amenity is still in use', async
   })
 
   await page.goto('/management/amenities')
-  page.on('dialog', (dialog) => dialog.accept())
   await page
     .getByRole('article', { name: 'Tiện nghi Wi-Fi' })
     .getByRole('button', { name: 'Xóa' })
+    .click()
+  await page
+    .getByRole('dialog', { name: 'Xóa tiện nghi này?' })
+    .getByRole('button', { name: 'Xóa tiện nghi' })
     .click()
 
   await expect(

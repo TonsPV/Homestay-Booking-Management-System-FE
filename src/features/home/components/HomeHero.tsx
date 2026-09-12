@@ -52,7 +52,7 @@ export function HomeHero() {
             <span className="grid size-6 place-items-center rounded-full bg-success text-white">
               <Check aria-hidden="true" className="size-3.5" />
             </span>
-            Homestay Green · Đặt phòng trực tiếp
+            Homi Stay · Đặt phòng trực tiếp
           </motion.p>
 
           <motion.h1

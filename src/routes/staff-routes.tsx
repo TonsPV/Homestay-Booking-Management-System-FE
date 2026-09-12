@@ -51,4 +51,11 @@ export const staffRoutes: RouteObject[] = [
       return { Component: StaffPaymentsPage }
     },
   },
+  {
+    path: 'payments/:paymentId',
+    lazy: async () => {
+      const { StaffPaymentDetailRoute } = await import('./StaffRouteAdapters')
+      return { Component: StaffPaymentDetailRoute }
+    },
+  },
 ]

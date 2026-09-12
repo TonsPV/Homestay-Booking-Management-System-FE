@@ -3,6 +3,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
 import {
   Alert,
   EmptyState,
@@ -36,6 +37,7 @@ export function AmenityManagementPage() {
   const [search, setSearch] = useState('')
   const [includeDeleted, setIncludeDeleted] = useState(false)
   const [editor, setEditor] = useState<EditorState>(null)
+  const [deleteTarget, setDeleteTarget] = useState<AdminAmenity | null>(null)
   const [successMessage, setSuccessMessage] = useState('')
   const query = useAdminAmenities({
     includeDeleted,
@@ -79,13 +81,23 @@ export function AmenityManagementPage() {
     }
   }
 
-  function removeAmenity(amenity: AdminAmenity) {
-    if (window.confirm(`Xóa tiện nghi "${amenity.name}"?`)) {
-      setSuccessMessage('')
-      deleteMutation.mutate(amenity.id, {
-        onSuccess: () => setSuccessMessage('Đã xóa tiện nghi.'),
-      })
+  function requestAmenityRemoval(amenity: AdminAmenity) {
+    deleteMutation.reset()
+    setSuccessMessage('')
+    setDeleteTarget(amenity)
+  }
+
+  function removeAmenity() {
+    if (!deleteTarget || deleteMutation.isPending) {
+      return
     }
+
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(null)
+        setSuccessMessage('Đã xóa tiện nghi.')
+      },
+    })
   }
 
   function recoverAmenity(amenity: AdminAmenity) {
@@ -140,7 +152,7 @@ export function AmenityManagementPage() {
         </Card>
       ) : null}
 
-      {!editor && actionError ? (
+      {!editor && !deleteTarget && actionError ? (
         <Alert tone="error">{getAmenityActionError(actionError)}</Alert>
       ) : null}
 
@@ -245,7 +257,7 @@ export function AmenityManagementPage() {
                           deleteMutation.isPending &&
                           deleteMutation.variables === amenity.id
                         }
-                        onClick={() => removeAmenity(amenity)}
+                        onClick={() => requestAmenityRemoval(amenity)}
                         variant="danger"
                       >
                         Xóa
@@ -262,6 +274,32 @@ export function AmenityManagementPage() {
           />
         </>
       )}
+
+      <ConfirmationDialog
+        busy={deleteMutation.isPending}
+        confirmLabel="Xóa tiện nghi"
+        description={
+          deleteTarget
+            ? `Tiện nghi “${deleteTarget.name}” sẽ không còn được gán cho các loại phòng mới.`
+            : undefined
+        }
+        onCancel={() => {
+          if (!deleteMutation.isPending) {
+            deleteMutation.reset()
+            setDeleteTarget(null)
+          }
+        }}
+        onConfirm={removeAmenity}
+        open={deleteTarget !== null}
+        title="Xóa tiện nghi này?"
+        tone="danger"
+      >
+        {deleteMutation.isError ? (
+          <Alert tone="error">
+            {getAmenityActionError(deleteMutation.error)}
+          </Alert>
+        ) : null}
+      </ConfirmationDialog>
     </div>
   )
 }

@@ -77,6 +77,14 @@ export const paymentApi = {
     })
   },
 
+  async getManagement(paymentId: string, signal?: AbortSignal) {
+    const result = await apiRequest<Payment>(
+      `/management/payments/${paymentId}`,
+      { signal },
+    )
+    return result.data
+  },
+
   listManagementBooking(
     bookingId: string,
     query: PaymentListQuery,

@@ -106,7 +106,7 @@ export function PublicLayout() {
       >
         <div className="mx-auto flex min-h-16 max-w-app items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
           <NavLink
-            aria-label="Homestay Green - Trang chủ"
+            aria-label="Homi Stay - Trang chủ"
             className={cn(
               "mr-auto inline-flex min-h-11 items-center gap-2 text-base font-black tracking-tight",
               transparentHeader ? "text-white" : "text-ink",
@@ -119,7 +119,7 @@ export function PublicLayout() {
             >
               HG
             </span>
-            <span className="hidden sm:inline">Homestay Green</span>
+            <span className="hidden sm:inline">Homi Stay</span>
           </NavLink>
 
           <nav
@@ -357,7 +357,7 @@ export function PublicLayout() {
       >
         <div className="mx-auto grid max-w-app gap-10 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
           <div>
-            <p className="text-lg font-black text-ink">Homestay Green</p>
+            <p className="text-lg font-black text-ink">Homi Stay</p>
             <p className="mt-3 max-w-sm text-sm leading-6 text-muted">
               Tìm phòng, đặt chỗ và theo dõi kỳ lưu trú trong một hành trình rõ
               ràng.
@@ -396,7 +396,7 @@ export function PublicLayout() {
         </div>
         <div className="border-t border-line">
           <div className="mx-auto flex max-w-app flex-col gap-2 px-4 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p>© 2026 Homestay Green.</p>
+            <p>© 2026 Homi Stay.</p>
             <p>Thông tin phòng và giá được cung cấp trực tiếp từ hệ thống.</p>
           </div>
         </div>

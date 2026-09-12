@@ -1,4 +1,4 @@
-# Sản phẩm Homestay Green
+# Sản phẩm Homi Stay
 
 <!-- impeccable:product-schema 1 -->
 
@@ -43,7 +43,7 @@ Giao diện và nội dung chính dùng tiếng Việt.
 
 ## Cam kết thương hiệu
 
-- Tên xác nhận: **Homestay Green**; không dùng “Homestay Booking” làm tên hiển thị mới.
+- Tên xác nhận: **Homi Stay**; không dùng “Homestay Booking” làm tên hiển thị mới.
 - Chưa xác nhận logo, khẩu hiệu hay tuyên bố tiếp thị chính thức.
 - Trang giới thiệu hướng đến chất lượng lưu trú boutique: ảnh cơ sở thật, hành động
   đặt phòng rõ ràng, nền trung tính tiết chế và tương tác quen thuộc. Mức hoàn thiện

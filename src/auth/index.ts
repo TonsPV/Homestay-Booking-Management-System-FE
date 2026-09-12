@@ -2,6 +2,7 @@ export { AuthProvider } from './AuthProvider'
 export { authQueryKeys } from './query-keys'
 export { LoginPage } from './pages/LoginPage'
 export { RegisterPage } from './pages/RegisterPage'
+export { GoogleSignInButton } from './components/GoogleSignInButton'
 export { useAuth } from './useAuth'
 export type {
   AccountStatus,
@@ -12,6 +13,7 @@ export type {
   AuthStatus,
   Customer,
   CustomerLoginInput,
+  GoogleCustomerLoginInput,
   LoginResponse,
   MeResponse,
   RegisterCustomerInput,

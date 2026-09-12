@@ -161,6 +161,43 @@ describe('PaymentDetailPage overview', () => {
       },
     })
   })
+
+  it('uses staff-local navigation without exposing refund actions', () => {
+    authMock.useAuth.mockReturnValue({
+      principal: {
+        actorType: 'user',
+        role: 'STAFF',
+      },
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/staff/payments/91']}>
+        <PaymentDetailPage
+          bookingBasePath="/staff/bookings"
+          paymentBasePath="/staff/payments"
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('link', { name: '#42' })).toHaveAttribute(
+      'href',
+      '/staff/bookings/42',
+    )
+    expect(screen.getByRole('link', { name: 'Quay lại danh sách' })).toHaveAttribute(
+      'href',
+      '/staff/payments',
+    )
+    expect(
+      screen.queryByRole('button', { name: 'Hoàn tiền' }),
+    ).not.toBeInTheDocument()
+
+    authMock.useAuth.mockReturnValue({
+      principal: {
+        actorType: 'user',
+        role: 'ADMIN',
+      },
+    })
+  })
 })
 
 describe('PaymentDetailPage actions', () => {

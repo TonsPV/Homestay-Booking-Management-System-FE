@@ -8,6 +8,7 @@ import type {
 import { useAuth } from '@/auth/useAuth'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
+import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
 import {
   Alert,
   EmptyState,
@@ -44,6 +45,7 @@ export function UserAdminPage() {
   const { principal } = useAuth()
   const [draftSearch, setDraftSearch] = useState('')
   const [editor, setEditor] = useState<EditorState>(null)
+  const [lockTarget, setLockTarget] = useState<User | null>(null)
   const [page, setPage] = useState(1)
   const [role, setRole] = useState<'' | UserRole>('')
   const [search, setSearch] = useState('')
@@ -69,13 +71,8 @@ export function UserAdminPage() {
     setSuccessMessage(message)
   }
 
-  const toggleStatus = (user: User) => {
-    if (
-      user.status === 'ACTIVE' &&
-      !window.confirm(
-        `Khóa tài khoản của ${user.fullName}? Nhân viên sẽ không thể đăng nhập cho tới khi được mở khóa.`,
-      )
-    ) {
+  const changeStatus = (user: User) => {
+    if (statusMutation.isPending) {
       return
     }
 
@@ -86,14 +83,26 @@ export function UserAdminPage() {
         status: user.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE',
       },
       {
-        onSuccess: () =>
+        onSuccess: () => {
           setSuccessMessage(
             user.status === 'ACTIVE'
               ? 'Đã khóa tài khoản nhân viên.'
               : 'Đã mở khóa tài khoản nhân viên.',
-          ),
+          )
+          setLockTarget(null)
+        },
       },
     )
+  }
+
+  const toggleStatus = (user: User) => {
+    if (user.status === 'ACTIVE') {
+      statusMutation.reset()
+      setLockTarget(user)
+      return
+    }
+
+    changeStatus(user)
   }
 
   return (
@@ -192,11 +201,39 @@ export function UserAdminPage() {
         </form>
       </Card>
 
-      {statusMutation.error ? (
+      {statusMutation.error && !lockTarget ? (
         <Alert title="Không thể cập nhật trạng thái" tone="error">
           {getUserActionError(statusMutation.error)}
         </Alert>
       ) : null}
+
+      <ConfirmationDialog
+        busy={statusMutation.isPending}
+        confirmLabel="Khóa tài khoản"
+        description={
+          lockTarget
+            ? `${lockTarget.fullName} sẽ không thể đăng nhập cho tới khi được mở khóa.`
+            : undefined
+        }
+        onCancel={() => {
+          if (!statusMutation.isPending) {
+            statusMutation.reset()
+            setLockTarget(null)
+          }
+        }}
+        onConfirm={() => {
+          if (lockTarget) {
+            changeStatus(lockTarget)
+          }
+        }}
+        open={lockTarget !== null}
+        title="Khóa tài khoản nhân viên?"
+        tone="danger"
+      >
+        {statusMutation.isError ? (
+          <Alert tone="error">{getUserActionError(statusMutation.error)}</Alert>
+        ) : null}
+      </ConfirmationDialog>
 
       {usersQuery.isPending ? (
         <LoadingState label="Đang tải danh sách nhân viên…" />

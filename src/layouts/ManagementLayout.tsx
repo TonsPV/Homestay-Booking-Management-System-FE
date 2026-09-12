@@ -93,7 +93,7 @@ function Brand({
 }) {
   return (
     <NavLink
-      aria-label={`Homestay Green - ${workspaceLabel}`}
+      aria-label={`Homi Stay - ${workspaceLabel}`}
       className="flex min-h-11 items-center gap-3 rounded-xl px-2 text-base font-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse"
       onClick={onNavigate}
       to={home}
@@ -105,7 +105,7 @@ function Brand({
         HG
       </span>
       <span>
-        Homestay Green
+        Homi Stay
         <span className="block text-xs font-semibold text-on-inverse-subtle">
           {workspaceLabel}
         </span>

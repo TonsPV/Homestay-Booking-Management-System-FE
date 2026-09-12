@@ -35,7 +35,7 @@ export function StaffLayout() {
       <header className="sticky top-0 z-sticky border-b border-inverse-line bg-inverse text-on-inverse shadow-elevation-2">
         <div className="mx-auto flex min-h-18 w-full max-w-[112rem] items-center gap-4 px-4 sm:px-6">
           <NavLink
-            aria-label="Homestay Green - Quầy lễ tân"
+            aria-label="Homi Stay - Quầy lễ tân"
             className="flex min-h-11 shrink-0 items-center gap-3 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-on-inverse"
             to={STAFF_PATHS.counter}
           >
@@ -46,7 +46,7 @@ export function StaffLayout() {
               HG
             </span>
             <span className="hidden sm:block">
-              <span className="block text-sm font-black">Homestay Green</span>
+              <span className="block text-sm font-black">Homi Stay</span>
               <span className="block text-xs font-semibold text-on-inverse-subtle">
                 POS · Quầy lễ tân
               </span>

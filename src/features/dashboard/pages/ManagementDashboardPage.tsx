@@ -346,7 +346,7 @@ export function ManagementDashboardPage() {
     <div className="space-y-6">
       <PageHeader
         description="Theo dõi booking, phòng và thanh toán từ dữ liệu vận hành thực tế."
-        eyebrow="Homestay Green"
+        eyebrow="Homi Stay"
         title="Tổng quan vận hành"
       />
 

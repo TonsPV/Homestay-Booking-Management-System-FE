@@ -53,7 +53,15 @@ interface PaymentActionFeedback {
   tone: 'info' | 'success' | 'warning'
 }
 
-export function PaymentDetailPage() {
+interface PaymentDetailPageProps {
+  bookingBasePath?: string
+  paymentBasePath?: string
+}
+
+export function PaymentDetailPage({
+  bookingBasePath = '/management/bookings',
+  paymentBasePath = '/management/payments',
+}: PaymentDetailPageProps) {
   const { paymentId } = useParams()
   const { principal } = useAuth()
   const paymentQuery = useManagementPayment(paymentId)
@@ -201,7 +209,7 @@ export function PaymentDetailPage() {
         description="Thông tin chi tiết giao dịch, đối soát cổng thanh toán và lịch sử hoàn tiền."
         actions={
           <div className="flex flex-wrap gap-2">
-            <LinkButton to="/management/payments" variant="outline">
+            <LinkButton to={paymentBasePath} variant="outline">
               Quay lại danh sách
             </LinkButton>
             {canRefund && payment.status === 'REFUND_PENDING' ? (
@@ -286,7 +294,7 @@ export function PaymentDetailPage() {
             <dd className="mt-1 font-bold text-brand-strong">
               <Link
                 className="hover:underline focus-visible:outline-2 focus-visible:outline-brand"
-                to={`/management/bookings/${payment.bookingId}`}
+                to={`${bookingBasePath}/${payment.bookingId}`}
               >
                 #{payment.bookingId}
               </Link>
@@ -452,7 +460,7 @@ export function PaymentDetailPage() {
                     · Giao dịch chính thành công:{' '}
                     <Link
                       className="font-bold text-brand-strong hover:underline"
-                      to={`/management/payments/${payment.reviewCanonicalPaymentId}`}
+                      to={`${paymentBasePath}/${payment.reviewCanonicalPaymentId}`}
                     >
                       #{payment.reviewCanonicalPaymentId}
                     </Link>

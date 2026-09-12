@@ -14,6 +14,7 @@ import {
   getMe,
   login as requestUnifiedLogin,
   loginCustomer as requestCustomerLogin,
+  loginCustomerWithGoogle as requestGoogleCustomerLogin,
   loginUser as requestUserLogin,
 } from './api'
 import { AuthContext, type AuthContextValue } from './auth-context'
@@ -33,6 +34,7 @@ import {
   type AuthPrincipal,
   type AuthSession,
   type CustomerLoginInput,
+  type GoogleCustomerLoginInput,
   type LoginResponse,
   type UserLoginInput,
 } from './types'
@@ -197,6 +199,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [storeLogin],
   )
 
+  const loginCustomerWithGoogle = useCallback(
+    async (
+      input: GoogleCustomerLoginInput,
+      persistence: AuthPersistence = 'session',
+    ) => storeLogin(await requestGoogleCustomerLogin(input), persistence),
+    [storeLogin],
+  )
+
   const login = useCallback(
     async (
       input: CustomerLoginInput | UserLoginInput,
@@ -253,6 +263,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: session !== null,
       login,
       loginCustomer,
+      loginCustomerWithGoogle,
       loginUser,
       logout,
       principal: session?.principal ?? null,
@@ -263,6 +274,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [
       login,
       loginCustomer,
+      loginCustomerWithGoogle,
       loginUser,
       logout,
       meQuery.error,

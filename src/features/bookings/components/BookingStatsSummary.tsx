@@ -10,11 +10,13 @@ import type { Booking } from '../types'
 interface BookingStatsSummaryProps {
   bookings: Booking[]
   loading: boolean
+  paymentsPath?: string
 }
 
 export function BookingStatsSummary({
   bookings,
   loading,
+  paymentsPath = '/management/payments',
 }: BookingStatsSummaryProps) {
   if (loading) {
     return (
@@ -98,7 +100,7 @@ export function BookingStatsSummary({
         </div>
         <Link
           className="inline-flex min-h-9 w-fit items-center justify-center rounded-control border border-line bg-surface px-3 py-1.5 text-sm font-semibold text-ink shadow-elevation-1 transition duration-fast ease-calm hover:border-muted/60 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
-          to="/management/payments"
+          to={paymentsPath}
         >
           Quản lý thanh toán →
         </Link>

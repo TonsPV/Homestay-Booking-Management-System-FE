@@ -1,105 +1,120 @@
-import { apiRequest } from '@/api/client'
+import { apiRequest } from "@/api/client";
 import type {
   AuthCustomerDto,
   AuthLoginResponseDto,
   AuthMeCustomerResponseDto,
   AuthMeUserResponseDto,
-} from '@/api/generated'
-import { ApiError } from '@/api/errors'
+} from "@/api/generated";
 
 import type {
   CustomerLoginInput,
+  GoogleCustomerLoginInput,
   LoginResponse,
   RegisterCustomerInput,
   UserLoginInput,
-} from './types'
+} from "./types";
 
-function normalizeLoginResponse(
-  response: AuthLoginResponseDto,
-  expectedActor: 'customer' | 'user',
-): LoginResponse {
-  if (expectedActor === 'customer' && response.customer) {
+function normalizeLoginResponse(response: AuthLoginResponseDto): LoginResponse {
+  if (response.actorType === "customer" && response.customer) {
     return {
       accessToken: response.accessToken,
-      actorType: 'customer',
+      actorType: "customer",
       customer: response.customer,
       expiresIn: response.expiresIn,
       tokenType: response.tokenType,
-    }
+    };
   }
 
-  if (expectedActor === 'user' && response.user) {
+  if (response.actorType === "user" && response.user) {
     return {
       accessToken: response.accessToken,
-      actorType: 'user',
+      actorType: "user",
       expiresIn: response.expiresIn,
       tokenType: response.tokenType,
       user: response.user,
-    }
+    };
   }
 
-  throw new Error('Máy chủ trả về dữ liệu đăng nhập không hợp lệ.')
+  throw new Error("Máy chủ trả về dữ liệu đăng nhập không hợp lệ.");
 }
 
 export async function registerCustomer(input: RegisterCustomerInput) {
-  const result = await apiRequest<AuthCustomerDto>('/auth/customers/register', {
+  const result = await apiRequest<AuthCustomerDto>("/auth/customers/register", {
     auth: false,
     body: input,
-    method: 'POST',
-  })
+    method: "POST",
+  });
 
-  return result.data
+  return result.data;
 }
 
 export async function loginCustomer(input: CustomerLoginInput) {
-  const result = await apiRequest<AuthLoginResponseDto>('/auth/customers/login', {
-    auth: false,
-    body: input,
-    method: 'POST',
-  })
+  const result = await apiRequest<AuthLoginResponseDto>(
+    "/auth/customers/login",
+    {
+      auth: false,
+      body: input,
+      method: "POST",
+    },
+  );
 
-  if (result.data.actorType !== 'customer') {
-    throw new Error('Máy chủ trả về sai loại tài khoản khách hàng.')
+  if (result.data.actorType !== "customer") {
+    throw new Error("Máy chủ trả về sai loại tài khoản khách hàng.");
   }
 
-  return normalizeLoginResponse(result.data, 'customer')
+  return normalizeLoginResponse(result.data);
 }
 
 export async function loginUser(input: UserLoginInput) {
-  const result = await apiRequest<AuthLoginResponseDto>('/auth/users/login', {
+  const result = await apiRequest<AuthLoginResponseDto>("/auth/users/login", {
     auth: false,
     body: input,
-    method: 'POST',
-  })
+    method: "POST",
+  });
 
-  if (result.data.actorType !== 'user') {
-    throw new Error('Máy chủ trả về sai loại tài khoản quản trị.')
+  if (result.data.actorType !== "user") {
+    throw new Error("Máy chủ trả về sai loại tài khoản quản trị.");
   }
 
-  return normalizeLoginResponse(result.data, 'user')
+  return normalizeLoginResponse(result.data);
 }
 
-/* Legacy actor discovery for callers that do not know their login surface.
- * Customer and operations screens must call their actor-specific endpoint so
- * a staff login never probes the customer credential store first. */
+export async function loginCustomerWithGoogle(
+  input: GoogleCustomerLoginInput,
+) {
+  const result = await apiRequest<AuthLoginResponseDto>(
+    "/auth/customers/google/login",
+    {
+      auth: false,
+      body: input,
+      method: "POST",
+    },
+  );
+
+  if (result.data.actorType !== "customer") {
+    throw new Error("Máy chủ trả về sai loại tài khoản khách hàng.");
+  }
+
+  return normalizeLoginResponse(result.data);
+}
+
+/** The canonical sign-in flow lets the server resolve the account role. */
 export async function login(
   input: CustomerLoginInput | UserLoginInput,
 ): Promise<LoginResponse> {
-  try {
-    return await loginCustomer(input)
-  } catch (error) {
-    if (error instanceof ApiError && error.isStatus(401)) {
-      return loginUser(input)
-    }
+  const result = await apiRequest<AuthLoginResponseDto>("/auth/login", {
+    auth: false,
+    body: input,
+    method: "POST",
+  });
 
-    throw error
-  }
+  return normalizeLoginResponse(result.data);
 }
 
 export async function getMe(signal?: AbortSignal) {
   const result = await apiRequest<
     AuthMeCustomerResponseDto | AuthMeUserResponseDto
-  >('/auth/me', { signal })
+  >("/auth/me", { signal });
 
-  return result.data
+  return result.data;
 }

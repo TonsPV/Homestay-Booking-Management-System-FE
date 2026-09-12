@@ -252,7 +252,7 @@ export function VnPayReturnPage() {
   } else if (paymentStatus === 'REQUIRES_REVIEW') {
     content = (
       <Alert tone="warning" title="Giao dịch đang được kiểm tra">
-        Kết quả thanh toán đến sau khi đặt phòng đã đóng. Homestay Green đang
+        Kết quả thanh toán đến sau khi đặt phòng đã đóng. Homi Stay đang
         kiểm tra và sẽ cập nhật khi có kết quả cuối cùng.
       </Alert>
     )

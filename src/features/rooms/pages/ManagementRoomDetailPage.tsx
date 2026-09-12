@@ -5,6 +5,7 @@ import { useRoomTypeOptions } from "@/features/room-types";
 import { Badge } from "@/shared/components/Badge";
 import { Button } from "@/shared/components/Button";
 import { Card } from "@/shared/components/Card";
+import { ConfirmationDialog } from "@/shared/components/ConfirmationDialog";
 import { Alert, ErrorState, LoadingState } from "@/shared/components/Feedback";
 import { Select } from "@/shared/components/FormControls";
 import {
@@ -30,6 +31,7 @@ import {
 } from "../types";
 
 interface ManagementRoomDetailPageProps {
+  bookingBasePath?: string;
   onBack?: () => void;
   onDeleted?: () => void;
   onEditRoom?: () => void;
@@ -45,6 +47,7 @@ function statusOptionsFor(role: ManagementRole) {
 }
 
 export function ManagementRoomDetailPage({
+  bookingBasePath = "/management/bookings",
   onBack,
   onDeleted,
   onEditRoom,
@@ -56,9 +59,12 @@ export function ManagementRoomDetailPage({
   const roomTypesQuery = useRoomTypeOptions(role === "ADMIN");
   const deleteMutation = useDeleteRoom();
   const statusMutation = useUpdateRoomStatus();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [statusDraft, setStatusDraft] = useState<RoomStatus>();
   const [successMessage, setSuccessMessage] = useState<string>();
-  const actionError = deleteMutation.error ?? statusMutation.error;
+  const actionError = deleteDialogOpen
+    ? statusMutation.error
+    : deleteMutation.error ?? statusMutation.error;
 
   if (query.isPending) {
     return <LoadingState label="Đang tải thông tin phòng…" />;
@@ -94,16 +100,15 @@ export function ManagementRoomDetailPage({
   }
 
   function removeRoom() {
-    if (
-      !window.confirm(
-        `Xóa vĩnh viễn phòng ${room.roomNumber}? Phòng có lịch sử đặt sẽ không thể xóa.`,
-      )
-    ) {
+    if (deleteMutation.isPending) {
       return;
     }
 
     deleteMutation.mutate(room.id, {
-      onSuccess: () => onDeleted?.(),
+      onSuccess: () => {
+        setDeleteDialogOpen(false);
+        onDeleted?.();
+      },
     });
   }
 
@@ -175,7 +180,10 @@ export function ManagementRoomDetailPage({
                 ) : null}
                 <Button
                   loading={deleteMutation.isPending}
-                  onClick={removeRoom}
+                  onClick={() => {
+                    deleteMutation.reset();
+                    setDeleteDialogOpen(true);
+                  }}
                   variant="danger"
                 >
                   Xóa phòng
@@ -263,7 +271,7 @@ export function ManagementRoomDetailPage({
         </section>
       </Card>
 
-      <RoomCalendarManager roomId={room.id} />
+      <RoomCalendarManager bookingBasePath={bookingBasePath} roomId={room.id} />
 
       <section aria-labelledby="room-images-heading">
         <div className="flex items-end justify-between gap-3">
@@ -317,6 +325,26 @@ export function ManagementRoomDetailPage({
           </div>
         )}
       </section>
+
+      <ConfirmationDialog
+        busy={deleteMutation.isPending}
+        confirmLabel="Xóa phòng"
+        description={`Phòng ${room.roomNumber} sẽ bị xóa vĩnh viễn. Phòng có lịch sử đặt sẽ không thể xóa.`}
+        onCancel={() => {
+          if (!deleteMutation.isPending) {
+            deleteMutation.reset();
+            setDeleteDialogOpen(false);
+          }
+        }}
+        onConfirm={removeRoom}
+        open={deleteDialogOpen}
+        title="Xóa phòng này?"
+        tone="danger"
+      >
+        {deleteMutation.isError ? (
+          <Alert tone="error">{getErrorMessage(deleteMutation.error)}</Alert>
+        ) : null}
+      </ConfirmationDialog>
     </div>
   );
 }

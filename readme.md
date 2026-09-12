@@ -1,4 +1,4 @@
-# Homestay Green — giao diện đặt phòng và quản lý
+# Homi Stay — giao diện đặt phòng và quản lý
 
 Ứng dụng React/Vite phục vụ khách đặt phòng, nhân viên tại quầy và quản trị viên.
 Backend quyết định quyền truy cập, giá, phòng trống và trạng thái giao dịch.

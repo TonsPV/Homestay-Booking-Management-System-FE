@@ -21,26 +21,36 @@ function resolveNotice(state: unknown, search: string) {
 export function LoginRoute() {
   const { principal } = useAuth();
   const location = useLocation();
-  const isManagementLogin = location.pathname === "/management/login";
 
   if (principal) {
-    return <Navigate replace to={resolvePostLoginRoute(principal, location.state)} />;
+    return (
+      <Navigate replace to={resolvePostLoginRoute(principal, location.state)} />
+    );
   }
 
   return (
     <LoginPage
-      actor={isManagementLogin ? "user" : "customer"}
       locationState={location.state}
       notice={resolveNotice(location.state, location.search)}
-      registerPath={isManagementLogin ? null : "/register"}
+      registerPath="/register"
     />
   );
 }
 
-/* Legacy aliases keep older deep links working while directing everyone to
- * the single canonical login route. */
+/** Keeps existing operational-login bookmarks on the canonical form. */
+export function ManagementLoginRoute() {
+  const location = useLocation();
+
+  return (
+    <Navigate
+      replace
+      state={location.state}
+      to={{ pathname: "/login", search: location.search }}
+    />
+  );
+}
+
 export const CustomerLoginRoute = LoginRoute;
-export const ManagementLoginRoute = LoginRoute;
 
 export function RegisterRoute() {
   const { principal } = useAuth();

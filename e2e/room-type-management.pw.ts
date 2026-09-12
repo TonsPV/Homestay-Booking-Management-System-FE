@@ -136,8 +136,11 @@ test('admin completes RoomType CRUD, exact amenity assignment and restore', asyn
   roomTypeCard = page.getByRole('article', {
     name: 'Loại phòng Phòng gia đình xanh',
   })
-  page.on('dialog', (dialog) => dialog.accept())
   await roomTypeCard.getByRole('button', { name: 'Xóa' }).click()
+  await page
+    .getByRole('dialog', { name: 'Xóa loại phòng này?' })
+    .getByRole('button', { name: 'Xóa loại phòng' })
+    .click()
   await expect(page.getByText('Đã xóa loại phòng.')).toBeVisible()
   await expect(roomTypeCard).toHaveCount(0)
 

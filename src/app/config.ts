@@ -91,6 +91,7 @@ export const appConfig = {
   appRelease: import.meta.env.VITE_APP_RELEASE?.trim() || null,
   currency: 'VND',
   errorReportingEndpoint: resolveErrorReportingEndpoint(),
+  googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || null,
   locale: 'vi-VN',
   timeZone: 'Asia/Ho_Chi_Minh',
 } as const

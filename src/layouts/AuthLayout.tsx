@@ -18,7 +18,7 @@ export function AuthLayout() {
           className="absolute -bottom-28 -right-20 size-80 rounded-full bg-brand/10 blur-3xl"
         />
         <Link
-          aria-label="Homestay Green - Trang chủ"
+          aria-label="Homi Stay - Trang chủ"
           className="relative flex min-h-11 items-center gap-3 rounded-xl font-black focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-on-inverse"
           to="/"
         >
@@ -28,7 +28,7 @@ export function AuthLayout() {
           >
             HG
           </span>
-          Homestay Green
+          Homi Stay
         </Link>
         <div className="relative max-w-md">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-on-inverse">
@@ -54,7 +54,7 @@ export function AuthLayout() {
       >
         <div className="w-full max-w-xl">
           <Link
-            aria-label="Homestay Green - Trang chủ"
+            aria-label="Homi Stay - Trang chủ"
             className="mb-7 inline-flex min-h-11 items-center gap-2 rounded-xl font-black text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand lg:hidden"
             to="/"
           >
@@ -64,7 +64,7 @@ export function AuthLayout() {
             >
               HG
             </span>
-            Homestay Green
+            Homi Stay
           </Link>
           <Outlet />
         </div>

@@ -157,6 +157,7 @@ export function StaffPaymentsPage() {
           <PaymentList
             bookingBasePath="/staff/bookings"
             management
+            paymentBasePath="/staff/payments"
             payments={payments}
           />
           <PaginationControls

@@ -4,7 +4,7 @@ const customerPaymentCodeMessages: Record<string, string> = {
   PAYMENT_IDEMPOTENCY_KEY_CONFLICT:
     "Thông tin thanh toán vừa thay đổi. Vui lòng tải lại trang trước khi thử lại.",
   PAYMENT_REFUND_REJECTED:
-    "Yêu cầu hoàn tiền chưa thể hoàn tất. Vui lòng liên hệ Homestay Green nếu cần hỗ trợ.",
+    "Yêu cầu hoàn tiền chưa thể hoàn tất. Vui lòng liên hệ Homi Stay nếu cần hỗ trợ.",
   PAYMENT_REFUND_NOT_ALLOWED:
     "Khoản thanh toán này chưa thể hoàn tiền ở thời điểm hiện tại.",
   PAYMENT_REFUND_OUTCOME_UNKNOWN:

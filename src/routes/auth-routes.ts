@@ -1,25 +1,25 @@
-import type { RouteObject } from 'react-router-dom'
+import type { RouteObject } from "react-router-dom";
 
 export const authRoutes: RouteObject[] = [
   {
-    path: 'login',
+    path: "login",
     lazy: async () => {
-      const { LoginRoute } = await import('./AuthRouteAdapters')
-      return { Component: LoginRoute }
+      const { LoginRoute } = await import("./AuthRouteAdapters");
+      return { Component: LoginRoute };
     },
   },
   {
-    path: 'register',
+    path: "register",
     lazy: async () => {
-      const { RegisterRoute } = await import('./AuthRouteAdapters')
-      return { Component: RegisterRoute }
+      const { RegisterRoute } = await import("./AuthRouteAdapters");
+      return { Component: RegisterRoute };
     },
   },
   {
-    path: 'management/login',
+    path: "management/login",
     lazy: async () => {
-      const { LoginRoute } = await import('./AuthRouteAdapters')
-      return { Component: LoginRoute }
+      const { ManagementLoginRoute } = await import("./AuthRouteAdapters");
+      return { Component: ManagementLoginRoute };
     },
   },
-]
+];

@@ -1,6 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { dashboardSummary, envelope, fulfillJson, principalFor } from "./helpers";
+import {
+  dashboardSummary,
+  envelope,
+  fulfillJson,
+  principalFor,
+} from "./helpers";
 
 async function openManagementSection(page: Page, name: string) {
   const links = page.getByRole("link", { exact: true, name });
@@ -45,7 +50,7 @@ test("admin login continues through amenity, room type, room, image cover and ca
     const path = url.pathname;
     const method = request.method();
 
-    if (path.endsWith("/auth/users/login")) {
+    if (path.endsWith("/auth/login")) {
       await fulfillJson(
         route,
         {
@@ -67,10 +72,6 @@ test("admin login continues through amenity, room type, room, image cover and ca
         path,
       );
       return;
-    }
-
-    if (path.endsWith("/auth/customers/login")) {
-      throw new Error("Operations login must not call the customer endpoint.");
     }
 
     /* ADMIN lands on the bookings workflow (dashboard is dormant); mock the
@@ -247,7 +248,7 @@ test("admin login continues through amenity, room type, room, image cover and ca
     await route.fallback();
   });
 
-  await page.goto("/management/login");
+  await page.goto("/login");
   await page.getByLabel("Email hoặc số điện thoại").fill(principal.email);
   await page
     .getByRole("textbox", { name: "Mật khẩu", exact: true })
@@ -312,5 +313,9 @@ test("admin login continues through amenity, room type, room, image cover and ca
   await page.getByLabel("Lý do").fill("Bảo trì định kỳ");
   await page.getByRole("button", { name: "Khóa ngày" }).click();
   await expect(page.getByText("Đã khóa 2 đêm.")).toBeVisible();
-  await expect(page.getByText("Bảo trì định kỳ")).toHaveCount(2);
+  await expect(
+    page
+      .locator("p:visible, td:visible")
+      .filter({ hasText: "Bảo trì định kỳ" }),
+  ).toHaveCount(2);
 });
