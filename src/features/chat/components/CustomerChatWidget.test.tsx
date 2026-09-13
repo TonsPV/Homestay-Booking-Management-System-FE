@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   conversations: {
@@ -100,6 +100,10 @@ function renderWidget(pathname = '/') {
 }
 
 describe('CustomerChatWidget', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   beforeEach(() => {
     mocks.useAuth.mockReset()
     mocks.useAuth.mockReturnValue({
@@ -108,8 +112,12 @@ describe('CustomerChatWidget', () => {
     mocks.conversations.refetch.mockReset()
   })
 
-  it('opens a compact booking inbox from the floating launcher', async () => {
+  it('opens a two-column booking messenger from the floating launcher', async () => {
     const user = userEvent.setup()
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: true }),
+    )
     renderWidget()
 
     await user.click(
@@ -117,12 +125,14 @@ describe('CustomerChatWidget', () => {
     )
 
     expect(screen.getByLabelText('Hộp thư hỗ trợ booking')).toBeInTheDocument()
+    expect(screen.getByLabelText('Danh sách hội thoại')).toBeInTheDocument()
+    expect(screen.getByLabelText('Chi tiết hội thoại')).toBeInTheDocument()
     expect(screen.getByText('Phòng hướng vườn')).toBeInTheDocument()
 
-    await user.click(screen.getByText('Phòng hướng vườn'))
-
-    expect(screen.getByTestId('chat-panel')).toHaveTextContent(
-      'Đang trao đổi: booking-1',
+    await waitFor(() =>
+      expect(screen.getByTestId('chat-panel')).toHaveTextContent(
+        'Đang trao đổi: booking-1',
+      ),
     )
 
     await user.click(screen.getByRole('button', { name: 'Xem booking' }))
@@ -134,12 +144,12 @@ describe('CustomerChatWidget', () => {
     ).toBeInTheDocument()
   })
 
-  it('does not render beside the dedicated customer inbox', () => {
+  it('keeps the launcher independent from the retired customer inbox route', () => {
     renderWidget('/messages')
 
     expect(
-      screen.queryByRole('button', { name: /Mở hỗ trợ booking/ }),
-    ).not.toBeInTheDocument()
+      screen.getByRole('button', { name: /Mở hỗ trợ booking/ }),
+    ).toBeInTheDocument()
   })
 
   it('returns focus to the launcher after closing the widget', async () => {

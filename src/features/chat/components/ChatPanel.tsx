@@ -39,6 +39,7 @@ interface ChatPanelProps {
   bookingId: string
   bookingHref?: string
   className?: string
+  embedded?: boolean
   floating?: boolean
   onBack?: () => void
   onBookingLink?: () => void
@@ -72,23 +73,40 @@ function getBookingStatusTone(status: string) {
 function BookingAttachment({
   booking,
   bookingHref,
+  embedded = false,
   onBookingLink,
 }: {
   booking: ChatBookingContext['booking']
   bookingHref?: string
+  embedded?: boolean
   onBookingLink?: () => void
 }) {
   return (
     <section
       aria-label="Booking đang trao đổi"
-      className="border-b border-line bg-canvas/45 px-4 py-3 sm:px-5"
+      className={cn(
+        'border-b border-line',
+        embedded
+          ? 'bg-brand-soft/35 px-3 py-2.5'
+          : 'bg-canvas/45 px-4 py-3 sm:px-5',
+      )}
     >
-      <div className="flex items-start gap-3 rounded-card border border-line bg-surface p-3 shadow-elevation-1">
+      <div
+        className={cn(
+          'flex items-start gap-3',
+          embedded
+            ? 'p-0'
+            : 'rounded-card border border-line bg-surface p-3 shadow-elevation-1',
+        )}
+      >
         <span
           aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong"
+          className={cn(
+            'grid shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong',
+            embedded ? 'size-9' : 'size-10',
+          )}
         >
-          <BedDouble className="size-5" strokeWidth={2.25} />
+          <BedDouble className={embedded ? 'size-4' : 'size-5'} strokeWidth={2.25} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -104,13 +122,16 @@ function BookingAttachment({
               {bookingStatusLabels[booking.status] ?? booking.status}
             </Badge>
           </div>
-          <p className="mt-2 text-xs leading-5 text-muted">
+          <p className={cn('text-xs leading-5 text-muted', embedded ? 'mt-1' : 'mt-2')}>
             {formatDateOnly(booking.checkInDate)} –{' '}
             {formatDateOnly(booking.checkOutDate)}
           </p>
           {bookingHref ? (
             <Link
-              className="mt-2 inline-flex text-xs font-bold text-brand-strong underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className={cn(
+                'inline-flex text-xs font-bold text-brand-strong underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                embedded ? 'mt-1' : 'mt-2',
+              )}
               onClick={onBookingLink}
               to={bookingHref}
             >
@@ -194,6 +215,7 @@ export function ChatPanel({
   bookingHref,
   bookingId,
   className,
+  embedded = false,
   floating = false,
   onBack,
   onBookingLink,
@@ -381,41 +403,40 @@ export function ChatPanel({
     send({ ...activePendingMessage, state: 'sending' })
   }
 
-  return (
-    <Card
-      className={cn(
-        'flex flex-col p-0',
-        floating ? 'h-full min-h-0' : 'min-h-[34rem]',
-        className,
-      )}
-    >
+  const invertedHeader = floating && !embedded
+  const panelContent = (
+    <>
       <header
         className={cn(
-          'flex min-h-16 items-center gap-3 border-b px-4 py-3 sm:px-5',
-          floating
+          'flex min-h-14 items-center gap-3 border-b px-3 py-2.5 sm:px-4',
+          invertedHeader
             ? 'border-brand-strong/35 bg-brand text-white'
-            : 'border-line bg-surface',
+            : embedded
+              ? 'border-line bg-surface'
+              : 'border-line bg-surface sm:px-5',
         )}
       >
         {onBack ? (
           <Button
             className={cn(
               'shrink-0 px-3',
-              floating
+              embedded
+                ? 'sm:hidden'
+                : invertedHeader
                 ? 'border-white/30 bg-white/10 text-white hover:border-white/45 hover:bg-white/18 focus-visible:outline-white'
                 : 'lg:hidden',
             )}
             onClick={onBack}
             variant="outline"
           >
-            {floating ? 'Hộp thư' : 'Danh sách'}
+            {embedded ? 'Danh sách' : floating ? 'Hộp thư' : 'Danh sách'}
           </Button>
         ) : null}
         <div className="min-w-0 flex-1">
           <h2
             className={cn(
               'truncate text-base font-bold',
-              floating ? 'text-white' : 'text-ink',
+              invertedHeader ? 'text-white' : 'text-ink',
             )}
           >
             {booking?.bookingCode ?? 'Trao đổi về booking'}
@@ -424,7 +445,7 @@ export function ChatPanel({
             <p
               className={cn(
                 'mt-0.5 truncate text-sm',
-                floating ? 'text-white/75' : 'text-muted',
+                invertedHeader ? 'text-white/75' : 'text-muted',
               )}
             >
               Phòng {booking.roomNumber} · {formatDateOnly(booking.checkInDate)}–
@@ -445,7 +466,7 @@ export function ChatPanel({
             <IconButton
               aria-label="Thu gọn cửa sổ chat"
               className={
-                floating
+                invertedHeader
                   ? 'text-white hover:bg-white/14 hover:text-white focus-visible:outline-white'
                   : undefined
               }
@@ -459,7 +480,7 @@ export function ChatPanel({
             <IconButton
               aria-label="Đóng cửa sổ chat"
               className={
-                floating
+                invertedHeader
                   ? 'text-white hover:bg-white/14 hover:text-white focus-visible:outline-white'
                   : undefined
               }
@@ -476,13 +497,17 @@ export function ChatPanel({
         <BookingAttachment
           booking={booking}
           bookingHref={bookingHref}
+          embedded={embedded}
           onBookingLink={onBookingLink}
         />
       ) : null}
 
       <section
         aria-label="Lịch sử trao đổi"
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-canvas/45 px-4 py-5 sm:px-5"
+        className={cn(
+          'min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-5',
+          embedded ? 'bg-canvas sm:px-5' : 'bg-canvas/45 sm:px-5',
+        )}
         onScroll={updateReadPosition}
         ref={historyRef}
       >
@@ -568,7 +593,7 @@ export function ChatPanel({
       </section>
 
       <form
-        className="border-t border-line bg-surface px-4 py-4 sm:px-5"
+        className="border-t border-line bg-surface px-4 py-3 sm:px-5"
         onSubmit={(event) => {
           event.preventDefault()
           submit()
@@ -605,6 +630,22 @@ export function ChatPanel({
           </Button>
         </div>
       </form>
+    </>
+  )
+
+  if (floating) {
+    return (
+      <section
+        className={cn('flex h-full min-h-0 flex-col bg-surface', className)}
+      >
+        {panelContent}
+      </section>
+    )
+  }
+
+  return (
+    <Card className={cn('flex min-h-[34rem] flex-col p-0', className)}>
+      {panelContent}
     </Card>
   )
 }

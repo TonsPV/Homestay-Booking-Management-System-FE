@@ -26,7 +26,7 @@ export function getUserWorkspaceDestination(state: unknown, role: UserRole) {
 
 type PostLoginWorkspace = "customer" | "management" | "staff";
 
-const CUSTOMER_SURFACE_PREFIXES = ["/account", "/bookings", "/messages", "/rooms", "/room-types"] as const;
+const CUSTOMER_SURFACE_PREFIXES = ["/account", "/bookings", "/rooms", "/room-types"] as const;
 
 function canLandOn(
   workspace: PostLoginWorkspace,

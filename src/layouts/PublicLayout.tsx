@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
-import { appConfig } from "@/app/config";
 import { CustomerChatWidgetProvider } from "@/features/chat/CustomerChatWidgetProvider";
-import { ChatUnreadBadge } from "@/features/chat/components/ChatUnreadBadge";
 import { CustomerChatWidget } from "@/features/chat/components/CustomerChatWidget";
 import { getPrincipalHome } from "@/routes/workspace-policy";
 import { ScrollToTop } from "@/routes/RouteSupport";
@@ -148,20 +146,6 @@ export function PublicLayout() {
                 Đặt phòng của tôi
               </NavLink>
             ) : null}
-            {principal?.actorType === "customer" && appConfig.chatEnabled ? (
-              <NavLink
-                className={(state) => navLinkClass(state, transparentHeader)}
-                to="/messages"
-              >
-                <ChatUnreadBadge
-                  className={cn(
-                    "mr-2",
-                    transparentHeader && "bg-white/18 text-white",
-                  )}
-                />
-                Tin nhắn
-              </NavLink>
-            ) : null}
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
@@ -296,16 +280,6 @@ export function PublicLayout() {
                   to="/bookings"
                 >
                   Đặt phòng của tôi
-                </NavLink>
-              ) : null}
-              {principal?.actorType === "customer" && appConfig.chatEnabled ? (
-              <NavLink
-                className={mobileNavLinkClass}
-                onClick={closeMenu}
-                to="/messages"
-              >
-                <ChatUnreadBadge className="mr-2 px-2" />
-                  Tin nhắn
                 </NavLink>
               ) : null}
             </nav>

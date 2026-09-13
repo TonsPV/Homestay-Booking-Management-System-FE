@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router-dom'
+import { Navigate, type RouteObject } from 'react-router-dom'
 
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -92,10 +92,7 @@ export const publicRoutes: RouteObject[] = [
       },
       {
         path: 'messages',
-        lazy: async () => {
-          const { ChatInboxPage } = await import('@/features/chat')
-          return { Component: ChatInboxPage }
-        },
+        element: <Navigate replace to="/bookings" />,
       },
     ],
   },

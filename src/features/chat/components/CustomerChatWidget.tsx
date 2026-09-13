@@ -1,13 +1,13 @@
 /**
- * THESIS: Booking support stays one tap away, carrying the room context instead
- * of making a guest reconstruct which stay a message belongs to.
- * OWN-WORLD: Restrained Homi Stay blue, white surfaces, crisp booking labels,
- * and a single soft-elevation floating window.
- * STORY: A customer opens their support thread, recognizes the booked room,
- * and returns to the full inbox only when they need broader history.
- * FIRST VIEWPORT: A circular chat launcher anchors the lower-right corner;
- * its expanded window puts booking threads before message history.
- * FORM: Operate-mode messenger widget, extending the existing customer surface.
+ * THESIS: Booking support should feel like a familiar messenger, with the
+ * stay context always visible beside the conversation it belongs to.
+ * OWN-WORLD: Homi blue anchors one calm workspace; muted canvas separates
+ * threads from messages without stacking white cards inside white cards.
+ * STORY: A guest opens the chat bubble, scans their booking threads, then
+ * continues the selected exchange without leaving the page they were using.
+ * FIRST VIEWPORT: Desktop opens a two-column chat window; mobile moves from
+ * the thread list into the selected conversation.
+ * FORM: Booking-centric messenger workspace for the customer surface.
  */
 import {
   BedDouble,
@@ -15,15 +15,17 @@ import {
   MessageCircle,
   MessagesSquare,
   Minus,
+  Search,
   X,
 } from 'lucide-react'
-import { useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
 
 import { appConfig } from '@/app/config'
 import { useAuth } from '@/auth/useAuth'
 import { Badge } from '@/shared/components/Badge'
+import { cn } from '@/shared/components/cn'
 import { ErrorState, LoadingState } from '@/shared/components/Feedback'
+import { Input } from '@/shared/components/FormControls'
 import { IconButton } from '@/shared/components/IconButton'
 import { formatDateTime } from '@/shared/formatting/formatters'
 
@@ -35,21 +37,27 @@ import { ChatPanel } from './ChatPanel'
 function ConversationPreview({
   conversation,
   onSelect,
+  selected,
 }: {
   conversation: ChatConversation
   onSelect: () => void
+  selected: boolean
 }) {
   const preview = conversation.lastMessage
 
   return (
     <button
-      className="group flex w-full items-start gap-3 border-b border-line px-4 py-4 text-left transition duration-fast ease-calm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand motion-reduce:transition-none"
+      aria-current={selected ? 'true' : undefined}
+      className={cn(
+        'group flex w-full items-start gap-3 border-b border-line px-3 py-3.5 text-left transition duration-fast ease-calm hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand motion-reduce:transition-none',
+        selected && 'bg-brand-soft/65 ring-1 ring-inset ring-brand/35',
+      )}
       onClick={onSelect}
       type="button"
     >
       <span
         aria-hidden="true"
-        className="grid size-11 shrink-0 place-items-center rounded-card bg-brand-soft text-brand-strong"
+        className="grid size-10 shrink-0 place-items-center rounded-control bg-brand-soft text-brand-strong"
       >
         <BedDouble className="size-5" strokeWidth={2.25} />
       </span>
@@ -82,39 +90,66 @@ function ConversationPreview({
       </span>
       <ChevronRight
         aria-hidden="true"
-        className="mt-3 size-4 shrink-0 text-muted transition duration-fast ease-calm group-hover:translate-x-0.5 group-hover:text-brand-strong motion-reduce:transition-none"
+        className="mt-3 size-4 shrink-0 text-muted sm:hidden"
       />
     </button>
   )
 }
 
-function WidgetInbox() {
-  const { close, minimize, openBooking } = useCustomerChatWidget()
-  const conversationsQuery = useChatConversations({ limit: 20, page: 1 })
+function ChatWindow() {
+  const {
+    close,
+    minimize,
+    openBooking,
+    openInbox,
+    selectedBookingId,
+  } = useCustomerChatWidget()
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const conversationsQuery = useChatConversations({
+    limit: 30,
+    page: 1,
+    search: search || undefined,
+  })
   const conversations = conversationsQuery.data?.data ?? []
+  const mostRecentBookingId = conversations[0]?.booking.id
+
+  useEffect(() => {
+    if (
+      selectedBookingId ||
+      !mostRecentBookingId ||
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      !window.matchMedia('(min-width: 640px)').matches
+    ) {
+      return
+    }
+
+    openBooking(mostRecentBookingId)
+  }, [mostRecentBookingId, openBooking, selectedBookingId])
 
   return (
     <section
       aria-label="Hộp thư hỗ trợ booking"
-      className="flex h-full min-h-0 flex-col bg-surface"
+      className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-canvas"
     >
-      <header className="flex min-h-16 items-center gap-3 bg-brand px-4 text-white">
+      <header className="flex min-h-14 items-center gap-3 bg-brand px-4 text-white">
         <span
           aria-hidden="true"
           className="grid size-9 place-items-center rounded-control bg-white/14"
         >
           <MessagesSquare className="size-5" strokeWidth={2.25} />
         </span>
-        <div className="min-w-0">
-          <h2 className="text-base font-bold">Hỗ trợ booking</h2>
-          <p className="mt-0.5 text-xs text-white/75">
-            Chọn phòng để tiếp tục trao đổi
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-bold">Trao đổi booking</h2>
+          <p className="mt-0.5 truncate text-xs text-white/75">
+            Chọn cuộc thoại để tiếp tục trao đổi
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="flex items-center gap-1">
           <IconButton
             aria-label="Thu gọn cửa sổ chat"
-            className="text-white hover:bg-white/14 hover:text-white"
+            className="text-white hover:bg-white/14 hover:text-white focus-visible:outline-white"
             onClick={minimize}
             size="sm"
           >
@@ -122,7 +157,7 @@ function WidgetInbox() {
           </IconButton>
           <IconButton
             aria-label="Đóng cửa sổ chat"
-            className="text-white hover:bg-white/14 hover:text-white"
+            className="text-white hover:bg-white/14 hover:text-white focus-visible:outline-white"
             onClick={close}
             size="sm"
           >
@@ -131,82 +166,134 @@ function WidgetInbox() {
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {conversationsQuery.isPending ? (
-          <LoadingState label="Đang tải các trao đổi…" />
-        ) : null}
-        {conversationsQuery.isError ? (
-          <div className="p-4">
-            <ErrorState
-              description="Không thể tải các trao đổi về booking."
-              onRetry={() => void conversationsQuery.refetch()}
-              title="Chưa tải được hộp thư"
-            />
-          </div>
-        ) : null}
-        {!conversationsQuery.isPending &&
-        !conversationsQuery.isError &&
-        conversations.length === 0 ? (
-          <div className="grid min-h-64 place-items-center px-7 py-10 text-center">
-            <div>
-              <span
-                aria-hidden="true"
-                className="mx-auto grid size-12 place-items-center rounded-card bg-brand-soft text-brand-strong"
-              >
-                <MessageCircle className="size-6" />
-              </span>
-              <h3 className="mt-4 text-base font-bold text-ink">
-                Chưa có trao đổi nào
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Mở chi tiết booking để bắt đầu trao đổi với đội hỗ trợ.
-              </p>
-            </div>
-          </div>
-        ) : null}
-        {conversations.map((conversation) => (
-          <ConversationPreview
-            conversation={conversation}
-            key={conversation.id}
-            onSelect={() => openBooking(conversation.booking.id)}
-          />
-        ))}
-      </div>
-
-      <footer className="border-t border-line bg-canvas/55 p-3">
-        <Link
-          className="flex min-h-11 items-center justify-center rounded-control px-3 text-sm font-bold text-brand-strong transition duration-fast ease-calm hover:bg-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none"
-          onClick={close}
-          to="/messages"
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <section
+          aria-label="Danh sách hội thoại"
+          className={cn(
+            'min-h-0 w-full flex-col border-line bg-surface sm:flex sm:w-60 sm:shrink-0 sm:border-r',
+            selectedBookingId ? 'hidden sm:flex' : 'flex',
+          )}
         >
-          Mở hộp thư đầy đủ
-          <ChevronRight aria-hidden="true" className="ml-1 size-4" />
-        </Link>
-      </footer>
+          <form
+            className="border-b border-line bg-surface px-3 py-3"
+            onSubmit={(event) => {
+              event.preventDefault()
+              setSearch(searchInput.trim())
+            }}
+          >
+            <label className="sr-only" htmlFor="floating-chat-search">
+              Tìm theo mã booking
+            </label>
+            <div className="relative">
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted"
+              />
+              <Input
+                className="min-h-10 border-line bg-canvas pl-9 py-2 text-sm shadow-none"
+                id="floating-chat-search"
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Tìm booking"
+                value={searchInput}
+              />
+            </div>
+          </form>
+
+          <div className="min-h-0 flex-1 overflow-y-auto bg-surface">
+            {conversationsQuery.isPending ? (
+              <LoadingState label="Đang tải cuộc thoại…" />
+            ) : null}
+            {conversationsQuery.isError ? (
+              <div className="p-3">
+                <ErrorState
+                  description="Không thể tải các trao đổi về booking."
+                  onRetry={() => void conversationsQuery.refetch()}
+                  title="Chưa tải được hộp thư"
+                />
+              </div>
+            ) : null}
+            {!conversationsQuery.isPending &&
+            !conversationsQuery.isError &&
+            conversations.length === 0 ? (
+              <div className="grid min-h-56 place-items-center px-6 py-8 text-center">
+                <div>
+                  <span
+                    aria-hidden="true"
+                    className="mx-auto grid size-11 place-items-center rounded-control bg-brand-soft text-brand-strong"
+                  >
+                    <MessageCircle className="size-5" />
+                  </span>
+                  <h3 className="mt-3 text-sm font-bold text-ink">
+                    Chưa có cuộc thoại
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-muted">
+                    Mở chi tiết booking để bắt đầu trao đổi.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+            {conversations.map((conversation) => (
+              <ConversationPreview
+                conversation={conversation}
+                key={conversation.id}
+                onSelect={() => openBooking(conversation.booking.id)}
+                selected={selectedBookingId === conversation.booking.id}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section
+          aria-label="Chi tiết hội thoại"
+          className={cn(
+            'min-w-0 flex-1 bg-canvas sm:flex',
+            selectedBookingId ? 'flex' : 'hidden sm:flex',
+          )}
+        >
+          {selectedBookingId ? (
+            <ChatPanel
+              bookingHref={`/bookings/${selectedBookingId}`}
+              bookingId={selectedBookingId}
+              className="h-full min-h-0 w-full"
+              embedded
+              floating
+              onBack={openInbox}
+              onBookingLink={close}
+            />
+          ) : (
+            <div className="grid h-full w-full place-items-center bg-canvas/75 px-8 text-center">
+              <div>
+                <span
+                  aria-hidden="true"
+                  className="mx-auto grid size-12 place-items-center rounded-card bg-brand-soft text-brand-strong"
+                >
+                  <MessageCircle className="size-6" />
+                </span>
+                <h3 className="mt-4 text-base font-bold text-ink">
+                  Chọn một cuộc thoại
+                </h3>
+                <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-muted">
+                  Danh sách booking nằm ở bên trái.
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
+      </div>
     </section>
   )
 }
 
 export function CustomerChatWidget() {
   const { principal } = useAuth()
-  const { pathname } = useLocation()
-  const {
-    close,
-    isMinimized,
-    isOpen,
-    minimize,
-    openBooking,
-    openInbox,
-    selectedBookingId,
-  } = useCustomerChatWidget()
+  const { close, isMinimized, isOpen, openBooking, openInbox, selectedBookingId } =
+    useCustomerChatWidget()
   const summary = useChatSummary()
   const launcherRef = useRef<HTMLButtonElement>(null)
   const hadOpenWindowRef = useRef(false)
   const unreadCount = summary.data?.unreadMessageCount ?? 0
   const canShow =
-    appConfig.chatEnabled &&
-    principal?.actorType === 'customer' &&
-    pathname !== '/messages'
+    appConfig.chatEnabled && principal?.actorType === 'customer'
   const isWindowOpen = isOpen && !isMinimized
 
   useEffect(() => {
@@ -241,12 +328,6 @@ export function CustomerChatWidget() {
     }
   }, [canShow, isWindowOpen])
 
-  useEffect(() => {
-    if (pathname === '/messages') {
-      close()
-    }
-  }, [close, pathname])
-
   if (!canShow) {
     return null
   }
@@ -277,22 +358,9 @@ export function CustomerChatWidget() {
       {isWindowOpen ? (
         <aside
           aria-label="Cửa sổ hỗ trợ booking"
-          className="fixed inset-0 z-modal flex bg-surface sm:inset-auto sm:bottom-5 sm:right-5 sm:h-[min(42rem,calc(100dvh-2.5rem))] sm:w-[min(25rem,calc(100vw-2.5rem))] sm:overflow-hidden sm:rounded-panel sm:border sm:border-line sm:shadow-elevation-4"
+          className="fixed inset-0 z-modal flex bg-canvas sm:inset-auto sm:bottom-5 sm:right-5 sm:h-[min(42rem,calc(100dvh-2.5rem))] sm:w-[min(50rem,calc(100vw-2.5rem))] sm:overflow-hidden sm:rounded-panel sm:border sm:border-line sm:shadow-elevation-4"
         >
-          {selectedBookingId ? (
-            <ChatPanel
-              bookingHref={`/bookings/${selectedBookingId}`}
-              bookingId={selectedBookingId}
-              className="h-full min-h-0 w-full rounded-none border-0 shadow-none"
-              floating
-              onBack={openInbox}
-              onBookingLink={close}
-              onClose={close}
-              onMinimize={minimize}
-            />
-          ) : (
-            <WidgetInbox />
-          )}
+          <ChatWindow />
         </aside>
       ) : null}
     </>
