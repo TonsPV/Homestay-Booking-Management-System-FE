@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -10,6 +11,19 @@ import { AuthLayout } from "./AuthLayout";
 import { ManagementLayout } from "./ManagementLayout";
 import { PublicLayout } from "./PublicLayout";
 import { StaffLayout } from "./StaffLayout";
+
+vi.mock("@/features/chat/CustomerChatWidgetProvider", () => ({
+  CustomerChatWidgetProvider: ({ children }: { children: ReactNode }) =>
+    children,
+}));
+
+vi.mock("@/features/chat/components/CustomerChatWidget", () => ({
+  CustomerChatWidget: () => null,
+}));
+
+vi.mock("@/features/chat/components/ChatUnreadBadge", () => ({
+  ChatUnreadBadge: () => null,
+}));
 
 const customer: AuthPrincipal = {
   actorType: "customer",

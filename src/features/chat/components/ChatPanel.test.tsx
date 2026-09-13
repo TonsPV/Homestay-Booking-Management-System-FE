@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const readAuthSessionMock = vi.hoisted(() => vi.fn())
@@ -30,6 +31,8 @@ vi.mock('../hooks', () => ({
         checkInDate: '2026-09-13',
         checkOutDate: '2026-09-14',
         roomNumber: '101',
+        roomName: 'Phòng hướng vườn',
+        status: 'CONFIRMED',
       },
       unreadCount: 0,
     },
@@ -141,5 +144,34 @@ describe('ChatPanel', () => {
     expect(retryRequest.input.clientMessageId).toBe(
       firstRequest.input.clientMessageId,
     )
+  })
+
+  it('keeps the attached room and stay details visible above the conversation', () => {
+    const onBookingLink = vi.fn()
+    render(
+      <MemoryRouter>
+        <ChatPanel
+          bookingHref="/bookings/booking-a"
+          bookingId="booking-a"
+          onBookingLink={onBookingLink}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByLabelText('Booking đang trao đổi')).toHaveTextContent(
+      'Phòng hướng vườn',
+    )
+    expect(screen.getByLabelText('Booking đang trao đổi')).toHaveTextContent(
+      'Đã xác nhận',
+    )
+    const bookingLink = screen.getByRole('link', {
+      name: 'Xem chi tiết booking',
+    })
+    expect(bookingLink).toHaveAttribute(
+      'href',
+      '/bookings/booking-a',
+    )
+    fireEvent.click(bookingLink)
+    expect(onBookingLink).toHaveBeenCalledTimes(1)
   })
 })

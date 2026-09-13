@@ -10,7 +10,11 @@ import {
   useNavigate,
   useParams,
 } from 'react-router-dom'
+import { MessageCircle } from 'lucide-react'
 
+import { appConfig } from '@/app/config'
+import { useCustomerChatWidget } from '@/features/chat/customer-chat-widget-context'
+import { CustomerPaymentPanel } from '@/features/payments/components/CustomerPaymentPanel'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { ConfirmationDialog } from '@/shared/components/ConfirmationDialog'
@@ -26,9 +30,6 @@ import {
 import { PageHeader } from '@/shared/components/PageHeader'
 import { LinkButton } from '@/shared/components/LinkButton'
 import { formatDateOnly } from '@/shared/formatting/formatters'
-import { CustomerPaymentPanel } from '@/features/payments/components/CustomerPaymentPanel'
-import { appConfig } from '@/app/config'
-import { ChatPanel } from '@/features/chat/components/ChatPanel'
 
 import { BookingDetails } from '../components/BookingDetails'
 import { BookingExpiryNotice } from '../components/BookingExpiryNotice'
@@ -50,6 +51,7 @@ export function CustomerBookingDetailPage() {
   const bookingId = params.bookingId ?? params.id
   const bookingQuery = useCustomerBooking(bookingId)
   const cancelMutation = useCancelCustomerBooking()
+  const { openBooking } = useCustomerChatWidget()
   const [expiredPaymentDeadline, setExpiredPaymentDeadline] =
     useState<string | null>(null)
   const bookingCreated =
@@ -181,9 +183,17 @@ export function CustomerBookingDetailPage() {
         eyebrow="Chi tiết đặt phòng"
         title={booking.bookingCode}
         actions={
-          <LinkButton to=".." relative="path" variant="outline">
-            Quay lại
-          </LinkButton>
+          <div className="flex flex-wrap items-center gap-2">
+            {appConfig.chatEnabled ? (
+              <Button onClick={() => openBooking(booking.id)} variant="outline">
+                <MessageCircle aria-hidden="true" className="size-4" />
+                Trao đổi
+              </Button>
+            ) : null}
+            <LinkButton to=".." relative="path" variant="outline">
+              Quay lại
+            </LinkButton>
+          </div>
         }
       />
 
@@ -214,7 +224,6 @@ export function CustomerBookingDetailPage() {
         </Alert>
       ) : null}
       <BookingDetails audience="customer" booking={booking} />
-      {appConfig.chatEnabled ? <ChatPanel bookingId={booking.id} /> : null}
       <CustomerPaymentPanel
         bookingId={booking.id}
         canPay={canPay}

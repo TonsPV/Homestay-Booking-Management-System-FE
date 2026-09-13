@@ -1,4 +1,7 @@
 export { ChatRealtimeBridge } from './ChatRealtimeBridge'
+export { CustomerChatWidgetProvider } from './CustomerChatWidgetProvider'
+export { CustomerChatWidget } from './components/CustomerChatWidget'
 export { ChatInboxPage } from './pages/ChatInboxPage'
 export { ChatPanel } from './components/ChatPanel'
+export { useCustomerChatWidget } from './customer-chat-widget-context'
 export { useChatSummary } from './hooks'

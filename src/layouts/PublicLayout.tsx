@@ -3,7 +3,9 @@ import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
 import { appConfig } from "@/app/config";
+import { CustomerChatWidgetProvider } from "@/features/chat/CustomerChatWidgetProvider";
 import { ChatUnreadBadge } from "@/features/chat/components/ChatUnreadBadge";
+import { CustomerChatWidget } from "@/features/chat/components/CustomerChatWidget";
 import { getPrincipalHome } from "@/routes/workspace-policy";
 import { ScrollToTop } from "@/routes/RouteSupport";
 import { Button } from "@/shared/components/Button";
@@ -362,18 +364,22 @@ export function PublicLayout() {
         ) : null}
       </header>
 
-      <main
-        className={cn(
-          "w-full focus:outline-none",
-          isHome
-            ? "max-w-none p-0"
-            : "mx-auto max-w-app px-4 py-8 sm:px-6 lg:px-8",
-        )}
-        id="main-content"
-        tabIndex={-1}
-      >
-        <Outlet />
-      </main>
+      <CustomerChatWidgetProvider>
+        <main
+          className={cn(
+            "w-full focus:outline-none",
+            isHome
+              ? "max-w-none p-0"
+              : "mx-auto max-w-app px-4 py-8 sm:px-6 lg:px-8",
+          )}
+          id="main-content"
+          tabIndex={-1}
+        >
+          <Outlet />
+        </main>
+
+        <CustomerChatWidget />
+      </CustomerChatWidgetProvider>
 
       <footer
         className={cn(

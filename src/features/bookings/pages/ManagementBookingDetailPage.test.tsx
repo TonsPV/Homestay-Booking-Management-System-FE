@@ -88,6 +88,10 @@ vi.mock("@/features/payments/components/ManagementBookingPaymentPanel", () => ({
   ),
 }));
 
+vi.mock("@/features/chat/components/ChatPanel", () => ({
+  ChatPanel: () => null,
+}));
+
 vi.mock("@/features/customers/components/InitialCustomerPasswordForm", () => ({
   InitialCustomerPasswordForm: ({
     onSuccess,
