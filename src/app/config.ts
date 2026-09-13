@@ -89,6 +89,7 @@ export const appConfig = {
   apiOrigin: resolveApiOrigin(),
   apiPrefix: '/api/v1',
   appRelease: import.meta.env.VITE_APP_RELEASE?.trim() || null,
+  chatEnabled: import.meta.env.VITE_CHAT_ENABLED === 'true',
   currency: 'VND',
   errorReportingEndpoint: resolveErrorReportingEndpoint(),
   googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() || null,

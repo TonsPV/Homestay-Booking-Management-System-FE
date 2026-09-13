@@ -52,6 +52,7 @@ describe('rooms API contract', () => {
     vi.stubGlobal('fetch', fetchMock)
 
     await listRooms({
+      amenityIds: ['3', '9'],
       page: 1,
       roomTypeId: '7',
       search: 'phòng biển',
@@ -63,7 +64,7 @@ describe('rooms API contract', () => {
     ]
 
     expect(url.toString()).toBe(
-      'http://localhost:3000/api/v1/rooms?page=1&roomTypeId=7&search=ph%C3%B2ng+bi%E1%BB%83n',
+      'http://localhost:3000/api/v1/rooms?amenityIds=3&amenityIds=9&page=1&roomTypeId=7&search=ph%C3%B2ng+bi%E1%BB%83n',
     )
     expect(options.method).toBe('GET')
     expect(new Headers(options.headers).has('Authorization')).toBe(false)

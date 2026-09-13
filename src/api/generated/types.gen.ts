@@ -19,7 +19,7 @@ export type SuccessEnvelopeDto = {
     requestId: string;
 };
 
-export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+export type ErrorCode = 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT' | 'CHAT_MESSAGE_IDEMPOTENCY_CONFLICT';
 
 export type ErrorEnvelopeDto = {
     success: boolean;
@@ -31,7 +31,7 @@ export type ErrorEnvelopeDto = {
      */
     fieldErrors?: {
         [key: string]: Array<{
-            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT';
+            errorCode: 'COMMON_VALIDATION_FAILED' | 'COMMON_UNAUTHORIZED' | 'COMMON_FORBIDDEN' | 'COMMON_NOT_FOUND' | 'COMMON_CONFLICT' | 'COMMON_RATE_LIMITED' | 'COMMON_PAYLOAD_TOO_LARGE' | 'COMMON_UNSUPPORTED_MEDIA_TYPE' | 'COMMON_SERVICE_UNAVAILABLE' | 'COMMON_INTERNAL_ERROR' | 'CUSTOMER_INITIAL_PASSWORD_ALREADY_CONFIGURED' | 'CUSTOMER_EMAIL_IN_USE' | 'CUSTOMER_PHONE_IN_USE' | 'CUSTOMER_CURRENT_PASSWORD_INVALID' | 'CUSTOMER_PASSWORD_REUSE_NOT_ALLOWED' | 'AUTH_GOOGLE_PHONE_REQUIRED' | 'AUTH_GOOGLE_ACCOUNT_CONFLICT' | 'AUTH_GOOGLE_INVALID_TOKEN' | 'AMENITY_NAME_ALREADY_EXISTS' | 'AMENITY_IN_USE' | 'ROOM_TYPE_IN_USE' | 'BOOKING_GUEST_CAPACITY_EXCEEDED' | 'BOOKING_CUSTOMER_CONTACT_REQUIRED' | 'BOOKING_ACTIVE_UNPAID_LIMIT_REACHED' | 'BOOKING_HELD_NIGHTS_LIMIT_REACHED' | 'BOOKING_ROOM_NOT_BOOKABLE' | 'BOOKING_CHECKIN_IN_PAST' | 'BOOKING_CHECKIN_TOO_FAR' | 'BOOKING_DATE_RANGE_INVALID' | 'BOOKING_STAY_TOO_LONG' | 'BOOKING_TOTAL_LIMIT_EXCEEDED' | 'BOOKING_ROOM_UNAVAILABLE' | 'BOOKING_CREATE_CONFLICT' | 'BOOKING_REQUEST_INTENT_CONFLICT' | 'BOOKING_CANCELLATION_REASON_REQUIRED' | 'BOOKING_REFUND_PENDING' | 'BOOKING_TRANSITION_NOT_ALLOWED' | 'BOOKING_CONFIRMATION_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_REQUIRES_PAYMENT' | 'BOOKING_CHECKIN_OUTSIDE_STAY_WINDOW' | 'BOOKING_ROOM_NOT_FOUND' | 'BOOKING_ROOM_MISSING_FOR_BOOKING' | 'BOOKING_ROOM_NOT_READY' | 'BOOKING_CANCELLATION_ALREADY_PAID' | 'BOOKING_CANCELLATION_NOT_ALLOWED' | 'PAYMENT_REFUND_REJECTED' | 'PAYMENT_REFUND_NOT_ALLOWED' | 'PAYMENT_REFUND_OUTCOME_UNKNOWN' | 'PAYMENT_IDEMPOTENCY_KEY_CONFLICT' | 'CHAT_MESSAGE_IDEMPOTENCY_CONFLICT';
             message?: string;
         }>;
     };
@@ -340,6 +340,81 @@ export type UpdateAccountStatusDto = {
 
 export type SetInitialCustomerPasswordDto = {
     password: string;
+};
+
+export type ChatBookingSummaryDto = {
+    id: string;
+    bookingCode: string;
+    status: string;
+    checkInDate: string;
+    checkOutDate: string;
+    roomNumber: string;
+    roomName: string;
+};
+
+export type ChatLastMessageDto = {
+    sequence: number;
+    content: string;
+    senderActorType: 'customer' | 'user';
+    senderActorId: string;
+    createdAt: string;
+};
+
+export type ChatConversationDto = {
+    id: string;
+    booking: ChatBookingSummaryDto;
+    lastSequence: number;
+    lastMessage: ChatLastMessageDto | null;
+    unreadCount: number;
+    needsReply: boolean;
+};
+
+export type ChatSummaryDto = {
+    unreadMessageCount: number;
+    /**
+     * Only non-zero for STAFF and ADMIN.
+     */
+    needsReplyConversationCount: number;
+};
+
+export type ChatBookingContextDto = {
+    booking: ChatBookingSummaryDto;
+    conversationId: string | null;
+    lastSequence: number;
+    unreadCount: number;
+};
+
+export type ChatMessageDto = {
+    id: string;
+    sequence: number;
+    content: string;
+    senderActorType: 'customer' | 'user';
+    senderActorId: string;
+    senderName: string | null;
+    createdAt: string;
+};
+
+export type ChatMessageListDto = {
+    conversationId: string | null;
+    lastSequence: number;
+    messages: Array<ChatMessageDto>;
+    hasMoreBefore: boolean;
+};
+
+export type CreateChatMessageDto = {
+    content: string;
+    /**
+     * A stable client-generated id. Retrying the same message must reuse this value.
+     */
+    clientMessageId: string;
+};
+
+export type ChatReadStateDto = {
+    lastReadSequence: number;
+};
+
+export type MarkChatReadDto = {
+    lastReadSequence: number;
 };
 
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'VNPAY';
@@ -1799,6 +1874,277 @@ export type CustomerCredentialManagementSetInitialPasswordResponses = {
 
 export type CustomerCredentialManagementSetInitialPasswordResponse = CustomerCredentialManagementSetInitialPasswordResponses[keyof CustomerCredentialManagementSetInitialPasswordResponses];
 
+export type ChatListConversationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number;
+        limit?: number;
+        /**
+         * Search by booking code.
+         */
+        search?: string;
+        unread?: boolean;
+        /**
+         * Only available to STAFF and ADMIN.
+         */
+        needsReply?: boolean;
+    };
+    url: '/api/v1/chat/conversations';
+};
+
+export type ChatListConversationsErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatListConversationsError = ChatListConversationsErrors[keyof ChatListConversationsErrors];
+
+export type ChatListConversationsResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: Array<ChatConversationDto>;
+        meta?: PaginationMetaDto;
+    };
+};
+
+export type ChatListConversationsResponse = ChatListConversationsResponses[keyof ChatListConversationsResponses];
+
+export type ChatGetSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/chat/summary';
+};
+
+export type ChatGetSummaryErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatGetSummaryError = ChatGetSummaryErrors[keyof ChatGetSummaryErrors];
+
+export type ChatGetSummaryResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: ChatSummaryDto;
+    };
+};
+
+export type ChatGetSummaryResponse = ChatGetSummaryResponses[keyof ChatGetSummaryResponses];
+
+export type ChatGetBookingContextData = {
+    body?: never;
+    path: {
+        bookingId: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/bookings/{bookingId}';
+};
+
+export type ChatGetBookingContextErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatGetBookingContextError = ChatGetBookingContextErrors[keyof ChatGetBookingContextErrors];
+
+export type ChatGetBookingContextResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: ChatBookingContextDto;
+    };
+};
+
+export type ChatGetBookingContextResponse = ChatGetBookingContextResponses[keyof ChatGetBookingContextResponses];
+
+export type ChatListMessagesData = {
+    body?: never;
+    path: {
+        bookingId: string;
+    };
+    query?: {
+        beforeSequence?: number;
+        afterSequence?: number;
+        limit?: number;
+    };
+    url: '/api/v1/chat/bookings/{bookingId}/messages';
+};
+
+export type ChatListMessagesErrors = {
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatListMessagesError = ChatListMessagesErrors[keyof ChatListMessagesErrors];
+
+export type ChatListMessagesResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: ChatMessageListDto;
+    };
+};
+
+export type ChatListMessagesResponse = ChatListMessagesResponses[keyof ChatListMessagesResponses];
+
+export type ChatSendMessageData = {
+    body: CreateChatMessageDto;
+    path: {
+        bookingId: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/bookings/{bookingId}/messages';
+};
+
+export type ChatSendMessageErrors = {
+    /**
+     * The request data is invalid.
+     */
+    400: ErrorEnvelopeDto;
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The requested resource does not exist.
+     */
+    404: ErrorEnvelopeDto;
+    /**
+     * The request conflicts with the current resource state.
+     */
+    409: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatSendMessageError = ChatSendMessageErrors[keyof ChatSendMessageErrors];
+
+export type ChatSendMessageResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: ChatMessageDto;
+    };
+};
+
+export type ChatSendMessageResponse = ChatSendMessageResponses[keyof ChatSendMessageResponses];
+
+export type ChatMarkReadData = {
+    body: MarkChatReadDto;
+    path: {
+        bookingId: string;
+    };
+    query?: never;
+    url: '/api/v1/chat/bookings/{bookingId}/read';
+};
+
+export type ChatMarkReadErrors = {
+    /**
+     * The request data is invalid.
+     */
+    400: ErrorEnvelopeDto;
+    /**
+     * Authentication is required.
+     */
+    401: ErrorEnvelopeDto;
+    /**
+     * The authenticated actor does not have access.
+     */
+    403: ErrorEnvelopeDto;
+    /**
+     * The requested resource does not exist.
+     */
+    404: ErrorEnvelopeDto;
+    /**
+     * The request conflicts with the current resource state.
+     */
+    409: ErrorEnvelopeDto;
+    /**
+     * The request rate limit was exceeded.
+     */
+    429: ErrorEnvelopeDto;
+    /**
+     * This feature is currently disabled.
+     */
+    503: ErrorEnvelopeDto;
+};
+
+export type ChatMarkReadError = ChatMarkReadErrors[keyof ChatMarkReadErrors];
+
+export type ChatMarkReadResponses = {
+    200: SuccessEnvelopeDto & {
+        statusCode?: number;
+        data?: ChatReadStateDto;
+    };
+};
+
+export type ChatMarkReadResponse = ChatMarkReadResponses[keyof ChatMarkReadResponses];
+
 export type PaymentListData = {
     body?: never;
     path: {
@@ -2289,6 +2635,10 @@ export type RoomListData = {
         limit?: number;
         search?: string;
         roomTypeId?: string;
+        /**
+         * Repeat this query parameter to require all selected amenities.
+         */
+        amenityIds?: Array<string>;
     };
     url: '/api/v1/rooms';
 };

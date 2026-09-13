@@ -15,6 +15,7 @@ export const MANAGEMENT_PATHS = {
   dashboard: "/management/bookings",
   rooms: "/management/rooms",
   bookings: "/management/bookings",
+  messages: "/management/messages",
   payments: "/management/payments",
   roomTypes: "/management/room-types",
   amenities: "/management/amenities",
@@ -39,6 +40,7 @@ export const MANAGEMENT_NAV_GROUPS: readonly ManagementNavGroup[] = [
       /* DORMANT (Phase 0): dashboard entry removed while the Backend lacks
        * /management/dashboard/summary. Bookings is the admin landing. */
       { label: "Booking", to: MANAGEMENT_PATHS.bookings },
+      { label: "Tin nhắn", to: MANAGEMENT_PATHS.messages },
       { label: "Thanh toán", to: MANAGEMENT_PATHS.payments },
     ],
     label: "Vận hành",
@@ -67,6 +69,7 @@ const MANAGEMENT_PREFIXES = [
   MANAGEMENT_PATHS.dashboard,
   MANAGEMENT_PATHS.rooms,
   MANAGEMENT_PATHS.bookings,
+  MANAGEMENT_PATHS.messages,
   MANAGEMENT_PATHS.payments,
   MANAGEMENT_PATHS.roomTypes,
   MANAGEMENT_PATHS.amenities,

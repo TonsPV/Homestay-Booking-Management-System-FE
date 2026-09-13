@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, type UseFormRegister } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 
-import { getErrorMessage } from "@/api/errors";
+import { ApiError, getErrorMessage } from "@/api/errors";
 import { useAmenityOptions } from "@/features/amenities/hooks";
 import type { Amenity } from "@/features/amenities/types";
 import { useRoomTypeOptions } from "@/features/room-types";
@@ -129,6 +129,7 @@ function buildDirectoryParams(
   search: string,
   roomTypeId: string,
   page = 1,
+  amenityIds: string[] = [],
 ) {
   const params = new URLSearchParams();
   const trimmedSearch = search.trim();
@@ -137,9 +138,21 @@ function buildDirectoryParams(
   if (/^[1-9][0-9]*$/.test(roomTypeId)) {
     params.set("roomTypeId", roomTypeId);
   }
+  for (const amenityId of amenityIds) {
+    params.append("amenityIds", amenityId);
+  }
   if (page > 1) params.set("page", String(page));
 
   return params;
+}
+
+function isUnsupportedAmenityFilter(error: unknown) {
+  return (
+    error instanceof ApiError &&
+    error.isStatus(400) &&
+    error.errorCode === "COMMON_VALIDATION_FAILED" &&
+    error.serverMessage?.includes("amenityIds")
+  );
 }
 
 function ResultsSkeleton({ label }: { label: string }) {
@@ -283,6 +296,7 @@ export function PublicRoomsPage({
     {
       limit: 12,
       page,
+      amenityIds: criteria ? undefined : initialValues.amenityIds,
       roomTypeId: criteria ? undefined : initialValues.roomTypeId || undefined,
       search: criteria ? undefined : appliedDirectorySearch || undefined,
     },
@@ -291,6 +305,10 @@ export function PublicRoomsPage({
   const searchQuery = useRoomSearch(criteria);
   const amenitiesQuery = useAmenityOptions();
   const activeQuery = criteria ? searchQuery : directoryQuery;
+  const isAmenityFilterUnavailable =
+    !criteria &&
+    initialValues.amenityIds.length > 0 &&
+    isUnsupportedAmenityFilter(activeQuery.error);
   const rooms = activeQuery.data?.items ?? [];
   const pagination = activeQuery.data?.pagination;
   const total = pagination?.total ?? rooms.length;
@@ -320,14 +338,12 @@ export function PublicRoomsPage({
     if (criteria && initialValues.maxPrice) {
       filters.push({ key: "maxPrice", label: `Đến ${initialValues.maxPrice} ₫` });
     }
-    if (criteria) {
-      for (const amenityId of initialValues.amenityIds) {
-        const amenity = amenitiesQuery.data?.find(
-          (item) => item.id === amenityId,
-        );
-        if (amenity) {
-          filters.push({ key: `amenity:${amenityId}`, label: amenity.name });
-        }
+    for (const amenityId of initialValues.amenityIds) {
+      const amenity = amenitiesQuery.data?.find(
+        (item) => item.id === amenityId,
+      );
+      if (amenity) {
+        filters.push({ key: `amenity:${amenityId}`, label: amenity.name });
       }
     }
 
@@ -346,8 +362,10 @@ export function PublicRoomsPage({
         directorySearch,
         getValues("roomTypeId"),
         nextPage,
+        getValues("amenityIds"),
       ),
     );
+    setFiltersOpen(false);
   }
 
   function submitSearch(values: RoomSearchFormValues) {
@@ -372,6 +390,7 @@ export function PublicRoomsPage({
         directorySearch,
         getValues("roomTypeId"),
         1,
+        getValues("amenityIds"),
       ),
     );
   }
@@ -380,6 +399,7 @@ export function PublicRoomsPage({
     if (!criteria) {
       setDirectorySearch("");
       setValue("roomTypeId", "");
+      setValue("amenityIds", []);
       setSearchParams(new URLSearchParams());
       return;
     }
@@ -398,11 +418,40 @@ export function PublicRoomsPage({
     if (!criteria) {
       if (key === "search") {
         setDirectorySearch("");
-        setSearchParams(buildDirectoryParams("", initialValues.roomTypeId, 1));
+        setSearchParams(
+          buildDirectoryParams(
+            "",
+            initialValues.roomTypeId,
+            1,
+            initialValues.amenityIds,
+          ),
+        );
       }
       if (key === "roomTypeId") {
         setValue("roomTypeId", "");
-        setSearchParams(buildDirectoryParams(appliedDirectorySearch, "", 1));
+        setSearchParams(
+          buildDirectoryParams(
+            appliedDirectorySearch,
+            "",
+            1,
+            initialValues.amenityIds,
+          ),
+        );
+      }
+      if (key.startsWith("amenity:")) {
+        const amenityId = key.slice("amenity:".length);
+        const nextAmenityIds = initialValues.amenityIds.filter(
+          (item) => item !== amenityId,
+        );
+        setValue("amenityIds", nextAmenityIds);
+        setSearchParams(
+          buildDirectoryParams(
+            appliedDirectorySearch,
+            initialValues.roomTypeId,
+            1,
+            nextAmenityIds,
+          ),
+        );
       }
       return;
     }
@@ -627,7 +676,7 @@ export function PublicRoomsPage({
                     Tiện ích mong muốn
                   </legend>
                   <p className="text-xs leading-5 text-muted">
-                    Lựa chọn này sẽ được áp dụng khi bạn tìm phòng trống.
+                    Chọn tiện ích rồi bấm áp dụng để lọc danh sách ngay.
                   </p>
                   <AmenityFilterOptions
                     amenities={amenitiesQuery.data}
@@ -775,24 +824,50 @@ export function PublicRoomsPage({
               <ResultsSkeleton label={criteria ? "Đang tìm phòng trống" : "Đang tải danh sách phòng"} />
             ) : activeQuery.isError ? (
               <ErrorState
-                description={getErrorMessage(activeQuery.error)}
-                onRetry={() => void activeQuery.refetch()}
+                description={
+                  isAmenityFilterUnavailable
+                    ? "Máy chủ chưa hỗ trợ lọc theo tiện ích. Hãy xóa bộ lọc này hoặc thử lại sau khi hệ thống được cập nhật."
+                    : getErrorMessage(activeQuery.error)
+                }
+                onRetry={
+                  isAmenityFilterUnavailable
+                    ? clearAllFilters
+                    : () => void activeQuery.refetch()
+                }
+                retryLabel={
+                  isAmenityFilterUnavailable ? "Xóa bộ lọc" : undefined
+                }
+                title={
+                  isAmenityFilterUnavailable
+                    ? "Chưa thể lọc theo tiện ích"
+                    : undefined
+                }
               />
             ) : rooms.length === 0 ? (
               <div className="rounded-panel bg-surface px-6 py-12 text-center shadow-elevation-2">
                 <h3 className="text-xl font-black text-ink">
-                  {criteria ? "Chưa tìm thấy phòng phù hợp" : "Chưa có phòng để hiển thị"}
+                  {criteria
+                    ? "Chưa tìm thấy phòng phù hợp"
+                    : activeFilters.length
+                      ? "Không tìm thấy phòng phù hợp"
+                      : "Chưa có phòng để hiển thị"}
                 </h3>
                 <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted">
                   {criteria
                     ? "Hãy thử chọn ngày khác, giảm số khách hoặc bớt tiện ích đã chọn."
-                    : "Hãy thử xóa điều kiện lọc hoặc quay lại sau."}
+                    : activeFilters.length
+                      ? "Không có phòng nào đáp ứng các điều kiện đang chọn. Hãy bỏ bớt điều kiện hoặc xem tất cả phòng."
+                      : "Hãy quay lại sau để xem các phòng mới được thêm."}
                 </p>
                 {criteria ? (
                   <div className="mt-5 flex justify-center gap-3">
                     <Button onClick={clearAllFilters} variant="outline">Xóa bộ lọc</Button>
                     <Button onClick={clearStay} variant="text">Xem tất cả phòng</Button>
                   </div>
+                ) : activeFilters.length ? (
+                  <Button className="mt-5" onClick={clearAllFilters} variant="outline">
+                    Xóa bộ lọc
+                  </Button>
                 ) : null}
               </div>
             ) : (

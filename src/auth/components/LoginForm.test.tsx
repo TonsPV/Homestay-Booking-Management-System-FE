@@ -13,6 +13,12 @@ vi.mock("../useAuth", () => ({
   useAuth: useAuthMock,
 }));
 
+vi.mock("@/app/config", () => ({
+  appConfig: {
+    googleClientId: null,
+  },
+}));
+
 function LocationProbe() {
   return <div>location:{useLocation().pathname}</div>;
 }

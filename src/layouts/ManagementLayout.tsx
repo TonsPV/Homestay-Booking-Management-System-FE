@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
+import { appConfig } from "@/app/config";
+import { ChatUnreadBadge } from "@/features/chat/components/ChatUnreadBadge";
 import {
   MANAGEMENT_NAV_GROUPS,
   MANAGEMENT_PATHS,
@@ -53,6 +55,9 @@ function ManagementNavigation({
           to={item.to}
         >
           {item.label}
+          {item.to === MANAGEMENT_PATHS.messages && appConfig.chatEnabled ? (
+            <ChatUnreadBadge className="ml-auto px-2" mode="needsReply" />
+          ) : null}
         </NavLink>
       ))}
     </nav>
@@ -72,7 +77,9 @@ function ManagementNavigationGroups({
             {group.label}
           </p>
           <ManagementNavigation
-            items={group.items}
+            items={group.items.filter(
+              (item) => appConfig.chatEnabled || item.to !== MANAGEMENT_PATHS.messages,
+            )}
             label={group.label}
             onNavigate={onNavigate}
           />

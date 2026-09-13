@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ApiError } from "@/api/errors";
+
 import type { PublicRoom, SearchRoomsQuery } from "../types";
 
 const roomsMock = vi.hoisted(() => vi.fn());
@@ -97,6 +99,33 @@ describe("PublicRoomsPage", () => {
       true,
     );
     expect(roomSearchMock).toHaveBeenLastCalledWith(undefined);
+  });
+
+  it("applies amenity filters to the public directory", async () => {
+    render(
+      <MemoryRouter initialEntries={["/rooms"]}>
+        <LocationProbe />
+        <PublicRoomsPage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByLabelText("Wi-Fi"));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Áp dụng danh mục" }),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent(
+        "?amenityIds=7",
+      ),
+    );
+    expect(roomsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ amenityIds: ["7"], limit: 12, page: 1 }),
+      true,
+    );
+    expect(
+      screen.getByRole("button", { name: /Xóa bộ lọc Wi-Fi/ }),
+    ).toBeInTheDocument();
   });
 
   it("searches availability from the same route and keeps the active stay for booking", () => {
@@ -210,5 +239,67 @@ describe("PublicRoomsPage", () => {
     expect(summary).not.toHaveClass("text-success");
     expect(screen.queryByText(/0 phòng còn trống/i)).not.toBeInTheDocument();
     expect(screen.getByText("Chưa tìm thấy phòng phù hợp")).toBeInTheDocument();
+  });
+
+  it("explains an empty directory result and lets the guest clear filters", () => {
+    roomsMock.mockReturnValue({
+      data: {
+        items: [],
+        pagination: { limit: 12, page: 1, total: 0, totalPages: 0 },
+      },
+      error: null,
+      isError: false,
+      isFetching: false,
+      isPending: false,
+      refetch: vi.fn(),
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/rooms?amenityIds=7"]}>
+        <LocationProbe />
+        <PublicRoomsPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Không tìm thấy phòng phù hợp")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Không có phòng nào đáp ứng các điều kiện đang chọn/),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Xóa bộ lọc" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent("");
+  });
+
+  it("offers to clear an amenity filter when the server has not been updated", () => {
+    roomsMock.mockReturnValue({
+      data: undefined,
+      error: new ApiError("Validation failed", {
+        errorCode: "COMMON_VALIDATION_FAILED",
+        kind: "http",
+        serverMessage: "property amenityIds should not exist",
+        status: 400,
+      }),
+      isError: true,
+      isFetching: false,
+      isPending: false,
+      refetch: vi.fn(),
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/rooms?amenityIds=7"]}>
+        <LocationProbe />
+        <PublicRoomsPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Chưa thể lọc theo tiện ích")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Máy chủ chưa hỗ trợ lọc theo tiện ích/),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Xóa bộ lọc" }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent("");
   });
 });

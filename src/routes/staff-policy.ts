@@ -7,6 +7,7 @@ export const STAFF_PATHS = {
   counter: "/staff/counter",
   rooms: "/staff/rooms",
   bookings: "/staff/bookings",
+  messages: "/staff/messages",
   payments: "/staff/payments",
 } as const;
 
@@ -20,6 +21,7 @@ export const STAFF_NAVIGATION: readonly StaffNavItem[] = [
   { label: "Đặt phòng", to: STAFF_PATHS.counter },
   { label: "Phòng", to: STAFF_PATHS.rooms },
   { label: "Booking", to: STAFF_PATHS.bookings },
+  { label: "Tin nhắn", to: STAFF_PATHS.messages },
   { label: "Thanh toán", to: STAFF_PATHS.payments },
 ];
 
@@ -27,6 +29,7 @@ const STAFF_PREFIXES = [
   STAFF_PATHS.counter,
   STAFF_PATHS.rooms,
   STAFF_PATHS.bookings,
+  STAFF_PATHS.messages,
   STAFF_PATHS.payments,
 ] as const;
 

@@ -13,6 +13,8 @@ import { LinkButton } from "@/shared/components/LinkButton";
 import { formatDateOnly, formatMoney } from "@/shared/formatting/formatters";
 import { ManagementBookingPaymentPanel } from "@/features/payments/components/ManagementBookingPaymentPanel";
 import { InitialCustomerPasswordForm } from "@/features/customers/components/InitialCustomerPasswordForm";
+import { appConfig } from "@/app/config";
+import { ChatPanel } from "@/features/chat/components/ChatPanel";
 
 import { BookingDetails } from "../components/BookingDetails";
 import { BookingPaymentStatusBadge } from "../components/BookingStatusBadges";
@@ -187,6 +189,7 @@ export function ManagementBookingDetailPage() {
       />
 
       <BookingDetails booking={booking} />
+      {appConfig.chatEnabled ? <ChatPanel bookingId={booking.id} /> : null}
 
       {credentialSuccess ? (
         <Alert title="Đã cấp quyền đăng nhập" tone="success">

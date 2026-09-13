@@ -1,6 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 
 import { useAuth } from "@/auth/useAuth";
+import { appConfig } from "@/app/config";
+import { ChatUnreadBadge } from "@/features/chat/components/ChatUnreadBadge";
 import { STAFF_NAVIGATION, STAFF_PATHS } from "@/routes/staff-policy";
 import { ScrollToTop } from "@/routes/RouteSupport";
 import { Button } from "@/shared/components/Button";
@@ -26,6 +28,9 @@ function staffNavClass({ isActive }: { isActive: boolean }) {
 
 export function StaffLayout() {
   const { logout, principal } = useAuth();
+  const staffNavigation = appConfig.chatEnabled
+    ? STAFF_NAVIGATION
+    : STAFF_NAVIGATION.filter((item) => item.to !== STAFF_PATHS.messages);
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
@@ -57,7 +62,7 @@ export function StaffLayout() {
             aria-label="Tác vụ tại quầy"
             className="ml-2 hidden items-center gap-1 lg:flex"
           >
-            {STAFF_NAVIGATION.map((item) => (
+            {staffNavigation.map((item) => (
               <NavLink
                 className={staffNavClass}
                 end={item.end}
@@ -65,6 +70,9 @@ export function StaffLayout() {
                 to={item.to}
               >
                 {item.label}
+                {item.to === STAFF_PATHS.messages && appConfig.chatEnabled ? (
+                  <ChatUnreadBadge className="ml-2" mode="needsReply" />
+                ) : null}
               </NavLink>
             ))}
           </nav>
@@ -107,9 +115,12 @@ export function StaffLayout() {
 
       <nav
         aria-label="Tác vụ tại quầy trên thiết bị di động"
-        className="fixed inset-x-0 bottom-0 z-sticky grid grid-cols-4 border-t border-inverse-line bg-inverse px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-on-inverse shadow-elevation-4 lg:hidden"
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-sticky grid border-t border-inverse-line bg-inverse px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-on-inverse shadow-elevation-4 lg:hidden",
+          staffNavigation.length === 5 ? "grid-cols-5" : "grid-cols-4",
+        )}
       >
-        {STAFF_NAVIGATION.map((item) => (
+        {staffNavigation.map((item) => (
           <NavLink
             className={({ isActive }) =>
               cn(
@@ -124,6 +135,12 @@ export function StaffLayout() {
             to={item.to}
           >
             {item.label}
+            {item.to === STAFF_PATHS.messages && appConfig.chatEnabled ? (
+              <ChatUnreadBadge
+                className="ml-1 text-[10px]"
+                mode="needsReply"
+              />
+            ) : null}
           </NavLink>
         ))}
       </nav>

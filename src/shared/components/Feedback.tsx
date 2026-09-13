@@ -94,12 +94,14 @@ export function EmptyState({
 interface ErrorStateProps {
   description?: string
   onRetry?: () => void
+  retryLabel?: string
   title?: string
 }
 
 export function ErrorState({
   description = 'Không thể tải dữ liệu. Vui lòng thử lại.',
   onRetry,
+  retryLabel = 'Thử lại',
   title = 'Không thể tải nội dung',
 }: ErrorStateProps) {
   return (
@@ -112,7 +114,7 @@ export function ErrorState({
       <p className="mt-2 text-sm text-danger">{description}</p>
       {onRetry ? (
         <Button className="mt-5" onClick={onRetry} variant="outline">
-          Thử lại
+          {retryLabel}
         </Button>
       ) : null}
     </Card>

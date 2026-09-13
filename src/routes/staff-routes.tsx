@@ -52,6 +52,13 @@ export const staffRoutes: RouteObject[] = [
     },
   },
   {
+    path: 'messages',
+    lazy: async () => {
+      const { ChatInboxPage } = await import('@/features/chat')
+      return { Component: ChatInboxPage }
+    },
+  },
+  {
     path: 'payments/:paymentId',
     lazy: async () => {
       const { StaffPaymentDetailRoute } = await import('./StaffRouteAdapters')

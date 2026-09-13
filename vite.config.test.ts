@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createDevProxy, resolveProxyTarget } from './vite.config'
 
 describe('Vite development proxy', () => {
-  it('routes API and media paths to the validated backend origin', () => {
+  it('routes API, media, and Socket.IO paths to the validated backend origin', () => {
     const proxy = createDevProxy('https://api.example.test/')
 
     expect(proxy).toEqual({
@@ -14,6 +14,11 @@ describe('Vite development proxy', () => {
       '/media': {
         changeOrigin: true,
         target: 'https://api.example.test',
+      },
+      '/socket.io': {
+        changeOrigin: true,
+        target: 'https://api.example.test',
+        ws: true,
       },
     })
   })

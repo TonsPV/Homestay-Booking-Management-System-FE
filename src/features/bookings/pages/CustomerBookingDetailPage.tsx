@@ -27,6 +27,8 @@ import { PageHeader } from '@/shared/components/PageHeader'
 import { LinkButton } from '@/shared/components/LinkButton'
 import { formatDateOnly } from '@/shared/formatting/formatters'
 import { CustomerPaymentPanel } from '@/features/payments/components/CustomerPaymentPanel'
+import { appConfig } from '@/app/config'
+import { ChatPanel } from '@/features/chat/components/ChatPanel'
 
 import { BookingDetails } from '../components/BookingDetails'
 import { BookingExpiryNotice } from '../components/BookingExpiryNotice'
@@ -212,6 +214,7 @@ export function CustomerBookingDetailPage() {
         </Alert>
       ) : null}
       <BookingDetails audience="customer" booking={booking} />
+      {appConfig.chatEnabled ? <ChatPanel bookingId={booking.id} /> : null}
       <CustomerPaymentPanel
         bookingId={booking.id}
         canPay={canPay}

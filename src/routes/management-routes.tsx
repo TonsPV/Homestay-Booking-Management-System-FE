@@ -108,6 +108,13 @@ export const managementRoutes: RouteObject[] = [
     },
   },
   {
+    path: "messages",
+    lazy: async () => {
+      const { ChatInboxPage } = await import("@/features/chat");
+      return { Component: ChatInboxPage };
+    },
+  },
+  {
     path: "payments",
     lazy: async () => {
       const { ManagementPaymentsPage } = await import("@/features/payments");

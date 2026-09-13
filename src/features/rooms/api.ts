@@ -42,6 +42,7 @@ export async function listRooms(
   const result = await apiRequest<PublicRoom[]>("/rooms", {
     auth: false,
     query: {
+      amenityIds: query.amenityIds,
       limit: query.limit,
       page: query.page,
       roomTypeId: query.roomTypeId,

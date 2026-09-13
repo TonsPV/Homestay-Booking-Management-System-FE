@@ -90,6 +90,13 @@ export const publicRoutes: RouteObject[] = [
           return { Component: CustomerBookingDetailPage }
         },
       },
+      {
+        path: 'messages',
+        lazy: async () => {
+          const { ChatInboxPage } = await import('@/features/chat')
+          return { Component: ChatInboxPage }
+        },
+      },
     ],
   },
   {

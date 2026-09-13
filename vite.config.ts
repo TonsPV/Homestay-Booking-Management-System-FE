@@ -42,6 +42,11 @@ export function createDevProxy(proxyTarget: string | undefined) {
       changeOrigin: true,
       target,
     },
+    '/socket.io': {
+      changeOrigin: true,
+      target,
+      ws: true,
+    },
   }
 }
 
